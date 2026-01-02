@@ -58,10 +58,17 @@
                         </svg>
                     </button>
                     <div x-show="open" x-collapse class="ml-8 mt-1 space-y-1 submenu">
-                        <a href="{{ route('admin.vehicles.index') }}" class="block px-3 py-2 text-sm text-gray-600 rounded-lg hover:bg-green-50 hover:text-green-700 transition-colors">All Vehicles</a>
-                        <a href="{{ route('admin.vehicles.create') }}" class="block px-3 py-2 text-sm text-gray-600 rounded-lg hover:bg-green-50 hover:text-green-700 transition-colors">Add New</a>
-                        <a href="{{ route('admin.vehicles.categories') }}" class="block px-3 py-2 text-sm text-gray-600 rounded-lg hover:bg-green-50 hover:text-green-700 transition-colors">Categories</a>
-                        <a href="{{ route('admin.vehicles.brands') }}" class="block px-3 py-2 text-sm text-gray-600 rounded-lg hover:bg-green-50 hover:text-green-700 transition-colors">Brands</a>
+                        <a href="{{ route('admin.vehicles.registration.index') }}" class="block px-3 py-2 text-sm text-gray-600 rounded-lg hover:bg-green-50 hover:text-green-700 transition-colors">All Vehicles</a>
+                        <a href="{{ route('admin.vehicles.registration.create') }}" class="block px-3 py-2 text-sm text-gray-600 rounded-lg hover:bg-green-50 hover:text-green-700 transition-colors">Register Vehicle</a>
+                        <a href="{{ route('admin.vehicles.registration.pending') }}" class="block px-3 py-2 text-sm text-gray-600 rounded-lg hover:bg-green-50 hover:text-green-700 transition-colors">
+                            Pending Approval
+                            @if(\App\Models\Vehicle::pending()->count() > 0)
+                                <span class="ml-2 px-2 py-0.5 text-xs font-semibold text-yellow-700 bg-yellow-100 rounded-full">
+                                    {{ \App\Models\Vehicle::pending()->count() }}
+                                </span>
+                            @endif
+                        </a>
+                        <a href="{{ route('admin.vehicles.registration.sold') }}" class="block px-3 py-2 text-sm text-gray-600 rounded-lg hover:bg-green-50 hover:text-green-700 transition-colors">Sold Vehicles</a>
                     </div>
                 </div>
 
@@ -148,6 +155,9 @@
                         </svg>
                     </button>
                     <div x-show="open" x-collapse class="ml-8 mt-1 space-y-1 submenu">
+                        <a href="{{ route('admin.registration.customers') }}" class="block px-3 py-2 text-sm text-gray-600 rounded-lg hover:bg-green-50 hover:text-green-700 transition-colors">Customer Registration</a>
+                        <a href="{{ route('admin.registration.cfcs') }}" class="block px-3 py-2 text-sm text-gray-600 rounded-lg hover:bg-green-50 hover:text-green-700 transition-colors">CFC Registration</a>
+                        <a href="{{ route('admin.registration.agents') }}" class="block px-3 py-2 text-sm text-gray-600 rounded-lg hover:bg-green-50 hover:text-green-700 transition-colors">Agent Registration</a>
                         <a href="{{ route('admin.registration.lenders') }}" class="block px-3 py-2 text-sm text-gray-600 rounded-lg hover:bg-green-50 hover:text-green-700 transition-colors">Lender Registration</a>
                         <a href="{{ route('admin.registration.dealers') }}" class="block px-3 py-2 text-sm text-gray-600 rounded-lg hover:bg-green-50 hover:text-green-700 transition-colors">Dealer Registration</a>
                     </div>

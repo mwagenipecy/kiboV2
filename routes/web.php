@@ -17,6 +17,10 @@ Route::prefix('cars')->name('cars.')->group(function () {
         return view('cars.index', ['vehicleType' => 'cars']);
     })->name('index');
     
+    Route::get('/search', \App\Livewire\Customer\VehicleSearch::class)->name('search');
+    
+    Route::get('/{id}', \App\Livewire\Customer\VehicleDetail::class)->name('detail');
+    
     Route::get('/used', function () {
         return view('cars.used', ['vehicleType' => 'cars']);
     })->name('used');
@@ -48,10 +52,6 @@ Route::prefix('cars')->name('cars.')->group(function () {
     Route::get('/buy-online', function () {
         return view('cars.buy-online', ['vehicleType' => 'cars']);
     })->name('buy-online');
-    
-    Route::get('/search', function () {
-        return view('cars.index', ['vehicleType' => 'cars']);
-    })->name('search');
 });
 
 // ============================================
@@ -414,6 +414,35 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
         Route::get('/brands', function () {
             return view('admin.vehicles.brands');
         })->name('brands');
+        
+        // Vehicle Registration
+        Route::prefix('registration')->name('registration.')->group(function () {
+            Route::get('/', function () {
+                return view('admin.vehicles.registration-index');
+            })->name('index');
+            
+            // Specific routes MUST come before dynamic routes
+            Route::get('/create', function () {
+                return view('admin.vehicles.registration-create');
+            })->name('create');
+            
+            Route::get('/pending', function () {
+                return view('admin.vehicles.registration-pending');
+            })->name('pending');
+            
+            Route::get('/sold', function () {
+                return view('admin.vehicles.registration-sold');
+            })->name('sold');
+            
+            // Dynamic routes come last
+            Route::get('/{id}', function ($id) {
+                return view('admin.vehicles.registration-view', ['id' => $id]);
+            })->name('view');
+            
+            Route::get('/{id}/edit', function ($id) {
+                return view('admin.vehicles.registration-edit', ['id' => $id]);
+            })->name('edit');
+        });
     });
     
     // Listings
@@ -464,6 +493,40 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
     
     // Registration
     Route::prefix('registration')->name('registration.')->group(function () {
+        // Customer Registration
+        Route::get('/customers', function () {
+            return view('admin.registration.customers');
+        })->name('customers');
+        Route::get('/customers/create', function () {
+            return view('admin.registration.customers-create');
+        })->name('customers.create');
+        Route::get('/customers/{id}/edit', function ($id) {
+            return view('admin.registration.customers-edit', ['id' => $id]);
+        })->name('customers.edit');
+        
+        // CFC Registration
+        Route::get('/cfcs', function () {
+            return view('admin.registration.cfcs');
+        })->name('cfcs');
+        Route::get('/cfcs/create', function () {
+            return view('admin.registration.cfcs-create');
+        })->name('cfcs.create');
+        Route::get('/cfcs/{id}/edit', function ($id) {
+            return view('admin.registration.cfcs-edit', ['id' => $id]);
+        })->name('cfcs.edit');
+        
+        // Agent Registration
+        Route::get('/agents', function () {
+            return view('admin.registration.agents');
+        })->name('agents');
+        Route::get('/agents/create', function () {
+            return view('admin.registration.agents-create');
+        })->name('agents.create');
+        Route::get('/agents/{id}/edit', function ($id) {
+            return view('admin.registration.agents-edit', ['id' => $id]);
+        })->name('agents.edit');
+        
+        // Lender Registration
         Route::get('/lenders', function () {
             return view('admin.registration.lenders');
         })->name('lenders');
@@ -474,6 +537,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
             return view('admin.registration.edit-lender', ['id' => $id]);
         })->name('lenders.edit');
         
+        // Dealer Registration
         Route::get('/dealers', function () {
             return view('admin.registration.dealers');
         })->name('dealers');

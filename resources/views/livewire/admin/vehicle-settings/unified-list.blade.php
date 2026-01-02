@@ -300,7 +300,7 @@
         <!-- Background overlay -->
         <div 
             wire:click="$set('showMakeModal', false)"
-            class="fixed inset-0 bg-gray-900 bg-opacity-10 transition-opacity"
+            class="fixed inset-0 bg-black/50 bg-opacity-10 transition-opacity"
         ></div>
         
         <!-- Modal content -->
@@ -405,7 +405,7 @@
         <!-- Background overlay -->
         <div 
             wire:click="$set('showMakeDeleteModal', false)"
-            class="fixed inset-0 bg-gray-900 bg-opacity-10 transition-opacity"
+            class="fixed inset-0 bg-black/50 bg-opacity-10 transition-opacity"
         ></div>
         
         <!-- Modal content -->
@@ -463,7 +463,7 @@
         <!-- Background overlay -->
         <div 
             wire:click="$set('showModelModal', false)"
-            class="fixed inset-0 bg-gray-900 bg-opacity-10 transition-opacity"
+            class="fixed inset-0 bg-black/50 bg-opacity-10 transition-opacity"
         ></div>
         
         <!-- Modal content -->
@@ -562,7 +562,7 @@
         <!-- Background overlay -->
         <div 
             wire:click="$set('showModelDeleteModal', false)"
-            class="fixed inset-0 bg-gray-900 bg-opacity-10 transition-opacity"
+            class="fixed inset-0 bg-black/50 bg-opacity-10 transition-opacity"
         ></div>
         
         <!-- Modal content -->

@@ -41,13 +41,16 @@
                     </svg>
                     <span class="text-xs mt-1">Saved</span>
                 </a>
-                <a href="#" class="flex flex-col items-center text-gray-700 hover:text-green-700">
+                <button id="openAuthModal" class="flex flex-col items-center text-gray-700 hover:text-green-700">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                     </svg>
                     <span class="text-xs mt-1">Sign in</span>
-                </a>
+                </button>
             </div>
         </div>
     </div>
 </header>
+
+<!-- Auth Modal Component -->
+<x-customer.auth-modal />

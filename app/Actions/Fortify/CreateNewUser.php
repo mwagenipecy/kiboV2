@@ -3,6 +3,7 @@
 namespace App\Actions\Fortify;
 
 use App\Models\User;
+use App\Models\Customer;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
@@ -30,10 +31,23 @@ class CreateNewUser implements CreatesNewUsers
             'password' => $this->passwordRules(),
         ])->validate();
 
-        return User::create([
+        $user = User::create([
             'name' => $input['name'],
             'email' => $input['email'],
             'password' => $input['password'],
+            'role' => 'customer', // Set role as customer by default
         ]);
+
+        // Create customer record for the new user
+        Customer::create([
+            'name' => $input['name'],
+            'email' => $input['email'],
+            'user_id' => $user->id,
+            'status' => 'active',
+            'approval_status' => 'approved', // Auto-approve customer registrations
+            'approved_at' => now(),
+        ]);
+
+        return $user;
     }
 }

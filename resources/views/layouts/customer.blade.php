@@ -12,6 +12,7 @@
         }
     </style>
     @stack('styles')
+    @livewireStyles
 </head>
 <body class="bg-white" style="font-family: ATVFabriga, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif !important;">
     
@@ -21,11 +22,13 @@
     <!-- Main Content -->
     <main>
         @yield('content')
+        {{ $slot ?? '' }}
     </main>
 
     <!-- Footer Component -->
     <x-customer.footer />
 
     @stack('scripts')
+    @livewireScripts
 </body>
 </html>
