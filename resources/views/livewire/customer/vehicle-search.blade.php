@@ -64,8 +64,8 @@
 
     {{-- Filter Modal --}}
     @if($showFilters)
-    <div class="fixed inset-0 bg-black bg-opacity-50 z-40 animate-fadeIn" wire:click="$set('showFilters', false)"></div>
-    <div class="fixed right-0 top-0 h-full w-full max-w-md bg-white shadow-2xl z-50 overflow-y-auto animate-slideInRight">
+    <div class="fixed inset-0 bg-black/50 bg-opacity-50 z-40 animate-fadeIn" wire:click="$set('showFilters', false)"></div>
+    <div class="fixed right-0 top-0 h-full w-full max-w-md bg-white shadow-2xl z-60 overflow-y-auto animate-slideInRight">
         {{-- Header --}}
         <div class="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between z-10">
             <h2 class="text-2xl font-bold text-gray-900">Filter and sort</h2>
@@ -80,22 +80,28 @@
         <div class="px-6 py-4">
             {{-- Sort --}}
             <div class="border-b border-gray-200 pb-4 mb-4">
-                <div class="flex items-center gap-3 mb-3">
-                    <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
-                    </svg>
-                    <div>
-                        <div class="font-semibold text-gray-900">Sort</div>
-                        <div class="text-sm text-gray-600">
-                            @if($sortBy === 'price_low') Price: Low to High
-                            @elseif($sortBy === 'price_high') Price: High to Low
-                            @elseif($sortBy === 'year_new') Year: Newest First
-                            @elseif($sortBy === 'mileage_low') Mileage: Low to High
-                            @else Relevance
-                            @endif
+                <button wire:click="toggleSection('sort')" class="w-full flex items-center justify-between py-3">
+                    <div class="flex items-center gap-3">
+                        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+                        </svg>
+                        <div class="text-left">
+                            <div class="font-semibold text-gray-900">Sort</div>
+                            <div class="text-sm text-gray-600">
+                                @if($sortBy === 'price_low') Price: Low to High
+                                @elseif($sortBy === 'price_high') Price: High to Low
+                                @elseif($sortBy === 'year_new') Year: Newest First
+                                @elseif($sortBy === 'mileage_low') Mileage: Low to High
+                                @else Relevance
+                                @endif
+                            </div>
                         </div>
                     </div>
-                </div>
+                    <svg class="w-5 h-5 text-gray-600 transition-transform {{ $expandedSections['sort'] ? 'rotate-180' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
+                @if($expandedSections['sort'])
                 <div class="space-y-2 pl-8">
                     <label class="flex items-center gap-3 py-2 cursor-pointer hover:bg-gray-50 rounded px-2">
                         <input wire:model.live="sortBy" type="radio" value="relevance" class="w-4 h-4 text-green-600">
@@ -118,16 +124,25 @@
                         <span class="text-gray-700">Mileage: Low to High</span>
                     </label>
                 </div>
+                @endif
             </div>
 
             {{-- Make and Model --}}
             <div class="border-b border-gray-200 pb-4 mb-4">
-                <div class="flex items-center gap-3 mb-3">
-                    <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                <button wire:click="toggleSection('makeModel')" class="w-full flex items-center justify-between py-3">
+                    <div class="flex items-center gap-3">
+                        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <div class="text-left">
+                            <div class="font-semibold text-gray-900">Make and model</div>
+                        </div>
+                    </div>
+                    <svg class="w-5 h-5 text-gray-600 transition-transform {{ $expandedSections['makeModel'] ? 'rotate-180' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
-                    <div class="font-semibold text-gray-900">Make and model</div>
-                </div>
+                </button>
+                @if($expandedSections['makeModel'])
                 <div class="space-y-3 pl-8">
                     <div>
                         <label class="text-sm text-gray-600 mb-1 block">Make</label>
@@ -150,17 +165,24 @@
                     </div>
                     @endif
                 </div>
+                @endif
             </div>
 
             {{-- Price --}}
             <div class="border-b border-gray-200 pb-4 mb-4">
-                <div class="flex items-center gap-3 mb-3">
-                    <div class="w-5 h-5 flex items-center justify-center text-gray-600 font-bold">£</div>
-                    <div>
-                        <div class="font-semibold text-gray-900">Price</div>
-                        <div class="text-sm text-gray-600">Pay in full</div>
+                <button wire:click="toggleSection('price')" class="w-full flex items-center justify-between py-3">
+                    <div class="flex items-center gap-3">
+                        <div class="w-5 h-5 flex items-center justify-center text-gray-600 font-bold">£</div>
+                        <div class="text-left">
+                            <div class="font-semibold text-gray-900">Price</div>
+                            <div class="text-sm text-gray-600">Pay in full</div>
+                        </div>
                     </div>
-                </div>
+                    <svg class="w-5 h-5 text-gray-600 transition-transform {{ $expandedSections['price'] ? 'rotate-180' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
+                @if($expandedSections['price'])
                 <div class="pl-8 space-y-4">
                     <div class="grid grid-cols-2 gap-3">
                         <div>
@@ -173,16 +195,25 @@
                         </div>
                     </div>
                 </div>
+                @endif
             </div>
 
             {{-- Year --}}
             <div class="border-b border-gray-200 pb-4 mb-4">
-                <div class="flex items-center gap-3 mb-3">
-                    <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                <button wire:click="toggleSection('year')" class="w-full flex items-center justify-between py-3">
+                    <div class="flex items-center gap-3">
+                        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                        <div class="text-left">
+                            <div class="font-semibold text-gray-900">Year</div>
+                        </div>
+                    </div>
+                    <svg class="w-5 h-5 text-gray-600 transition-transform {{ $expandedSections['year'] ? 'rotate-180' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
-                    <div class="font-semibold text-gray-900">Year</div>
-                </div>
+                </button>
+                @if($expandedSections['year'])
                 <div class="pl-8 space-y-4">
                     <div class="grid grid-cols-2 gap-3">
                         <div>
@@ -195,16 +226,25 @@
                         </div>
                     </div>
                 </div>
+                @endif
             </div>
 
             {{-- Mileage --}}
             <div class="border-b border-gray-200 pb-4 mb-4">
-                <div class="flex items-center gap-3 mb-3">
-                    <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                <button wire:click="toggleSection('mileage')" class="w-full flex items-center justify-between py-3">
+                    <div class="flex items-center gap-3">
+                        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <div class="text-left">
+                            <div class="font-semibold text-gray-900">Mileage</div>
+                        </div>
+                    </div>
+                    <svg class="w-5 h-5 text-gray-600 transition-transform {{ $expandedSections['mileage'] ? 'rotate-180' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
-                    <div class="font-semibold text-gray-900">Mileage</div>
-                </div>
+                </button>
+                @if($expandedSections['mileage'])
                 <div class="pl-8 space-y-4">
                     <div class="grid grid-cols-2 gap-3">
                         <div>
@@ -217,16 +257,25 @@
                         </div>
                     </div>
                 </div>
+                @endif
             </div>
 
             {{-- Gearbox --}}
             <div class="border-b border-gray-200 pb-4 mb-4">
-                <div class="flex items-center gap-3 mb-3">
-                    <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                <button wire:click="toggleSection('gearbox')" class="w-full flex items-center justify-between py-3">
+                    <div class="flex items-center gap-3">
+                        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                        </svg>
+                        <div class="text-left">
+                            <div class="font-semibold text-gray-900">Gearbox</div>
+                        </div>
+                    </div>
+                    <svg class="w-5 h-5 text-gray-600 transition-transform {{ $expandedSections['gearbox'] ? 'rotate-180' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
-                    <div class="font-semibold text-gray-900">Gearbox</div>
-                </div>
+                </button>
+                @if($expandedSections['gearbox'])
                 <div class="pl-8 space-y-2">
                     <label class="flex items-center gap-3 py-2 cursor-pointer hover:bg-gray-50 rounded px-2">
                         <input wire:model.live="transmission" type="checkbox" value="Manual" class="w-4 h-4 text-green-600 rounded">
@@ -237,17 +286,26 @@
                         <span class="text-gray-700">Automatic</span>
                     </label>
                 </div>
+                @endif
             </div>
 
             {{-- Body Type --}}
             <div class="pb-4 mb-20">
-                <div class="flex items-center gap-3 mb-3">
-                    <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0h-.01M15 17a2 2 0 104 0m-4 0h-.01"></path>
+                <button wire:click="toggleSection('bodyType')" class="w-full flex items-center justify-between py-3">
+                    <div class="flex items-center gap-3">
+                        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0h-.01M15 17a2 2 0 104 0m-4 0h-.01"></path>
+                        </svg>
+                        <div class="text-left">
+                            <div class="font-semibold text-gray-900">Body type</div>
+                        </div>
+                    </div>
+                    <svg class="w-5 h-5 text-gray-600 transition-transform {{ $expandedSections['bodyType'] ? 'rotate-180' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
-                    <div class="font-semibold text-gray-900">Body type</div>
-                </div>
+                </button>
+                @if($expandedSections['bodyType'])
                 <div class="pl-8 space-y-2">
                     <label class="flex items-center gap-3 py-2 cursor-pointer hover:bg-gray-50 rounded px-2">
                         <input wire:model.live="bodyType" type="checkbox" value="Sedan" class="w-4 h-4 text-green-600 rounded">
@@ -282,6 +340,7 @@
                         <span class="text-gray-700">Wagon</span>
                     </label>
                 </div>
+                @endif
             </div>
         </div>
 
@@ -322,46 +381,88 @@
         </div>
 
         {{-- Car Grid --}}
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             @forelse($vehicles as $vehicle)
-            <a href="{{ route('cars.detail', $vehicle->id) }}" class="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-300 flex flex-col">
-                {{-- Image --}}
-                <div class="relative aspect-[4/3] bg-gray-100">
-                    @if($vehicle->image_front)
-                        <img src="{{ asset('storage/' . $vehicle->image_front) }}" alt="{{ $vehicle->full_name }}" class="w-full h-full object-cover">
+            @php
+                $allImages = [];
+                if($vehicle->image_front) {
+                    $allImages[] = $vehicle->image_front;
+                }
+                if($vehicle->image_back) {
+                    $allImages[] = $vehicle->image_back;
+                }
+                if($vehicle->image_left) {
+                    $allImages[] = $vehicle->image_left;
+                }
+                if($vehicle->image_right) {
+                    $allImages[] = $vehicle->image_right;
+                }
+                if($vehicle->image_interior) {
+                    $allImages[] = $vehicle->image_interior;
+                }
+                if($vehicle->other_images && is_array($vehicle->other_images)) {
+                    $allImages = array_merge($allImages, $vehicle->other_images);
+                }
+                $imageCount = count($allImages);
+            @endphp
+            <div class="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-300 flex flex-col">
+                {{-- Image Carousel --}}
+                <div class="relative aspect-[4/3] bg-gray-100 group" data-carousel="vehicle-{{ $vehicle->id }}">
+                    @if($imageCount > 0)
+                        @foreach($allImages as $index => $image)
+                        <a href="{{ route('cars.detail', $vehicle->id) }}" class="carousel-image absolute inset-0 {{ $index === 0 ? '' : 'hidden' }}" data-index="{{ $index }}">
+                            <img src="{{ asset('storage/' . $image) }}" alt="{{ $vehicle->full_name }}" class="w-full h-full object-cover">
+                        </a>
+                        @endforeach
                     @else
-                        <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-200 to-gray-300">
-                            <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                            </svg>
-                        </div>
+                        <a href="{{ route('cars.detail', $vehicle->id) }}" class="absolute inset-0">
+                            <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-200 to-gray-300">
+                                <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                </svg>
+                            </div>
+                        </a>
+                    @endif
+
+                    {{-- Navigation Arrows --}}
+                    @if($imageCount > 1)
+                    <button onclick="navigateCarousel(event, 'vehicle-{{ $vehicle->id }}', -1)" class="carousel-nav absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/90 hover:bg-white rounded-full flex items-center justify-center shadow-md opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                        <svg class="w-5 h-5 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                        </svg>
+                    </button>
+                    <button onclick="navigateCarousel(event, 'vehicle-{{ $vehicle->id }}', 1)" class="carousel-nav absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/90 hover:bg-white rounded-full flex items-center justify-center shadow-md opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                        <svg class="w-5 h-5 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </button>
                     @endif
 
                     {{-- Condition Badge --}}
                     @if($vehicle->condition)
-                    <div class="absolute top-2 left-2 bg-white px-3 py-1 rounded text-xs font-semibold text-gray-900 shadow-sm">
+                    <div class="absolute top-2 left-2 bg-white px-3 py-1 rounded text-xs font-semibold text-gray-900 shadow-sm z-10">
                         {{ ucfirst($vehicle->condition) }}
                     </div>
                     @endif
 
                     {{-- Save Button --}}
-                    <button wire:click.prevent="toggleSave({{ $vehicle->id }})" class="absolute top-2 right-2 w-10 h-10 bg-white rounded-full flex items-center justify-center hover:bg-gray-50 shadow-md transition-colors">
+                    <button wire:click.prevent="toggleSave({{ $vehicle->id }})" class="absolute top-2 right-2 w-10 h-10 bg-white rounded-full flex items-center justify-center hover:bg-gray-50 shadow-md transition-colors z-10">
                         <svg class="w-5 h-5 {{ in_array($vehicle->id, $savedVehicles) ? 'fill-red-500 text-red-500' : 'text-gray-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
                         </svg>
                     </button>
 
                     {{-- Image counter --}}
-                    @if($vehicle->other_images && count($vehicle->other_images) > 0)
-                    <div class="absolute bottom-3 right-3 bg-gray-900/80 text-white px-2 py-1 rounded text-xs font-medium">
-                        {{ count($vehicle->other_images) + 1 }} photos
+                    @if($imageCount > 0)
+                    <div class="absolute bottom-3 right-3 bg-gray-900/80 text-white px-2 py-1 rounded text-xs font-medium z-10">
+                        <span class="current-image">1</span>/{{ $imageCount }}
                     </div>
                     @endif
                 </div>
 
                 {{-- Content --}}
-                <div class="p-4 flex flex-col flex-grow">
+                <a href="{{ route('cars.detail', $vehicle->id) }}" class="p-4 flex flex-col flex-grow">
                     <h3 class="text-base font-bold text-gray-900 mb-1">{{ $vehicle->make->name ?? '' }} {{ $vehicle->model->name ?? '' }}</h3>
                     <p class="text-sm text-gray-700 mb-1 line-clamp-2">{{ $vehicle->variant }}</p>
                     <p class="text-xs text-gray-600 mb-3">{{ $vehicle->year }} • {{ number_format($vehicle->mileage) }} km</p>
@@ -400,8 +501,8 @@
                         </div>
                         @endif
                     </div>
-                </div>
-            </a>
+                </a>
+            </div>
             @empty
             <div class="col-span-full text-center py-16">
                 <svg class="w-20 h-20 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -431,4 +532,44 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
         </svg>
     </button>
+
+    {{-- Carousel Navigation Script --}}
+    <script>
+        function navigateCarousel(event, carouselId, direction) {
+            event.preventDefault();
+            event.stopPropagation();
+            
+            const carousel = document.querySelector(`[data-carousel="${carouselId}"]`);
+            if (!carousel) return;
+            
+            const images = carousel.querySelectorAll('.carousel-image');
+            if (images.length <= 1) return;
+            
+            let currentIndex = -1;
+            images.forEach((img, index) => {
+                if (!img.classList.contains('hidden')) {
+                    currentIndex = index;
+                }
+            });
+            
+            if (currentIndex === -1) return;
+            
+            // Hide current image
+            images[currentIndex].classList.add('hidden');
+            
+            // Calculate new index
+            let newIndex = currentIndex + direction;
+            if (newIndex < 0) newIndex = images.length - 1;
+            if (newIndex >= images.length) newIndex = 0;
+            
+            // Show new image
+            images[newIndex].classList.remove('hidden');
+            
+            // Update counter
+            const counter = carousel.querySelector('.current-image');
+            if (counter) {
+                counter.textContent = newIndex + 1;
+            }
+        }
+    </script>
 </div>

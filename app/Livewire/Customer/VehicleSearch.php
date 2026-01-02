@@ -33,6 +33,16 @@ class VehicleSearch extends Component
     // UI states
     public $showFilters = false;
     public $savedVehicles = [];
+    public $expandedSections = [
+        'sort' => true,
+        'distance' => false,
+        'makeModel' => false,
+        'price' => false,
+        'year' => false,
+        'mileage' => false,
+        'gearbox' => false,
+        'bodyType' => false,
+    ];
     
     protected $queryString = [
         'make',
@@ -69,6 +79,11 @@ class VehicleSearch extends Component
             $this->savedVehicles[] = $vehicleId;
         }
         session()->put('saved_vehicles', $this->savedVehicles);
+    }
+
+    public function toggleSection($section)
+    {
+        $this->expandedSections[$section] = !$this->expandedSections[$section];
     }
 
     public function clearFilters()
