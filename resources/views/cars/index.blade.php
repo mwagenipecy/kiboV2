@@ -4,7 +4,7 @@
 
 @section('content')
     <!-- Hero Section with Search -->
-    <section class="relative bg-gray-100">
+    <section class="relative bg-white mb-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div class="relative">
                 <!-- Hero Image -->
@@ -83,48 +83,20 @@
         </div>
     </section>
 
-    <!-- Content Section -->
-    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <h2 class="text-4xl font-bold text-gray-900 text-center mb-12">
-            Discover more cars
-        </h2>
+    <!-- Discovery Component -->
+    <x-customer.discovery />
 
-        <!-- Content Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <!-- Card 1 -->
-            <div class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-                <img src="https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&fit=crop&w=800&q=80" 
-                     alt="People in car" 
-                     class="w-full h-64 object-cover">
-                <div class="p-6">
-                    <h3 class="text-xl font-semibold text-gray-900 mb-2">Find your perfect car</h3>
-                    <p class="text-gray-600">Browse thousands of vehicles from trusted dealers</p>
-                </div>
-            </div>
+    <!-- Lease Carousel Component -->
+    <x-customer.lease-carousel />
 
-            <!-- Card 2 -->
-            <div class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-                <img src="https://images.unsplash.com/photo-1560179707-f14e90ef3623?auto=format&fit=crop&w=800&q=80" 
-                     alt="Car interior" 
-                     class="w-full h-64 object-cover">
-                <div class="p-6">
-                    <h3 class="text-xl font-semibold text-gray-900 mb-2">Expert car reviews</h3>
-                    <p class="text-gray-600">Read detailed reviews to make informed decisions</p>
-                </div>
-            </div>
+    <!-- Reserve Online Component -->
+    <x-customer.reserve-online />
 
-            <!-- Card 3 -->
-            <div class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-                <img src="https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?auto=format&fit=crop&w=800&q=80" 
-                     alt="Mobile notification" 
-                     class="w-full h-64 object-cover">
-                <div class="p-6">
-                    <h3 class="text-xl font-semibold text-gray-900 mb-2">Get instant alerts</h3>
-                    <p class="text-gray-600">Never miss out on your dream car with notifications</p>
-                </div>
-            </div>
-        </div>
-    </section>
+    <!-- Browse by Brand Component -->
+    <x-customer.browse-by-brand />
+
+    <!-- FAQ Accordion Component -->
+    <x-customer.faq-accordion />
 
     <!-- Additional Features Section -->
     <section class="bg-white py-16">
