@@ -37,6 +37,7 @@ class VehicleSearch extends Component
         'sort' => true,
         'distance' => false,
         'makeModel' => false,
+        'condition' => false,
         'price' => false,
         'year' => false,
         'mileage' => false,
@@ -52,6 +53,7 @@ class VehicleSearch extends Component
         'minYear',
         'maxYear',
         'sortBy',
+        'condition',
     ];
 
     public function mount()

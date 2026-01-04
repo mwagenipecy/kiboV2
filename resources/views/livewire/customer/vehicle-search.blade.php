@@ -5,6 +5,13 @@
             <div class="flex items-center gap-3 justify-between flex-wrap">
                 {{-- Left side - Filter chips --}}
                 <div class="flex items-center gap-3 flex-wrap">
+                    {{-- Condition Filter Chip --}}
+                    @if($condition)
+                        <button wire:click="$toggle('showFilters')" class="px-6 py-2 bg-green-600 text-white rounded-full font-medium hover:bg-green-700 transition-colors">
+                            {{ ucfirst($condition) }}
+                        </button>
+                    @endif
+
                     {{-- Make Filter Chip --}}
                     @if($make)
                         @php
@@ -164,6 +171,42 @@
                         </select>
                     </div>
                     @endif
+                </div>
+                @endif
+            </div>
+
+            {{-- Condition --}}
+            <div class="border-b border-gray-200 pb-4 mb-4">
+                <button wire:click="toggleSection('condition')" class="w-full flex items-center justify-between py-3">
+                    <div class="flex items-center gap-3">
+                        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <div class="text-left">
+                            <div class="font-semibold text-gray-900">Condition</div>
+                            @if($condition)
+                                <div class="text-sm text-gray-600">{{ ucfirst($condition) }}</div>
+                            @endif
+                        </div>
+                    </div>
+                    <svg class="w-5 h-5 text-gray-600 transition-transform {{ $expandedSections['condition'] ?? false ? 'rotate-180' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
+                @if($expandedSections['condition'] ?? false)
+                <div class="pl-8 space-y-2">
+                    <label class="flex items-center gap-3 py-2 cursor-pointer hover:bg-gray-50 rounded px-2">
+                        <input wire:model.live="condition" type="radio" value="" class="w-4 h-4 text-green-600">
+                        <span class="text-gray-700">All</span>
+                    </label>
+                    <label class="flex items-center gap-3 py-2 cursor-pointer hover:bg-gray-50 rounded px-2">
+                        <input wire:model.live="condition" type="radio" value="new" class="w-4 h-4 text-green-600">
+                        <span class="text-gray-700">New</span>
+                    </label>
+                    <label class="flex items-center gap-3 py-2 cursor-pointer hover:bg-gray-50 rounded px-2">
+                        <input wire:model.live="condition" type="radio" value="used" class="w-4 h-4 text-green-600">
+                        <span class="text-gray-700">Used</span>
+                    </label>
                 </div>
                 @endif
             </div>

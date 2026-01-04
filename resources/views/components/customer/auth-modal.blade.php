@@ -20,8 +20,8 @@
             <!-- Logo -->
             <div class="mb-8 text-center">
                 <img src="{{ asset('logo/green.png') }}" alt="Kibo Auto" class="h-12 mx-auto mb-4">
-                <h2 id="authTitle" class="text-2xl font-bold text-gray-900">Sign in</h2>
-                <p class="text-gray-600 mt-2">Welcome back to Kibo Auto</p>
+                <h2 id="authTitle" class="text-2xl font-bold text-gray-900">{{ __('auth.sign_in') }}</h2>
+                <p id="authSubtitle" class="text-gray-600 mt-2">{{ __('auth.welcome_back') }}</p>
             </div>
 
             <!-- Login Form -->
@@ -40,7 +40,7 @@
                                     @if ($errors->has('email'))
                                         {{ $errors->first('email') }}
                                     @else
-                                        These credentials do not match our records.
+                                        {{ __('auth.credentials_not_match') }}
                                     @endif
                                 </span>
                             </div>
@@ -49,7 +49,7 @@
                     
                     <!-- Email -->
                     <div class="mb-4">
-                        <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email address</label>
+                        <label for="email" class="block text-sm font-medium text-gray-700 mb-2">{{ __('auth.email_address') }}</label>
                         <input 
                             type="email" 
                             id="email" 
@@ -57,20 +57,20 @@
                             value="{{ old('email') }}"
                             required
                             class="w-full px-4 py-3 border {{ $errors->has('email') ? 'border-red-300' : 'border-gray-300' }} rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent"
-                            placeholder="Enter your email"
+                            placeholder="{{ __('auth.enter_email') }}"
                         >
                     </div>
 
                     <!-- Password -->
                     <div class="mb-6">
-                        <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                        <label for="password" class="block text-sm font-medium text-gray-700 mb-2">{{ __('auth.password') }}</label>
                         <input 
                             type="password" 
                             id="password" 
                             name="password" 
                             required
                             class="w-full px-4 py-3 border {{ $errors->has('password') ? 'border-red-300' : 'border-gray-300' }} rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent"
-                            placeholder="Enter your password"
+                            placeholder="{{ __('auth.enter_password') }}"
                         >
                     </div>
 
@@ -78,9 +78,9 @@
                     <div class="flex items-center justify-between mb-6">
                         <label class="flex items-center">
                             <input type="checkbox" name="remember" class="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500">
-                            <span class="ml-2 text-sm text-gray-600">Remember me</span>
+                            <span class="ml-2 text-sm text-gray-600">{{ __('auth.remember_me') }}</span>
                         </label>
-                        <a href="#" class="text-sm text-green-700 hover:text-green-800">Forgot password?</a>
+                        <a href="#" class="text-sm text-green-700 hover:text-green-800">{{ __('auth.forgot_password') }}</a>
                     </div>
 
                     <!-- Sign In Button -->
@@ -88,7 +88,7 @@
                         type="submit" 
                         class="w-full bg-green-700 hover:bg-green-800 text-white py-3 rounded-lg font-medium transition-colors"
                     >
-                        Sign in
+                        {{ __('auth.sign_in') }}
                     </button>
                 </form>
 
@@ -98,7 +98,7 @@
                         <div class="w-full border-t border-gray-300"></div>
                     </div>
                     <div class="relative flex justify-center text-sm">
-                        <span class="px-2 bg-white text-gray-500">Don't have an account?</span>
+                        <span class="px-2 bg-white text-gray-500">{{ __('auth.dont_have_account') }}</span>
                     </div>
                 </div>
 
@@ -107,7 +107,7 @@
                     id="showRegisterForm" 
                     class="w-full border-2 border-green-700 text-green-700 hover:bg-green-50 py-3 rounded-lg font-medium transition-colors"
                 >
-                    Create account
+                    {{ __('auth.create_account') }}
                 </button>
             </div>
 
@@ -134,7 +134,7 @@
                     
                     <!-- Name -->
                     <div class="mb-4">
-                        <label for="reg_name" class="block text-sm font-medium text-gray-700 mb-2">Full name</label>
+                        <label for="reg_name" class="block text-sm font-medium text-gray-700 mb-2">{{ __('auth.full_name') }}</label>
                         <input 
                             type="text" 
                             id="reg_name" 
@@ -142,13 +142,13 @@
                             value="{{ old('name') }}"
                             required
                             class="w-full px-4 py-3 border {{ $errors->has('name') ? 'border-red-300' : 'border-gray-300' }} rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent"
-                            placeholder="Enter your full name"
+                            placeholder="{{ __('auth.enter_full_name') }}"
                         >
                     </div>
 
                     <!-- Email -->
                     <div class="mb-4">
-                        <label for="reg_email" class="block text-sm font-medium text-gray-700 mb-2">Email address</label>
+                        <label for="reg_email" class="block text-sm font-medium text-gray-700 mb-2">{{ __('auth.email_address') }}</label>
                         <input 
                             type="email" 
                             id="reg_email" 
@@ -156,33 +156,33 @@
                             value="{{ old('email') }}"
                             required
                             class="w-full px-4 py-3 border {{ $errors->has('email') ? 'border-red-300' : 'border-gray-300' }} rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent"
-                            placeholder="Enter your email"
+                            placeholder="{{ __('auth.enter_email') }}"
                         >
                     </div>
 
                     <!-- Password -->
                     <div class="mb-4">
-                        <label for="reg_password" class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                        <label for="reg_password" class="block text-sm font-medium text-gray-700 mb-2">{{ __('auth.password') }}</label>
                         <input 
                             type="password" 
                             id="reg_password" 
                             name="password" 
                             required
                             class="w-full px-4 py-3 border {{ $errors->has('password') ? 'border-red-300' : 'border-gray-300' }} rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent"
-                            placeholder="Create a password"
+                            placeholder="{{ __('auth.create_password') }}"
                         >
                     </div>
 
                     <!-- Confirm Password -->
                     <div class="mb-6">
-                        <label for="reg_password_confirmation" class="block text-sm font-medium text-gray-700 mb-2">Confirm password</label>
+                        <label for="reg_password_confirmation" class="block text-sm font-medium text-gray-700 mb-2">{{ __('auth.confirm_password') }}</label>
                         <input 
                             type="password" 
                             id="reg_password_confirmation" 
                             name="password_confirmation" 
                             required
                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent"
-                            placeholder="Confirm your password"
+                            placeholder="{{ __('auth.confirm_your_password') }}"
                         >
                     </div>
 
@@ -191,7 +191,7 @@
                         <label class="flex items-start">
                             <input type="checkbox" required class="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500 mt-1">
                             <span class="ml-2 text-sm text-gray-600">
-                                I agree to the <a href="#" class="text-green-700 hover:underline">Terms of Service</a> and <a href="#" class="text-green-700 hover:underline">Privacy Policy</a>
+                                {!! __('auth.terms_agreement', ['terms' => '<a href="#" class="text-green-700 hover:underline">' . __('auth.terms_of_service') . '</a>', 'privacy' => '<a href="#" class="text-green-700 hover:underline">' . __('auth.privacy_policy') . '</a>']) !!}
                             </span>
                         </label>
                     </div>
@@ -201,7 +201,7 @@
                         type="submit" 
                         class="w-full bg-green-700 hover:bg-green-800 text-white py-3 rounded-lg font-medium transition-colors"
                     >
-                        Create account
+                        {{ __('auth.create_account') }}
                     </button>
                 </form>
 
@@ -211,7 +211,7 @@
                         <div class="w-full border-t border-gray-300"></div>
                     </div>
                     <div class="relative flex justify-center text-sm">
-                        <span class="px-2 bg-white text-gray-500">Already have an account?</span>
+                        <span class="px-2 bg-white text-gray-500">{{ __('auth.already_have_account') }}</span>
                     </div>
                 </div>
 
@@ -220,7 +220,7 @@
                     id="showLoginForm" 
                     class="w-full border-2 border-green-700 text-green-700 hover:bg-green-50 py-3 rounded-lg font-medium transition-colors"
                 >
-                    Sign in
+                    {{ __('auth.sign_in') }}
                 </button>
             </div>
         </div>
@@ -239,6 +239,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const loginForm = document.getElementById('loginForm');
     const registerForm = document.getElementById('registerForm');
     const authTitle = document.getElementById('authTitle');
+    const authSubtitle = document.getElementById('authSubtitle');
 
     // Auto-open modal if there are validation errors
     @if ($errors->any())
@@ -252,8 +253,8 @@ document.addEventListener('DOMContentLoaded', function() {
         @if (old('name'))
             loginForm.classList.add('hidden');
             registerForm.classList.remove('hidden');
-            authTitle.textContent = 'Create account';
-            authTitle.nextElementSibling.textContent = 'Join Kibo Auto today';
+            authTitle.textContent = '{{ __('auth.register_title') }}';
+            authSubtitle.textContent = '{{ __('auth.join_today') }}';
         @endif
     @endif
 
@@ -285,16 +286,16 @@ document.addEventListener('DOMContentLoaded', function() {
     showRegisterForm.addEventListener('click', function() {
         loginForm.classList.add('hidden');
         registerForm.classList.remove('hidden');
-        authTitle.textContent = 'Create account';
-        authTitle.nextElementSibling.textContent = 'Join Kibo Auto today';
+        authTitle.textContent = '{{ __('auth.register_title') }}';
+        authSubtitle.textContent = '{{ __('auth.join_today') }}';
     });
 
     // Switch to login form
     showLoginForm.addEventListener('click', function() {
         registerForm.classList.add('hidden');
         loginForm.classList.remove('hidden');
-        authTitle.textContent = 'Sign in';
-        authTitle.nextElementSibling.textContent = 'Welcome back to Kibo Auto';
+        authTitle.textContent = '{{ __('auth.auth_title') }}';
+        authSubtitle.textContent = '{{ __('auth.welcome_back') }}';
     });
 
     // Close on Escape key

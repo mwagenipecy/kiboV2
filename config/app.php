@@ -86,6 +86,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Available Locales
+    |--------------------------------------------------------------------------
+    |
+    | This array contains all the locales that are available in the application.
+    | You can add more locales here as you add translation files.
+    |
+    */
+
+    'available_locales' => ['en', 'sw'],
+
+    /*
+    |--------------------------------------------------------------------------
     | Encryption Key
     |--------------------------------------------------------------------------
     |

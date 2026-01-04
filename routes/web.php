@@ -4,6 +4,15 @@ use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
 use Livewire\Volt\Volt;
 
+// Language switching route
+Route::get('/lang/{locale}', function ($locale) {
+    if (in_array($locale, config('app.available_locales', ['en', 'sw']))) {
+        session(['locale' => $locale]);
+        app()->setLocale($locale);
+    }
+    return redirect()->back();
+})->name('language.switch');
+
 // Redirect root to cars section (default landing page)
 Route::get('/', function () {
     return redirect()->route('cars.index');
@@ -19,8 +28,7 @@ Route::prefix('cars')->name('cars.')->group(function () {
     
     Route::get('/search', \App\Livewire\Customer\VehicleSearch::class)->name('search');
     
-    Route::get('/{id}', \App\Livewire\Customer\VehicleDetail::class)->name('detail');
-    
+    // Specific routes MUST come before dynamic routes
     Route::get('/used', function () {
         return view('cars.used', ['vehicleType' => 'cars']);
     })->name('used');
@@ -52,6 +60,9 @@ Route::prefix('cars')->name('cars.')->group(function () {
     Route::get('/buy-online', function () {
         return view('cars.buy-online', ['vehicleType' => 'cars']);
     })->name('buy-online');
+    
+    // Dynamic route comes last
+    Route::get('/{id}', \App\Livewire\Customer\VehicleDetail::class)->name('detail');
 });
 
 // ============================================

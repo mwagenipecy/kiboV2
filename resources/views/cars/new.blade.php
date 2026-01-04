@@ -1,16 +1,47 @@
 @extends('layouts.customer')
 
-@section('title', 'New Cars for Sale | Autotrader')
+@section('title', 'New Cars for Sale | Kibo Auto')
 
 @section('content')
-    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <h1 class="text-4xl font-bold text-gray-900 mb-6">New Cars for Sale</h1>
-        <p class="text-lg text-gray-600 mb-8">Discover the latest models with manufacturer warranties</p>
-        
-        <div class="bg-white rounded-xl shadow-sm p-8">
-            <h2 class="text-2xl font-semibold mb-4">Browse New Cars</h2>
-            <p class="text-gray-600">Explore brand new vehicles with the latest features and technology.</p>
+    <!-- Hero Section with Search -->
+    <section class="relative bg-white mb-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="relative">
+                <!-- Hero Text Section (Instead of Image) -->
+                <div class="relative h-80 rounded-2xl overflow-hidden bg-black flex items-center justify-center">
+                    <div class="text-center text-white px-4">
+                        <h1 class="text-5xl md:text-6xl font-bold mb-4">New cars</h1>
+                        <p class="text-xl md:text-2xl text-white">Discover the latest models</p>
+                    </div>
+                </div>
+
+                <!-- Search Form Overlay -->
+                <div class="absolute bottom-0 left-0 right-0 transform translate-y-1/2 px-4">
+                    <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-6">
+                        @livewire('customer.vehicle-search-form', ['vehicleType' => 'cars', 'condition' => 'new'])
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
+
+
+
+
+     <!-- Reserve Online Component -->
+     <x-customer.reserve-online />
+
+
+      <!-- Browse by Brand Component -->
+    <x-customer.browse-by-brand />
+
+     <!-- Feature Sections Component -->
+     <x-customer.feature-sections />
+
+     <!-- FAQ Component -->
+     <x-customer.faq-accordion />
+
+
+
 @endsection
 
