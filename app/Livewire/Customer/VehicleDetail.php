@@ -110,6 +110,21 @@ class VehicleDetail extends Component
         $this->modalContent = null;
     }
 
+    public function openValuationModal($vehicleId)
+    {
+        $this->dispatch('open-valuation-modal', vehicleId: $vehicleId);
+    }
+
+    public function openFinancingModal($vehicleId)
+    {
+        $this->dispatch('open-financing-modal', vehicleId: $vehicleId);
+    }
+
+    public function openCashPurchaseModal($vehicleId)
+    {
+        $this->dispatch('open-cash-purchase-modal', vehicleId: $vehicleId);
+    }
+
     public function render()
     {
         return view('livewire.customer.vehicle-detail')

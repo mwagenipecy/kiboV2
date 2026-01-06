@@ -47,6 +47,7 @@ new class extends Component {
 
         $user->save();
 
+        session()->flash('status', 'Profile updated successfully!');
         $this->dispatch('profile-updated', name: $user->name);
     }
 
@@ -58,7 +59,7 @@ new class extends Component {
         $user = Auth::user();
 
         if ($user->hasVerifiedEmail()) {
-            $this->redirectIntended(default: route('dashboard', absolute: false));
+            $this->redirectIntended(default: route('cars.index', absolute: false));
 
             return;
         }
@@ -69,48 +70,84 @@ new class extends Component {
     }
 }; ?>
 
-<section class="w-full">
-    @include('partials.settings-heading')
+<div>
+    <!-- Page Header -->
+    <div class="mb-6">
+        <h2 class="text-2xl font-bold text-gray-900">Profile Information</h2>
+        <p class="mt-2 text-gray-600">Update your name and email address</p>
+    </div>
 
-    <x-settings.layout :heading="__('Profile')" :subheading="__('Update your name and email address')">
-        <form wire:submit="updateProfileInformation" class="my-6 w-full space-y-6">
-            <flux:input wire:model="name" :label="__('Name')" type="text" required autofocus autocomplete="name" />
+    <!-- Success Message -->
+    @if (session('status'))
+        <div class="mb-6 p-4 bg-green-50 border border-green-200 text-green-800 rounded-lg">
+            {{ session('status') }}
+        </div>
+    @endif
 
-            <div>
-                <flux:input wire:model="email" :label="__('Email')" type="email" required autocomplete="email" />
+    <form wire:submit="updateProfileInformation" class="space-y-6">
+        <!-- Name -->
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+                Full Name
+            </label>
+            <input 
+                type="text" 
+                wire:model="name"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                required
+                autofocus
+            >
+            @error('name') 
+                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+            @enderror
+        </div>
 
-                @if (auth()->user() instanceof \Illuminate\Contracts\Auth\MustVerifyEmail &&! auth()->user()->hasVerifiedEmail())
-                    <div>
-                        <flux:text class="mt-4">
-                            {{ __('Your email address is unverified.') }}
+        <!-- Email -->
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+                Email Address
+            </label>
+            <input 
+                type="email" 
+                wire:model="email"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                required
+            >
+            @error('email') 
+                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+            @enderror
 
-                            <flux:link class="text-sm cursor-pointer" wire:click.prevent="resendVerificationNotification">
-                                {{ __('Click here to re-send the verification email.') }}
-                            </flux:link>
-                        </flux:text>
+            @if (auth()->user() instanceof \Illuminate\Contracts\Auth\MustVerifyEmail &&! auth()->user()->hasVerifiedEmail())
+                <div class="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <p class="text-sm text-yellow-800">
+                        Your email address is unverified.
+                        <button type="button" wire:click.prevent="resendVerificationNotification" class="underline hover:text-yellow-900">
+                            Click here to re-send the verification email.
+                        </button>
+                    </p>
 
-                        @if (session('status') === 'verification-link-sent')
-                            <flux:text class="mt-2 font-medium !dark:text-green-400 !text-green-600">
-                                {{ __('A new verification link has been sent to your email address.') }}
-                            </flux:text>
-                        @endif
-                    </div>
-                @endif
-            </div>
-
-            <div class="flex items-center gap-4">
-                <div class="flex items-center justify-end">
-                    <flux:button variant="primary" type="submit" class="w-full" data-test="update-profile-button">
-                        {{ __('Save') }}
-                    </flux:button>
+                    @if (session('status') === 'verification-link-sent')
+                        <p class="mt-2 text-sm font-medium text-green-600">
+                            A new verification link has been sent to your email address.
+                        </p>
+                    @endif
                 </div>
+            @endif
+        </div>
 
-                <x-action-message class="me-3" on="profile-updated">
-                    {{ __('Saved.') }}
-                </x-action-message>
-            </div>
-        </form>
+        <!-- Submit Button -->
+        <div class="flex items-center justify-end pt-4 border-t">
+            <button 
+                type="submit"
+                class="px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors"
+            >
+                Save Changes
+            </button>
+        </div>
+    </form>
 
+    <!-- Delete Account Section -->
+    <div class="mt-8 pt-8 border-t border-gray-200">
         <livewire:settings.delete-user-form />
-    </x-settings.layout>
-</section>
+    </div>
+</div>

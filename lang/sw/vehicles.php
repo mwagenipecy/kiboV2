@@ -67,5 +67,16 @@ return [
     'edit_vehicle' => 'Hariri Gari',
     'basic_information' => 'Taarifa za Msingi',
     'required_field' => 'Sehemu inayohitajika',
+    
+    // Navigation Items
+    'used_cars' => 'Magari yaliyotumika',
+    'new_cars' => 'Magari mapya',
+    'sell_your_car' => 'Uza gari lako',
+    'value_your_car' => 'Thamani ya gari lako',
+    'car_reviews' => 'Ukaguzi wa magari',
+    'car_leasing' => 'Kukodisha gari',
+    'electric_cars' => 'Magari ya umeme',
+    'buy_car_online' => 'Nunua gari mkondoni',
+    'car_insurance' => 'Bima ya gari',
 ];
 

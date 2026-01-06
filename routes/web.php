@@ -57,6 +57,10 @@ Route::prefix('cars')->name('cars.')->group(function () {
         return view('cars.electric', ['vehicleType' => 'cars']);
     })->name('electric');
     
+    Route::get('/insurance', function () {
+        return view('cars.insurance', ['vehicleType' => 'cars']);
+    })->name('insurance');
+    
     Route::get('/buy-online', function () {
         return view('cars.buy-online', ['vehicleType' => 'cars']);
     })->name('buy-online');
@@ -398,6 +402,113 @@ Route::prefix('electric-bikes')->name('electric-bikes.')->group(function () {
 });
 
 // ============================================
+// DEALER PANEL ROUTES
+// ============================================
+Route::prefix('dealer')->name('dealer.')->middleware(['auth', 'verified'])->group(function () {
+    // Dashboard
+    Route::get('/dashboard', function () {
+        return view('dealer.dashboard');
+    })->name('dashboard');
+    
+    // Vehicles
+    Route::prefix('vehicles')->name('vehicles.')->group(function () {
+        Route::get('/', function () {
+            return view('dealer.vehicles.index');
+        })->name('index');
+        Route::get('/create', function () {
+            return view('dealer.vehicles.create');
+        })->name('create');
+        Route::get('/active', function () {
+            return view('dealer.vehicles.active');
+        })->name('active');
+        Route::get('/sold', function () {
+            return view('dealer.vehicles.sold');
+        })->name('sold');
+    });
+    
+    // Offers
+    Route::get('/offers', function () {
+        return view('dealer.offers');
+    })->name('offers');
+    
+    // Orders
+    Route::get('/orders', function () {
+        return view('dealer.orders');
+    })->name('orders');
+    
+    // Analytics
+    Route::get('/analytics', function () {
+        return view('dealer.analytics');
+    })->name('analytics');
+    
+    // Profile
+    Route::get('/profile', function () {
+        return view('dealer.profile');
+    })->name('profile');
+    
+    // Settings
+    Route::get('/settings', function () {
+        return view('dealer.settings');
+    })->name('settings');
+});
+
+// ============================================
+// LENDER PANEL ROUTES
+// ============================================
+Route::prefix('lender')->name('lender.')->middleware(['auth', 'verified'])->group(function () {
+    // Dashboard
+    Route::get('/dashboard', function () {
+        return view('lender.dashboard');
+    })->name('dashboard');
+    
+    // Loan Requests
+    Route::prefix('requests')->name('requests.')->group(function () {
+        Route::get('/', function () {
+            return view('lender.requests.index');
+        })->name('index');
+        Route::get('/pending', function () {
+            return view('lender.requests.pending');
+        })->name('pending');
+        Route::get('/approved', function () {
+            return view('lender.requests.approved');
+        })->name('approved');
+        Route::get('/rejected', function () {
+            return view('lender.requests.rejected');
+        })->name('rejected');
+    });
+    
+    // Active Loans
+    Route::get('/loans', function () {
+        return view('lender.loans');
+    })->name('loans');
+    
+    // Portfolio
+    Route::get('/portfolio', function () {
+        return view('lender.portfolio');
+    })->name('portfolio');
+    
+    // Reports
+    Route::get('/reports', function () {
+        return view('lender.reports');
+    })->name('reports');
+    
+    // Customers
+    Route::get('/customers', function () {
+        return view('lender.customers');
+    })->name('customers');
+    
+    // Profile
+    Route::get('/profile', function () {
+        return view('lender.profile');
+    })->name('profile');
+    
+    // Settings
+    Route::get('/settings', function () {
+        return view('lender.settings');
+    })->name('settings');
+});
+
+// ============================================
 // ADMIN PANEL ROUTES
 // ============================================
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(function () {
@@ -477,15 +588,83 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
         Route::get('/', function () {
             return view('admin.orders.index');
         })->name('index');
+        Route::get('/pending', function () {
+            return view('admin.orders.pending');
+        })->name('pending');
         Route::get('/processing', function () {
             return view('admin.orders.processing');
         })->name('processing');
         Route::get('/completed', function () {
             return view('admin.orders.completed');
         })->name('completed');
-        Route::get('/cancelled', function () {
-            return view('admin.orders.cancelled');
-        })->name('cancelled');
+        
+        // Evaluation Orders
+        Route::prefix('evaluations')->name('evaluations.')->group(function () {
+            Route::get('/', function () {
+                return view('admin.orders.evaluations-index');
+            })->name('index');
+            Route::get('/pending-payment', function () {
+                return view('admin.orders.evaluations-pending-payment');
+            })->name('pending-payment');
+            Route::get('/paid', function () {
+                return view('admin.orders.evaluations-paid');
+            })->name('paid');
+            Route::get('/completed', function () {
+                return view('admin.orders.evaluations-completed');
+            })->name('completed');
+            
+            // Debug route to check orders
+            Route::get('/debug', function () {
+                $orders = \App\Models\Order::all();
+                $valuationOrders = \App\Models\Order::where('order_type', 'valuation_report')->get();
+                return response()->json([
+                    'total_orders' => $orders->count(),
+                    'valuation_orders' => $valuationOrders->count(),
+                    'all_orders' => $orders->map(fn($o) => [
+                        'id' => $o->id,
+                        'order_number' => $o->order_number,
+                        'type' => $o->order_type,
+                        'status' => $o->status,
+                    ]),
+                    'valuation_details' => $valuationOrders->map(fn($o) => [
+                        'id' => $o->id,
+                        'order_number' => $o->order_number,
+                        'user' => $o->user ? $o->user->name : 'N/A',
+                        'vehicle' => $o->vehicle ? $o->vehicle->id : 'N/A',
+                    ]),
+                ]);
+            });
+            
+            // Test route to check if order 1 exists
+            Route::get('/test/{orderId}', function ($orderId) {
+                try {
+                    $order = \App\Models\Order::with(['vehicle.make', 'vehicle.model', 'user'])
+                        ->where('order_type', 'valuation_report')
+                        ->findOrFail($orderId);
+                    
+                    return response()->json([
+                        'success' => true,
+                        'order' => [
+                            'id' => $order->id,
+                            'number' => $order->order_number,
+                            'status' => $order->status,
+                            'user' => $order->user->name,
+                            'vehicle' => $order->vehicle->make->name . ' ' . $order->vehicle->model->name,
+                        ]
+                    ]);
+                } catch (\Exception $e) {
+                    return response()->json([
+                        'success' => false,
+                        'error' => $e->getMessage(),
+                        'type' => get_class($e)
+                    ]);
+                }
+            });
+            
+            Route::get('/{orderId}', function ($orderId) {
+                return view('admin.orders.evaluation-detail', ['orderId' => $orderId]);
+            })->name('view');
+        });
     });
     
     // Customers
@@ -606,29 +785,50 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
 });
 
 // ============================================
+// OTP VERIFICATION ROUTES
+// ============================================
+Route::middleware(['auth'])->group(function () {
+    Route::get('/verify-otp', [App\Http\Controllers\Auth\OtpVerificationController::class, 'show'])->name('otp.verify');
+    Route::post('/verify-otp', [App\Http\Controllers\Auth\OtpVerificationController::class, 'verify'])->name('otp.verify');
+    Route::post('/resend-otp', [App\Http\Controllers\Auth\OtpVerificationController::class, 'resend'])->name('otp.resend');
+});
+
+// ============================================
 // AUTHENTICATED ROUTES
 // ============================================
-Route::view('dashboard', 'dashboard')
-    ->middleware(['auth', 'verified'])
-    ->name('dashboard');
+// Dashboard route disabled - redirect to home if accessed
+Route::get('dashboard', function () {
+    return redirect()->route('cars.index');
+})->name('dashboard');
 
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');
 
-    Volt::route('settings/profile', 'settings.profile')->name('profile.edit');
-    Volt::route('settings/password', 'settings.password')->name('user-password.edit');
-    Volt::route('settings/appearance', 'settings.appearance')->name('appearance.edit');
+    Route::get('settings/profile', function () {
+        return view('customer.profile');
+    })->name('profile.edit');
+    
+    Route::get('settings/password', function () {
+        return view('customer.password');
+    })->name('user-password.edit');
+    
+    Route::get('settings/appearance', function () {
+        return view('customer.appearance');
+    })->name('appearance.edit');
 
-    Volt::route('settings/two-factor', 'settings.two-factor')
-        ->middleware(
-            when(
-                Features::canManageTwoFactorAuthentication()
-                    && Features::optionEnabled(Features::twoFactorAuthentication(), 'confirmPassword'),
-                ['password.confirm'],
-                [],
-            ),
-        )
-        ->name('two-factor.show');
+    // My Orders
+    Route::get('my-orders', \App\Livewire\Customer\MyOrders::class)->name('my-orders');
+
+    Route::get('settings/two-factor', function () {
+        return view('customer.two-factor');
+    })->middleware(
+        when(
+            Features::canManageTwoFactorAuthentication()
+                && Features::optionEnabled(Features::twoFactorAuthentication(), 'confirmPassword'),
+            ['password.confirm'],
+            [],
+        ),
+    )->name('two-factor.show');
 });
 
 // ============================================

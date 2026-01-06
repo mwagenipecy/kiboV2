@@ -17,4 +17,10 @@ class VehicleMake extends Model
     {
         return $this->hasMany(VehicleModel::class);
     }
+
+    // Alias for convenience
+    public function models(): HasMany
+    {
+        return $this->vehicleModels();
+    }
 }

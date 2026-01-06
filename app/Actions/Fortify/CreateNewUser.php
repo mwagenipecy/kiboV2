@@ -28,7 +28,14 @@ class CreateNewUser implements CreatesNewUsers
                 'max:255',
                 Rule::unique(User::class),
             ],
+            'nida_number' => ['required', 'string', 'size:20', 'regex:/^[0-9]{20}$/'],
+            'phone_number' => ['required', 'string', 'max:20'],
             'password' => $this->passwordRules(),
+        ], [
+            'nida_number.required' => 'NIDA number is required.',
+            'nida_number.size' => 'NIDA number must be exactly 20 digits.',
+            'nida_number.regex' => 'NIDA number must contain only numbers.',
+            'phone_number.required' => 'Phone number is required.',
         ])->validate();
 
         $user = User::create([
@@ -42,6 +49,8 @@ class CreateNewUser implements CreatesNewUsers
         Customer::create([
             'name' => $input['name'],
             'email' => $input['email'],
+            'nida_number' => $input['nida_number'],
+            'phone_number' => $input['phone_number'],
             'user_id' => $user->id,
             'status' => 'active',
             'approval_status' => 'approved', // Auto-approve customer registrations

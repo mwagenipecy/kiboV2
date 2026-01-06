@@ -69,6 +69,7 @@ return [
     'contact' => 'Wasiliana',
     'help' => 'Msaada',
     'support' => 'Usaidizi',
+    'saved' => 'Imehifadhiwa',
     
     // Language
     'language' => 'Lugha',

@@ -45,6 +45,12 @@ class VehicleSearch extends Component
         'bodyType' => false,
     ];
     
+    // Order modals
+    public $showValuationModal = false;
+    public $showFinancingModal = false;
+    public $showCashPurchaseModal = false;
+    public $selectedVehicleId = null;
+    
     protected $queryString = [
         'make',
         'model',
@@ -97,6 +103,35 @@ class VehicleSearch extends Component
         ]);
         $this->showFilters = false;
         $this->resetPage();
+    }
+
+    public function openValuationModal($vehicleId)
+    {
+        $this->selectedVehicleId = $vehicleId;
+        $this->showValuationModal = true;
+        $this->dispatch('open-valuation-modal', vehicleId: $vehicleId);
+    }
+
+    public function openFinancingModal($vehicleId)
+    {
+        $this->selectedVehicleId = $vehicleId;
+        $this->showFinancingModal = true;
+        $this->dispatch('open-financing-modal', vehicleId: $vehicleId);
+    }
+
+    public function openCashPurchaseModal($vehicleId)
+    {
+        $this->selectedVehicleId = $vehicleId;
+        $this->showCashPurchaseModal = true;
+        $this->dispatch('open-cash-purchase-modal', vehicleId: $vehicleId);
+    }
+
+    public function closeModals()
+    {
+        $this->showValuationModal = false;
+        $this->showFinancingModal = false;
+        $this->showCashPurchaseModal = false;
+        $this->selectedVehicleId = null;
     }
 
     public function render()

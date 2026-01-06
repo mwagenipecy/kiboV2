@@ -4,14 +4,17 @@ namespace App\Providers;
 
 use App\Actions\Fortify\CreateNewUser;
 use App\Actions\Fortify\ResetUserPassword;
+use App\Mail\LoginOtpMail;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Laravel\Fortify\Fortify;
 use Laravel\Fortify\Contracts\LoginResponse;
 use Laravel\Fortify\Contracts\LogoutResponse;
+use Laravel\Fortify\Contracts\RegisterResponse;
 
 class FortifyServiceProvider extends ServiceProvider
 {
@@ -26,12 +29,33 @@ class FortifyServiceProvider extends ServiceProvider
             {
                 $user = auth()->user();
                 
-                // Redirect based on role
-                if ($user->isAdmin()) {
-                    return redirect()->intended(route('admin.dashboard'));
-                }
+                // Generate 4-digit OTP code
+                $otpCode = str_pad((string) random_int(0, 9999), 4, '0', STR_PAD_LEFT);
                 
-                return redirect()->intended(route('dashboard'));
+                // Store OTP in database
+                $user->update([
+                    'otp_code' => $otpCode,
+                    'otp_expires_at' => now()->addMinutes(5),
+                ]);
+                
+                // Send OTP email
+                Mail::to($user->email)->send(new LoginOtpMail($user, $otpCode));
+                
+                // Store intended URL in session for after OTP verification
+                $intendedUrl = $user->isAdmin() ? route('admin.dashboard') : route('cars.index');
+                session()->put('otp_intended_url', $intendedUrl);
+                
+                // Redirect to home page with flag to show OTP form in modal
+                return redirect()->route('cars.index')->with('showOtpVerification', true);
+            }
+        });
+
+        // Register custom registration response - redirect to home page
+        $this->app->instance(RegisterResponse::class, new class implements RegisterResponse {
+            public function toResponse($request)
+            {
+                // Redirect to home page after successful registration
+                return redirect()->route('cars.index')->with('registrationSuccess', true);
             }
         });
     }
@@ -73,7 +97,10 @@ class FortifyServiceProvider extends ServiceProvider
             return redirect()->route('cars.index');
         });
         Fortify::resetPasswordView(fn () => view('livewire.auth.reset-password'));
-        Fortify::requestPasswordResetLinkView(fn () => view('livewire.auth.forgot-password'));
+        // Redirect forgot password to home page (they should use modal)
+        Fortify::requestPasswordResetLinkView(function () {
+            return redirect()->route('cars.index')->with('showForgotPassword', true);
+        });
     }
 
     /**

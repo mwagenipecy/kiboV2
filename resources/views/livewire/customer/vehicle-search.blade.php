@@ -535,7 +535,7 @@
                             £{{ number_format($vehicle->price, 0) }}
                         </div>
                         @if($vehicle->entity)
-                        <div class="flex items-center gap-1 text-gray-600 text-xs">
+                        <div class="flex items-center gap-1 text-gray-600 text-xs mb-3">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
@@ -545,6 +545,64 @@
                         @endif
                     </div>
                 </a>
+
+                {{-- Action Buttons --}}
+                <div class="px-4 pb-4 space-y-2" x-data="{ showMenu: false }">
+                    {{-- Main action button dropdown --}}
+                    <div class="relative">
+                        <button @click.stop="showMenu = !showMenu" class="w-full px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                            </svg>
+                            Quick Actions
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </button>
+
+                        {{-- Dropdown Menu --}}
+                        <div x-show="showMenu" @click.away="showMenu = false" x-transition class="absolute bottom-full mb-2 left-0 right-0 bg-white rounded-lg shadow-xl border border-gray-200 z-20 overflow-hidden">
+                            {{-- Valuation Report --}}
+                            @auth
+                            <button wire:click="openValuationModal({{ $vehicle->id }})" @click="showMenu = false" class="w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors flex items-start gap-3 border-b border-gray-100">
+                                <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                                <div>
+                                    <div class="text-sm font-medium text-gray-900">Get Valuation Report</div>
+                                    <div class="text-xs text-gray-500">Professional report - £50</div>
+                                </div>
+                            </button>
+
+                            {{-- Financing --}}
+                            <button wire:click="openFinancingModal({{ $vehicle->id }})" @click="showMenu = false" class="w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors flex items-start gap-3 border-b border-gray-100">
+                                <svg class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <div>
+                                    <div class="text-sm font-medium text-gray-900">Apply for Financing</div>
+                                    <div class="text-xs text-gray-500">Get approved in minutes</div>
+                                </div>
+                            </button>
+
+                            {{-- Cash Purchase --}}
+                            <button wire:click="openCashPurchaseModal({{ $vehicle->id }})" @click="showMenu = false" class="w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors flex items-start gap-3">
+                                <svg class="w-5 h-5 text-purple-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                                </svg>
+                                <div>
+                                    <div class="text-sm font-medium text-gray-900">Buy with Cash</div>
+                                    <div class="text-xs text-gray-500">Direct purchase</div>
+                                </div>
+                            </button>
+                            @else
+                            <a href="{{ route('login') }}" class="block w-full px-4 py-3 text-center text-sm font-medium text-green-600 hover:bg-gray-50">
+                                Login to access quick actions
+                            </a>
+                            @endauth
+                        </div>
+                    </div>
+                </div>
             </div>
             @empty
             <div class="col-span-full text-center py-16">
@@ -615,4 +673,9 @@
             }
         }
     </script>
+
+    {{-- Order Modals --}}
+    @livewire('customer.valuation-request-modal')
+    @livewire('customer.financing-application-modal')
+    @livewire('customer.cash-purchase-modal')
 </div>

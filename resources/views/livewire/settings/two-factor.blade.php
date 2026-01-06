@@ -177,13 +177,14 @@ new class extends Component {
     }
 } ?>
 
-<section class="w-full">
-    @include('partials.settings-heading')
+<div>
+    <!-- Page Header -->
+    <div class="mb-6">
+        <h2 class="text-2xl font-bold text-gray-900">Two Factor Authentication</h2>
+        <p class="mt-2 text-gray-600">Manage your two-factor authentication settings</p>
+    </div>
 
-    <x-settings.layout
-        :heading="__('Two Factor Authentication')"
-        :subheading="__('Manage your two-factor authentication settings')"
-    >
+    <div class="space-y-6">
         <div class="flex flex-col w-full mx-auto space-y-6 text-sm" wire:cloak>
             @if ($twoFactorEnabled)
                 <div class="space-y-4">
@@ -229,7 +230,7 @@ new class extends Component {
                 </div>
             @endif
         </div>
-    </x-settings.layout>
+    </div>
 
     <flux:modal
         name="two-factor-setup-modal"
@@ -381,4 +382,4 @@ new class extends Component {
             @endif
         </div>
     </flux:modal>
-</section>
+</div>

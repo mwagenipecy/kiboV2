@@ -93,20 +93,25 @@
                     </div>
                 </div>
 
-                <!-- Sales Section -->
+                <!-- Orders Section -->
                 <div class="pt-4 pb-2 section-title">
-                    <p class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Sales</p>
+                    <p class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Orders</p>
                 </div>
 
-                <!-- Orders - Expandable -->
-                <div x-data="{ open: {{ request()->is('admin/orders*') ? 'true' : 'false' }} }">
+                <!-- All Orders - Expandable -->
+                <div x-data="{ open: {{ request()->is('admin/orders*') && !request()->is('admin/orders/evaluations*') ? 'true' : 'false' }} }">
                     <button @click="open = !open" class="w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium text-gray-700 rounded-lg hover:bg-green-50 hover:text-green-700 transition-colors group">
                         <div class="flex items-center min-w-0">
                             <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
                             </svg>
-                            <span class="menu-text">Orders</span>
-                            <span class="ml-auto mr-2 px-2 py-0.5 text-xs font-semibold text-green-700 bg-green-100 rounded-full menu-text">12</span>
+                            <span class="menu-text">All Orders</span>
+                            @php
+                                $totalOrders = \App\Models\Order::count();
+                            @endphp
+                            @if($totalOrders > 0)
+                            <span class="ml-auto mr-2 px-2 py-0.5 text-xs font-semibold text-green-700 bg-green-100 rounded-full menu-text">{{ $totalOrders }}</span>
+                            @endif
                         </div>
                         <svg class="w-4 h-4 transition-transform menu-text flex-shrink-0" :class="open ? 'rotate-90' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
@@ -114,9 +119,36 @@
                     </button>
                     <div x-show="open" x-collapse class="ml-8 mt-1 space-y-1 submenu">
                         <a href="{{ route('admin.orders.index') }}" class="block px-3 py-2 text-sm text-gray-600 rounded-lg hover:bg-green-50 hover:text-green-700 transition-colors">All Orders</a>
+                        <a href="{{ route('admin.orders.pending') }}" class="block px-3 py-2 text-sm text-gray-600 rounded-lg hover:bg-green-50 hover:text-green-700 transition-colors">Pending</a>
                         <a href="{{ route('admin.orders.processing') }}" class="block px-3 py-2 text-sm text-gray-600 rounded-lg hover:bg-green-50 hover:text-green-700 transition-colors">Processing</a>
                         <a href="{{ route('admin.orders.completed') }}" class="block px-3 py-2 text-sm text-gray-600 rounded-lg hover:bg-green-50 hover:text-green-700 transition-colors">Completed</a>
-                        <a href="{{ route('admin.orders.cancelled') }}" class="block px-3 py-2 text-sm text-gray-600 rounded-lg hover:bg-green-50 hover:text-green-700 transition-colors">Cancelled</a>
+                    </div>
+                </div>
+
+                <!-- Evaluation Orders - Expandable -->
+                <div x-data="{ open: {{ request()->is('admin/orders/evaluations*') ? 'true' : 'false' }} }">
+                    <button @click="open = !open" class="w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium text-gray-700 rounded-lg hover:bg-green-50 hover:text-green-700 transition-colors group">
+                        <div class="flex items-center min-w-0">
+                            <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                            <span class="menu-text">Evaluation Orders</span>
+                            @php
+                                $evaluationCount = \App\Models\Order::where('order_type', \App\Enums\OrderType::VALUATION_REPORT->value)->whereIn('status', [\App\Enums\OrderStatus::PENDING->value, \App\Enums\OrderStatus::PROCESSING->value])->count();
+                            @endphp
+                            @if($evaluationCount > 0)
+                            <span class="ml-auto mr-2 px-2 py-0.5 text-xs font-semibold text-yellow-700 bg-yellow-100 rounded-full menu-text">{{ $evaluationCount }}</span>
+                            @endif
+                        </div>
+                        <svg class="w-4 h-4 transition-transform menu-text flex-shrink-0" :class="open ? 'rotate-90' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </button>
+                    <div x-show="open" x-collapse class="ml-8 mt-1 space-y-1 submenu">
+                        <a href="{{ route('admin.orders.evaluations.index') }}" class="block px-3 py-2 text-sm text-gray-600 rounded-lg hover:bg-green-50 hover:text-green-700 transition-colors">All Evaluations</a>
+                        <a href="{{ route('admin.orders.evaluations.pending-payment') }}" class="block px-3 py-2 text-sm text-gray-600 rounded-lg hover:bg-green-50 hover:text-green-700 transition-colors">Pending Payment</a>
+                        <a href="{{ route('admin.orders.evaluations.paid') }}" class="block px-3 py-2 text-sm text-gray-600 rounded-lg hover:bg-green-50 hover:text-green-700 transition-colors">Paid - Issue Report</a>
+                        <a href="{{ route('admin.orders.evaluations.completed') }}" class="block px-3 py-2 text-sm text-gray-600 rounded-lg hover:bg-green-50 hover:text-green-700 transition-colors">Completed</a>
                     </div>
                 </div>
 

@@ -67,5 +67,16 @@ return [
     'edit_vehicle' => 'Edit Vehicle',
     'basic_information' => 'Basic Information',
     'required_field' => 'Required field',
+    
+    // Navigation Items
+    'used_cars' => 'Used cars',
+    'new_cars' => 'New cars',
+    'sell_your_car' => 'Sell your car',
+    'value_your_car' => 'Value your car',
+    'car_reviews' => 'Car reviews',
+    'car_leasing' => 'Car leasing',
+    'electric_cars' => 'Electric cars',
+    'buy_car_online' => 'Buy a car online',
+    'car_insurance' => 'insurance',
 ];
 

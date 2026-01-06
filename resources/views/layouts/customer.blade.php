@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -22,7 +22,9 @@
     <!-- Main Content -->
     <main>
         @yield('content')
-        {{ $slot ?? '' }}
+        @isset($slot)
+            {{ $slot }}
+        @endisset
     </main>
 
     <!-- Footer Component -->
@@ -30,5 +32,20 @@
 
     @stack('scripts')
     @livewireScripts
+    
+    <script>
+        // Close user menu dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const userMenu = event.target.closest('.user-menu-dropdown');
+            if (!userMenu) {
+                // Clicked outside, find and close the dropdown
+                Livewire.all().forEach(component => {
+                    if (component.showDropdown !== undefined && component.showDropdown) {
+                        component.closeDropdown();
+                    }
+                });
+            }
+        });
+    </script>
 </body>
 </html>

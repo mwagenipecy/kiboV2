@@ -19,14 +19,44 @@ class RedirectBasedOnRole
         if (Auth::check()) {
             $user = Auth::user();
             
-            // If user is admin and trying to access non-admin routes, redirect to admin dashboard
-            if ($user->isAdmin() && !$request->is('admin/*')) {
-                return redirect()->route('admin.dashboard');
+            // Admin redirects
+            if ($user->isAdmin()) {
+                // If admin trying to access non-admin routes (except logout and public pages)
+                if (!$request->is('admin/*') && !$request->is('logout') && !$request->is('lang/*')) {
+                    return redirect()->route('admin.dashboard');
+                }
             }
             
-            // If user is regular user and trying to access admin routes, redirect to user dashboard
-            if ($user->isUser() && $request->is('admin/*')) {
-                return redirect()->route('dashboard');
+            // Dealer redirects
+            if ($user->isDealer()) {
+                // If dealer trying to access admin or lender routes
+                if ($request->is('admin/*') || $request->is('lender/*')) {
+                    return redirect()->route('dealer.dashboard');
+                }
+                // If dealer trying to access home/public pages (except logout)
+                if (!$request->is('dealer/*') && !$request->is('logout') && !$request->is('lang/*')) {
+                    return redirect()->route('dealer.dashboard');
+                }
+            }
+            
+            // Lender redirects
+            if ($user->isLender()) {
+                // If lender trying to access admin or dealer routes
+                if ($request->is('admin/*') || $request->is('dealer/*')) {
+                    return redirect()->route('lender.dashboard');
+                }
+                // If lender trying to access home/public pages (except logout)
+                if (!$request->is('lender/*') && !$request->is('logout') && !$request->is('lang/*')) {
+                    return redirect()->route('lender.dashboard');
+                }
+            }
+            
+            // Regular user redirects
+            if ($user->isUser()) {
+                // If regular user trying to access admin, dealer, or lender routes
+                if ($request->is('admin/*') || $request->is('dealer/*') || $request->is('lender/*')) {
+                    return redirect()->route('cars.index');
+                }
             }
         }
         

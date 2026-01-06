@@ -16,6 +16,14 @@ return [
     'unique' => 'The :attribute has already been taken.',
     'exists' => 'The selected :attribute is invalid.',
     
+    // Password validation messages
+    'password' => [
+        'min' => 'The password must be at least :min characters.',
+        'mixed' => 'The password must contain at least one uppercase and one lowercase letter.',
+        'numbers' => 'The password must contain at least one number.',
+        'symbols' => 'The password must contain at least one special character.',
+    ],
+    
     // Custom attribute names
     'attributes' => [
         'email' => 'email address',
@@ -23,6 +31,8 @@ return [
         'name' => 'name',
         'title' => 'title',
         'description' => 'description',
+        'nida_number' => 'NIDA number',
+        'phone_number' => 'phone number',
     ],
 ];
 

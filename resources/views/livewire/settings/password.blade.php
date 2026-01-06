@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\ValidationException;
 use Livewire\Volt\Component;
@@ -27,53 +28,84 @@ new class extends Component {
         }
 
         Auth::user()->update([
-            'password' => $validated['password'],
+            'password' => Hash::make($validated['password']),
         ]);
 
         $this->reset('current_password', 'password', 'password_confirmation');
 
+        session()->flash('status', 'Password updated successfully!');
         $this->dispatch('password-updated');
     }
 }; ?>
 
-<section class="w-full">
-    @include('partials.settings-heading')
+<div>
+    <!-- Page Header -->
+    <div class="mb-6">
+        <h2 class="text-2xl font-bold text-gray-900">Update Password</h2>
+        <p class="mt-2 text-gray-600">Ensure your account is using a long, random password to stay secure</p>
+    </div>
 
-    <x-settings.layout :heading="__('Update password')" :subheading="__('Ensure your account is using a long, random password to stay secure')">
-        <form method="POST" wire:submit="updatePassword" class="mt-6 space-y-6">
-            <flux:input
+    <!-- Success Message -->
+    @if (session('status'))
+        <div class="mb-6 p-4 bg-green-50 border border-green-200 text-green-800 rounded-lg">
+            {{ session('status') }}
+        </div>
+    @endif
+
+    <form wire:submit="updatePassword" class="space-y-6">
+        <!-- Current Password -->
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+                Current Password
+            </label>
+            <input 
+                type="password" 
                 wire:model="current_password"
-                :label="__('Current password')"
-                type="password"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 required
-                autocomplete="current-password"
-            />
-            <flux:input
+            >
+            @error('current_password') 
+                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+            @enderror
+        </div>
+
+        <!-- New Password -->
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+                New Password
+            </label>
+            <input 
+                type="password" 
                 wire:model="password"
-                :label="__('New password')"
-                type="password"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 required
-                autocomplete="new-password"
-            />
-            <flux:input
+            >
+            @error('password') 
+                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+            @enderror
+        </div>
+
+        <!-- Confirm New Password -->
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+                Confirm New Password
+            </label>
+            <input 
+                type="password" 
                 wire:model="password_confirmation"
-                :label="__('Confirm Password')"
-                type="password"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 required
-                autocomplete="new-password"
-            />
+            >
+        </div>
 
-            <div class="flex items-center gap-4">
-                <div class="flex items-center justify-end">
-                    <flux:button variant="primary" type="submit" class="w-full" data-test="update-password-button">
-                        {{ __('Save') }}
-                    </flux:button>
-                </div>
-
-                <x-action-message class="me-3" on="password-updated">
-                    {{ __('Saved.') }}
-                </x-action-message>
-            </div>
-        </form>
-    </x-settings.layout>
-</section>
+        <!-- Submit Button -->
+        <div class="flex items-center justify-end pt-4 border-t">
+            <button 
+                type="submit"
+                class="px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors"
+            >
+                Update Password
+            </button>
+        </div>
+    </form>
+</div>

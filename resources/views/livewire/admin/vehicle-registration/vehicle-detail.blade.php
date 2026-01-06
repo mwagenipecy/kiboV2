@@ -397,7 +397,7 @@
 
     <!-- Status Change Modal -->
     @if($showStatusModal)
-        <div class="fixed inset-0 bg-gray-900 bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="fixed inset-0 bg-black/50  bg-opacity-50 z-50 flex items-center justify-center p-4">
             <div class="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
                 <h3 class="text-lg font-semibold text-gray-900 mb-4">Change Vehicle Status</h3>
                 

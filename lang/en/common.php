@@ -69,6 +69,7 @@ return [
     'contact' => 'Contact',
     'help' => 'Help',
     'support' => 'Support',
+    'saved' => 'Saved',
     
     // Language
     'language' => 'Language',
