@@ -7,6 +7,7 @@ enum OrderType: string
     case VALUATION_REPORT = 'valuation_report';
     case FINANCING_APPLICATION = 'financing_application';
     case CASH_PURCHASE = 'cash_purchase';
+    case LEASING_APPLICATION = 'leasing_application';
     case TEST_DRIVE = 'test_drive';
     case VEHICLE_INSPECTION = 'vehicle_inspection';
     case TRADE_IN = 'trade_in';
@@ -17,6 +18,7 @@ enum OrderType: string
             self::VALUATION_REPORT => 'Valuation Report',
             self::FINANCING_APPLICATION => 'Financing Application',
             self::CASH_PURCHASE => 'Cash Purchase',
+            self::LEASING_APPLICATION => 'Leasing Application',
             self::TEST_DRIVE => 'Test Drive',
             self::VEHICLE_INSPECTION => 'Vehicle Inspection',
             self::TRADE_IN => 'Trade-In Request',
@@ -29,6 +31,7 @@ enum OrderType: string
             self::VALUATION_REPORT => 'Professional vehicle valuation report',
             self::FINANCING_APPLICATION => 'Apply for car financing',
             self::CASH_PURCHASE => 'Direct purchase with cash',
+            self::LEASING_APPLICATION => 'Apply for vehicle leasing',
             self::TEST_DRIVE => 'Schedule a test drive',
             self::VEHICLE_INSPECTION => 'Pre-purchase vehicle inspection',
             self::TRADE_IN => 'Trade in your current vehicle',
@@ -41,6 +44,7 @@ enum OrderType: string
             self::VALUATION_REPORT => 50.00,
             self::FINANCING_APPLICATION => 0.00,
             self::CASH_PURCHASE => 0.00,
+            self::LEASING_APPLICATION => 0.00,
             self::TEST_DRIVE => 0.00,
             self::VEHICLE_INSPECTION => 100.00,
             self::TRADE_IN => 0.00,

@@ -23,14 +23,9 @@ class AgentList extends Component
 
     // Agent types
     public $agentTypes = [
-        'cars' => 'Cars',
-        'trucks' => 'Trucks',
-        'bikes' => 'Bikes',
-        'vans' => 'Vans',
-        'motorhomes' => 'Motorhomes',
-        'caravans' => 'Caravans',
-        'farm' => 'Farm Equipment',
-        'plant' => 'Plant Machinery',
+        'garage_owner' => 'Garage Owner',
+        'lubricant_shop' => 'Lubricant Shop',
+        'spare_part' => 'Spare Part',
     ];
 
     protected $queryString = ['search', 'filterAgentType'];
@@ -63,34 +58,47 @@ class AgentList extends Component
                 return;
             }
 
-            // Generate random password
-            $password = Str::random(12);
+            // Check if user already exists (created when agent was created)
+            if ($agent->user_id) {
+                // User already exists, just update approval status
+                $agent->update([
+                    'approval_status' => 'approved',
+                    'approved_at' => now(),
+                    'approved_by' => auth()->id(),
+                ]);
 
-            // Create user account
-            $user = User::create([
-                'name' => $agent->name,
-                'email' => $agent->email,
-                'password' => Hash::make($password),
-                'role' => 'agent',
-            ]);
+                session()->flash('success', 'Agent approved successfully!');
+            } else {
+                // User doesn't exist (old agent created before user creation on save)
+                // Generate random password
+                $password = Str::random(12);
 
-            // Update agent with approval info
-            $agent->update([
-                'approval_status' => 'approved',
-                'user_id' => $user->id,
-                'approved_at' => now(),
-                'approved_by' => auth()->id(),
-            ]);
+                // Create user account
+                $user = User::create([
+                    'name' => $agent->name,
+                    'email' => $agent->email,
+                    'password' => Hash::make($password),
+                    'role' => 'agent',
+                ]);
 
-            // Dispatch queued job to send credentials email
-            SendRegistrationCredentials::dispatch(
-                $agent->email,
-                $agent->name,
-                $password,
-                'agent'
-            );
+                // Update agent with approval info
+                $agent->update([
+                    'approval_status' => 'approved',
+                    'user_id' => $user->id,
+                    'approved_at' => now(),
+                    'approved_by' => auth()->id(),
+                ]);
 
-            session()->flash('success', 'Agent approved successfully! Credentials have been sent via email.');
+                // Dispatch queued job to send credentials email
+                SendRegistrationCredentials::dispatch(
+                    $agent->email,
+                    $agent->name,
+                    $password,
+                    'agent'
+                );
+
+                session()->flash('success', 'Agent approved successfully! Credentials have been sent via email.');
+            }
         } catch (\Exception $e) {
             session()->flash('error', 'An error occurred: ' . $e->getMessage());
         }

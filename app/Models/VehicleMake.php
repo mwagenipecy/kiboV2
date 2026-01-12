@@ -23,4 +23,12 @@ class VehicleMake extends Model
     {
         return $this->vehicleModels();
     }
+
+    /**
+     * Get the leasing cars for this make
+     */
+    public function leasingCars(): HasMany
+    {
+        return $this->hasMany(LeasingCar::class, 'vehicle_make_id');
+    }
 }

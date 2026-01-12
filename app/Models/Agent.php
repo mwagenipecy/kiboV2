@@ -11,8 +11,13 @@ class Agent extends Model
         'email',
         'phone_number',
         'agent_type',
+        'vehicle_makes',
+        'services',
+        'spare_part_details',
         'license_number',
         'address',
+        'latitude',
+        'longitude',
         'company_name',
         'status',
         'approval_status',
@@ -23,6 +28,8 @@ class Agent extends Model
 
     protected $casts = [
         'approved_at' => 'datetime',
+        'vehicle_makes' => 'array',
+        'services' => 'array',
     ];
 
     public function user()

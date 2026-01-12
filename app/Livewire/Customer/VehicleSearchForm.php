@@ -44,8 +44,12 @@ class VehicleSearchForm extends Component
         $hasFilters = $this->make || $this->model || $this->minYear || $this->condition;
         
         if ($hasFilters) {
-            // Build query to check if vehicles exist
-            $query = Vehicle::where('status', VehicleStatus::APPROVED);
+            // Build query to check if vehicles/trucks exist
+            if ($this->vehicleType === 'trucks') {
+                $query = \App\Models\Truck::where('status', VehicleStatus::APPROVED);
+            } else {
+                $query = Vehicle::where('status', VehicleStatus::APPROVED);
+            }
 
             if ($this->make) {
                 $query->where('vehicle_make_id', $this->make);
@@ -80,6 +84,11 @@ class VehicleSearchForm extends Component
             'minYear' => $this->minYear,
             'condition' => $this->condition,
         ]);
+
+        // Route based on vehicle type
+        if ($this->vehicleType === 'trucks') {
+            return redirect()->route('trucks.search', $queryParams);
+        }
 
         return redirect()->route('cars.search', $queryParams);
     }

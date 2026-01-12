@@ -482,12 +482,25 @@
                     </button>
                     @endif
 
-                    {{-- Condition Badge --}}
-                    @if($vehicle->condition)
-                    <div class="absolute top-2 left-2 bg-white px-3 py-1 rounded text-xs font-semibold text-gray-900 shadow-sm z-10">
-                        {{ ucfirst($vehicle->condition) }}
+                    {{-- Badges --}}
+                    <div class="absolute top-2 left-2 flex flex-col gap-1.5 z-10">
+                        {{-- Condition Badge --}}
+                        @if($vehicle->condition)
+                        <div class="bg-white px-3 py-1 rounded text-xs font-semibold text-gray-900 shadow-sm">
+                            {{ ucfirst($vehicle->condition) }}
+                        </div>
+                        @endif
+                        
+                        {{-- Financing Available Badge --}}
+                        @if(isset($vehicleFinancingAvailability[$vehicle->id]) && $vehicleFinancingAvailability[$vehicle->id])
+                        <div class="bg-green-600 px-3 py-1 rounded text-xs font-semibold text-white shadow-sm flex items-center gap-1">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            Financing Available
+                        </div>
+                        @endif
                     </div>
-                    @endif
 
                     {{-- Save Button --}}
                     <button wire:click.prevent="toggleSave({{ $vehicle->id }})" class="absolute top-2 right-2 w-10 h-10 bg-white rounded-full flex items-center justify-center hover:bg-gray-50 shadow-md transition-colors z-10">

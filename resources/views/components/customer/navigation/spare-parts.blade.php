@@ -1,0 +1,6 @@
+<a href="{{ route('spare-parts.index') }}" class="text-sm font-medium {{ request()->routeIs('spare-parts.index') ? 'text-gray-900 font-semibold border-b-2 border-green-600 pb-1' : 'text-gray-700' }} hover:text-green-700 transition-colors">Browse Spare Parts</a>
+<a href="{{ route('spare-parts.by-make') }}" class="text-sm font-medium {{ request()->routeIs('spare-parts.by-make') ? 'text-gray-900 font-semibold border-b-2 border-green-600 pb-1' : 'text-gray-700' }} hover:text-green-700 transition-colors">By Vehicle Make</a>
+<a href="{{ route('spare-parts.categories') }}" class="text-sm font-medium {{ request()->routeIs('spare-parts.categories') ? 'text-gray-900 font-semibold border-b-2 border-green-600 pb-1' : 'text-gray-700' }} hover:text-green-700 transition-colors">Categories</a>
+<a href="{{ route('spare-parts.search') }}" class="text-sm font-medium {{ request()->routeIs('spare-parts.search') || request()->routeIs('spare-parts.supplier') ? 'text-gray-900 font-semibold border-b-2 border-green-600 pb-1' : 'text-gray-700' }} hover:text-green-700 transition-colors">Search Parts</a>
+<a href="{{ route('spare-parts.sourcing') }}" class="text-sm font-medium {{ request()->routeIs('spare-parts.sourcing') ? 'text-gray-900 font-semibold border-b-2 border-green-600 pb-1' : 'text-gray-700' }} hover:text-green-700 transition-colors">Sourcing</a>
+

@@ -92,6 +92,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Get the customer profile for this user
+     */
+    public function customer()
+    {
+        return $this->hasOne(Customer::class);
+    }
+
+    /**
      * Check if user belongs to a dealer entity
      */
     public function isDealer(): bool

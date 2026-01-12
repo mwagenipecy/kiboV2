@@ -5,14 +5,17 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-start space-x-4 h-12">
             <a href="{{ route('cars.index') }}" class="text-sm font-medium {{ $vehicleType === 'cars' ? 'text-gray-900' : 'text-gray-600' }} hover:text-green-700">{{ __('vehicles.cars') }}</a>
-            <a href="{{ route('vans.index') }}" class="text-sm font-medium {{ $vehicleType === 'vans' ? 'text-gray-900' : 'text-gray-600' }} hover:text-green-700">{{ __('vehicles.vans') }}</a>
-            <a href="{{ route('bikes.index') }}" class="text-sm font-medium {{ $vehicleType === 'bikes' ? 'text-gray-900' : 'text-gray-600' }} hover:text-green-700">{{ __('vehicles.bikes') }}</a>
-            <a href="{{ route('motorhomes.index') }}" class="text-sm font-medium {{ $vehicleType === 'motorhomes' ? 'text-gray-900' : 'text-gray-600' }} hover:text-green-700">{{ __('vehicles.motorhomes') }}</a>
-            <a href="{{ route('caravans.index') }}" class="text-sm font-medium {{ $vehicleType === 'caravans' ? 'text-gray-900' : 'text-gray-600' }} hover:text-green-700">{{ __('vehicles.caravans') }}</a>
             <a href="{{ route('trucks.index') }}" class="text-sm font-medium {{ $vehicleType === 'trucks' ? 'text-gray-900' : 'text-gray-600' }} hover:text-green-700">{{ __('vehicles.trucks') }}</a>
-            <a href="{{ route('farm.index') }}" class="text-sm font-medium {{ $vehicleType === 'farm' ? 'text-gray-900' : 'text-gray-600' }} hover:text-green-700">{{ __('vehicles.farm') }}</a>
-            <a href="{{ route('plant.index') }}" class="text-sm font-medium {{ $vehicleType === 'plant' ? 'text-gray-900' : 'text-gray-600' }} hover:text-green-700">{{ __('vehicles.plant') }}</a>
-            <a href="{{ route('electric-bikes.index') }}" class="text-sm font-medium {{ $vehicleType === 'electric-bikes' ? 'text-gray-900' : 'text-gray-600' }} hover:text-green-700">{{ __('vehicles.electric_bikes') }}</a>
+            <a href="{{ route('spare-parts.index') }}" class="text-sm font-medium {{ $vehicleType === 'spare-parts' || request()->routeIs('spare-parts.*') ? 'text-gray-900' : 'text-gray-600' }} hover:text-green-700">Spare Parts</a>
+            <a href="{{ route('garage.index') }}" class="text-sm font-medium {{ $vehicleType === 'garage' || request()->routeIs('garage.*') ? 'text-gray-900' : 'text-gray-600' }} hover:text-green-700">Garage</a>
+            {{-- Hidden menus --}}
+            {{-- <a href="{{ route('vans.index') }}" class="text-sm font-medium {{ $vehicleType === 'vans' ? 'text-gray-900' : 'text-gray-600' }} hover:text-green-700">{{ __('vehicles.vans') }}</a> --}}
+            {{-- <a href="{{ route('bikes.index') }}" class="text-sm font-medium {{ $vehicleType === 'bikes' ? 'text-gray-900' : 'text-gray-600' }} hover:text-green-700">{{ __('vehicles.bikes') }}</a> --}}
+            {{-- <a href="{{ route('motorhomes.index') }}" class="text-sm font-medium {{ $vehicleType === 'motorhomes' ? 'text-gray-900' : 'text-gray-600' }} hover:text-green-700">{{ __('vehicles.motorhomes') }}</a> --}}
+            {{-- <a href="{{ route('caravans.index') }}" class="text-sm font-medium {{ $vehicleType === 'caravans' ? 'text-gray-900' : 'text-gray-600' }} hover:text-green-700">{{ __('vehicles.caravans') }}</a> --}}
+            {{-- <a href="{{ route('farm.index') }}" class="text-sm font-medium {{ $vehicleType === 'farm' ? 'text-gray-900' : 'text-gray-600' }} hover:text-green-700">{{ __('vehicles.farm') }}</a> --}}
+            {{-- <a href="{{ route('plant.index') }}" class="text-sm font-medium {{ $vehicleType === 'plant' ? 'text-gray-900' : 'text-gray-600' }} hover:text-green-700">{{ __('vehicles.plant') }}</a> --}}
+            {{-- <a href="{{ route('electric-bikes.index') }}" class="text-sm font-medium {{ $vehicleType === 'electric-bikes' ? 'text-gray-900' : 'text-gray-600' }} hover:text-green-700">{{ __('vehicles.electric_bikes') }}</a> --}}
         </div>
     </div>
 </nav>

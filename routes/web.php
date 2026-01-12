@@ -53,6 +53,12 @@ Route::prefix('cars')->name('cars.')->group(function () {
         return view('cars.leasing', ['vehicleType' => 'cars']);
     })->name('leasing');
     
+    // Leasing Cars Routes
+    Route::prefix('lease')->name('lease.')->group(function () {
+        Route::get('/', \App\Livewire\Customer\LeasingCarList::class)->name('index');
+        Route::get('/{id}', \App\Livewire\Customer\LeasingCarDetail::class)->name('detail');
+    });
+    
     Route::get('/electric', function () {
         return view('cars.electric', ['vehicleType' => 'cars']);
     })->name('electric');
@@ -245,6 +251,8 @@ Route::prefix('trucks')->name('trucks.')->group(function () {
         return view('trucks.index', ['vehicleType' => 'trucks']);
     })->name('index');
     
+    Route::get('/search', \App\Livewire\Customer\TruckSearch::class)->name('search');
+    
     Route::get('/used', function () {
         return view('trucks.index', ['vehicleType' => 'trucks']);
     })->name('used');
@@ -276,6 +284,13 @@ Route::prefix('trucks')->name('trucks.')->group(function () {
     Route::get('/parts', function () {
         return view('trucks.index', ['vehicleType' => 'trucks']);
     })->name('parts');
+    
+    Route::get('/insurance', function () {
+        return view('trucks.insurance', ['vehicleType' => 'trucks']);
+    })->name('insurance');
+    
+    // Dynamic route for truck detail must come AFTER all static routes
+    Route::get('/{id}', \App\Livewire\Customer\TruckDetail::class)->name('detail');
 });
 
 // ============================================
@@ -399,6 +414,54 @@ Route::prefix('electric-bikes')->name('electric-bikes.')->group(function () {
     Route::get('/charging', function () {
         return view('electric-bikes.index', ['vehicleType' => 'electric-bikes']);
     })->name('charging');
+});
+
+// ============================================
+// SPARE PARTS SECTION ROUTES
+// ============================================
+Route::prefix('spare-parts')->name('spare-parts.')->group(function () {
+    Route::get('/', function () {
+        return view('spare-parts.index', ['vehicleType' => 'spare-parts']);
+    })->name('index');
+    
+    Route::get('/by-make', function () {
+        return view('spare-parts.by-make', ['vehicleType' => 'spare-parts']);
+    })->name('by-make');
+    
+    Route::get('/categories', function () {
+        return view('spare-parts.categories', ['vehicleType' => 'spare-parts']);
+    })->name('categories');
+    
+    Route::get('/search', function () {
+        return view('spare-parts.search', ['vehicleType' => 'spare-parts']);
+    })->name('search');
+    
+    Route::get('/sourcing', function () {
+        return view('spare-parts.sourcing', ['vehicleType' => 'spare-parts']);
+    })->name('sourcing');
+    
+    Route::get('/supplier/{id}', \App\Livewire\Customer\SparePartSupplierDetail::class)->name('supplier');
+});
+
+// ============================================
+// GARAGE SECTION ROUTES
+// ============================================
+Route::prefix('garage')->name('garage.')->group(function () {
+    Route::get('/', function () {
+        return view('garage.index', ['vehicleType' => 'garage']);
+    })->name('index');
+    
+    Route::get('/services', function () {
+        return view('garage.services', ['vehicleType' => 'garage']);
+    })->name('services');
+    
+    Route::get('/by-location', function () {
+        return view('garage.by-location', ['vehicleType' => 'garage']);
+    })->name('by-location');
+    
+    Route::get('/book-service', function () {
+        return view('garage.book-service', ['vehicleType' => 'garage']);
+    })->name('book-service');
 });
 
 // ============================================
@@ -567,6 +630,35 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
         });
     });
     
+    // Trucks Management
+    Route::prefix('trucks')->name('trucks.')->group(function () {
+        Route::get('/', function () {
+            return view('admin.trucks.index');
+        })->name('index');
+        
+        // Specific routes MUST come before dynamic routes
+        Route::get('/create', function () {
+            return view('admin.trucks.create');
+        })->name('create');
+        
+        Route::get('/pending', function () {
+            return view('admin.trucks.pending');
+        })->name('pending');
+        
+        Route::get('/sold', function () {
+            return view('admin.trucks.sold');
+        })->name('sold');
+        
+        // Dynamic routes come last
+        Route::get('/{id}', function ($id) {
+            return view('admin.trucks.view', ['id' => $id]);
+        })->name('view');
+        
+        Route::get('/{id}/edit', function ($id) {
+            return view('admin.trucks.edit', ['id' => $id]);
+        })->name('edit');
+    });
+    
     // Listings
     Route::prefix('listings')->name('listings.')->group(function () {
         Route::get('/active', function () {
@@ -582,6 +674,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
             return view('admin.listings.archived');
         })->name('archived');
     });
+    
+    // Spare Part Orders
+    Route::get('/spare-part-orders', \App\Livewire\Admin\SparePartOrders::class)->name('spare-part-orders');
     
     // Orders
     Route::prefix('orders')->name('orders.')->group(function () {
@@ -664,6 +759,75 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
             Route::get('/{orderId}', function ($orderId) {
                 return view('admin.orders.evaluation-detail', ['orderId' => $orderId]);
             })->name('view');
+        });
+        
+        // Cash Purchase Orders
+        Route::prefix('cash')->name('cash.')->group(function () {
+            Route::get('/', function () {
+                return view('admin.orders.cash-index');
+            })->name('index');
+            Route::get('/pending', function () {
+                return view('admin.orders.cash-pending');
+            })->name('pending');
+            Route::get('/approved', function () {
+                return view('admin.orders.cash-approved');
+            })->name('approved');
+            Route::get('/completed', function () {
+                return view('admin.orders.cash-completed');
+            })->name('completed');
+            Route::get('/rejected', function () {
+                return view('admin.orders.cash-rejected');
+            })->name('rejected');
+            Route::get('/{id}', function ($id) {
+                return view('admin.orders.cash-detail', ['orderId' => $id]);
+            })->name('detail');
+        });
+        
+        // Financing Orders
+        Route::prefix('financing')->name('financing.')->group(function () {
+            Route::get('/', function () {
+                return view('admin.orders.financing-index');
+            })->name('index');
+            Route::get('/pending', function () {
+                return view('admin.orders.financing-index', ['filter' => 'pending']);
+            })->name('pending');
+            Route::get('/approved', function () {
+                return view('admin.orders.financing-index', ['filter' => 'approved']);
+            })->name('approved');
+            Route::get('/completed', function () {
+                return view('admin.orders.financing-index', ['filter' => 'completed']);
+            })->name('completed');
+            Route::get('/rejected', function () {
+                return view('admin.orders.financing-index', ['filter' => 'rejected']);
+            })->name('rejected');
+            Route::get('/{id}', function ($id) {
+                return view('admin.orders.financing-detail', ['orderId' => $id]);
+            })->name('detail');
+        });
+        
+        // Leasing Orders
+        Route::prefix('leasing')->name('leasing.')->group(function () {
+            Route::get('/', function () {
+                return view('admin.orders.leasing-index');
+            })->name('index');
+            Route::get('/pending', function () {
+                return view('admin.orders.leasing-index', ['filter' => 'pending']);
+            })->name('pending');
+            Route::get('/approved', function () {
+                return view('admin.orders.leasing-index', ['filter' => 'approved']);
+            })->name('approved');
+            Route::get('/active', function () {
+                return view('admin.orders.leasing-index', ['filter' => 'active']);
+            })->name('active');
+            Route::get('/completed', function () {
+                return view('admin.orders.leasing-index', ['filter' => 'completed']);
+            })->name('completed');
+            Route::get('/rejected', function () {
+                return view('admin.orders.leasing-index', ['filter' => 'rejected']);
+            })->name('rejected');
+            Route::get('/{id}', function ($id) {
+                return view('admin.orders.leasing-detail', ['orderId' => $id]);
+            })->name('detail');
         });
     });
     
@@ -764,6 +928,54 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
         })->name('permissions');
     });
     
+    // Lending Criteria
+    Route::prefix('lending-criteria')->name('lending-criteria.')->group(function () {
+        Route::get('/', function () {
+            return view('admin.lending-criteria.index');
+        })->name('index');
+        Route::get('/create', function () {
+            return view('admin.lending-criteria.create');
+        })->name('create');
+        Route::get('/{id}', function ($id) {
+            return view('admin.lending-criteria.view', ['criteriaId' => $id]);
+        })->name('view');
+        Route::get('/{id}/edit', function ($id) {
+            return view('admin.lending-criteria.edit', ['criteriaId' => $id]);
+        })->name('edit');
+    });
+    
+    // Vehicle Leasing
+    Route::prefix('leasing')->name('leasing.')->group(function () {
+        Route::get('/', function () {
+            return view('admin.leasing.index');
+        })->name('index');
+        Route::get('/create', function () {
+            return view('admin.leasing.create');
+        })->name('create');
+        Route::get('/{id}', function ($id) {
+            return view('admin.leasing.view', ['id' => $id]);
+        })->name('view');
+        Route::get('/{id}/edit', function ($id) {
+            return view('admin.leasing.edit', ['id' => $id]);
+        })->name('edit');
+    });
+    
+    // Leasing Cars
+    Route::prefix('leasing-cars')->name('leasing-cars.')->group(function () {
+        Route::get('/', function () {
+            return view('admin.leasing-cars.index');
+        })->name('index');
+        Route::get('/create', function () {
+            return view('admin.leasing-cars.create');
+        })->name('create');
+        Route::get('/{id}/edit', function ($id) {
+            return view('admin.leasing-cars.edit', ['id' => $id]);
+        })->name('edit');
+        Route::get('/{id}', function ($id) {
+            return view('admin.leasing-cars.view', ['id' => $id]);
+        })->name('view');
+    });
+    
     // Settings
     Route::prefix('settings')->name('settings.')->group(function () {
         Route::get('/vehicles', function () {
@@ -785,10 +997,38 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
 });
 
 // ============================================
+// LENDER ROUTES (Additional routes)
+// ============================================
+Route::get('/lender', function () {
+    return redirect()->route('lender.applications.index');
+})->name('lender.index');
+
+Route::prefix('lender')->name('lender.')->group(function () {
+    // Financing Applications
+    Route::prefix('applications')->name('applications.')->group(function () {
+        Route::get('/', function () {
+            return view('lender.applications.index', ['filter' => 'pending']);
+        })->name('index');
+        Route::get('/pending', function () {
+            return view('lender.applications.index', ['filter' => 'pending']);
+        })->name('pending');
+        Route::get('/approved', function () {
+            return view('lender.applications.index', ['filter' => 'approved']);
+        })->name('approved');
+        Route::get('/rejected', function () {
+            return view('lender.applications.index', ['filter' => 'rejected']);
+        })->name('rejected');
+        Route::get('/{id}', function ($id) {
+            return view('lender.applications.detail', ['applicationId' => $id]);
+        })->name('detail');
+    });
+});
+
+// ============================================
 // OTP VERIFICATION ROUTES
 // ============================================
 Route::middleware(['auth'])->group(function () {
-    Route::get('/verify-otp', [App\Http\Controllers\Auth\OtpVerificationController::class, 'show'])->name('otp.verify');
+    Route::get('/verify-otp', [App\Http\Controllers\Auth\OtpVerificationController::class, 'show'])->name('otp.verify.show');
     Route::post('/verify-otp', [App\Http\Controllers\Auth\OtpVerificationController::class, 'verify'])->name('otp.verify');
     Route::post('/resend-otp', [App\Http\Controllers\Auth\OtpVerificationController::class, 'resend'])->name('otp.resend');
 });

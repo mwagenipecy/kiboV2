@@ -3,6 +3,7 @@
 namespace App\Livewire\Customer;
 
 use App\Enums\VehicleStatus;
+use App\Models\LendingCriteria;
 use App\Models\Vehicle;
 use App\Models\VehicleMake;
 use App\Models\VehicleModel;
@@ -66,6 +67,11 @@ class VehicleSearch extends Component
     {
         // Load saved vehicles from session
         $this->savedVehicles = session()->get('saved_vehicles', []);
+        
+        // Check if this is the electric cars page - set default filter
+        if (request()->routeIs('cars.electric')) {
+            $this->fuelType = ['Electric'];
+        }
     }
 
     public function updatingMake()
@@ -180,7 +186,10 @@ class VehicleSearch extends Component
             $query->whereIn('body_type', $this->bodyType);
         }
 
-        if (!empty($this->fuelType)) {
+        // For electric cars page, always filter for electric vehicles only (not petrol or diesel)
+        if (request()->routeIs('cars.electric')) {
+            $query->where('fuel_type', 'Electric');
+        } elseif (!empty($this->fuelType)) {
             $query->whereIn('fuel_type', $this->fuelType);
         }
 
@@ -210,8 +219,20 @@ class VehicleSearch extends Component
                 break;
         }
 
-        $vehicles = $query->paginate(15);
+        $vehicles = $query->paginate(16);
         $totalCount = $vehicles->total();
+
+        // Get all active lending criteria for checking financing availability
+        $allCriteria = LendingCriteria::active()->get();
+        
+        // Check which vehicles have financing available
+        $vehicleFinancingAvailability = [];
+        foreach ($vehicles as $vehicle) {
+            $hasFinancing = $allCriteria->contains(function ($criterion) use ($vehicle) {
+                return $criterion->vehicleMeetsCriteria($vehicle);
+            });
+            $vehicleFinancingAvailability[$vehicle->id] = $hasFinancing;
+        }
 
         // Get available makes and models for filters
         $makes = VehicleMake::where('status', 'active')->orderBy('name')->get();
@@ -229,6 +250,7 @@ class VehicleSearch extends Component
             'totalCount' => $totalCount,
             'makes' => $makes,
             'models' => $models,
+            'vehicleFinancingAvailability' => $vehicleFinancingAvailability,
         ])->layout('layouts.customer');
     }
 }

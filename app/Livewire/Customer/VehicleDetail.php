@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Customer;
 
+use App\Models\LendingCriteria;
 use App\Models\Vehicle;
 use Livewire\Component;
 
@@ -16,6 +17,7 @@ class VehicleDetail extends Component
     public $allImages = [];
     public $showInfoModal = false;
     public $modalContent = null;
+    public $matchingLenders = [];
 
     public function mount($id)
     {
@@ -46,6 +48,26 @@ class VehicleDetail extends Component
             'exported' => false,
             'writtenOff' => false,
         ];
+        
+        // Get matching lenders for financing options
+        $this->matchingLenders = $this->getMatchingLenders();
+    }
+    
+    /**
+     * Get lenders whose criteria match this vehicle
+     */
+    public function getMatchingLenders()
+    {
+        $criteria = LendingCriteria::with('entity')
+            ->active()
+            ->orderBy('priority', 'desc')
+            ->get();
+        
+        $matching = $criteria->filter(function ($criterion) {
+            return $criterion->vehicleMeetsCriteria($this->vehicle);
+        });
+        
+        return $matching->values();
     }
 
     public function toggleSave()

@@ -252,7 +252,7 @@
     <div class="fixed inset-0 z-50 overflow-y-auto">
         <div 
             wire:click="$set('showDeleteModal', false)"
-            class="fixed inset-0 bg-gray-900 bg-opacity-50 transition-opacity"
+            class="fixed inset-0 bg-black/50 bg-opacity-50 transition-opacity"
         ></div>
         
         <div class="flex items-center justify-center min-h-screen px-4 py-6">
