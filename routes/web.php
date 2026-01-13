@@ -41,6 +41,10 @@ Route::prefix('cars')->name('cars.')->group(function () {
         return view('cars.sell', ['vehicleType' => 'cars']);
     })->name('sell');
     
+    Route::get('/pricing', function () {
+        return view('pricing.index', ['category' => 'cars', 'vehicleType' => 'cars']);
+    })->name('pricing');
+    
     Route::get('/value', function () {
         return view('cars.value', ['vehicleType' => 'cars']);
     })->name('value');
@@ -265,6 +269,10 @@ Route::prefix('trucks')->name('trucks.')->group(function () {
         return view('trucks.index', ['vehicleType' => 'trucks']);
     })->name('sell');
     
+    Route::get('/pricing', function () {
+        return view('pricing.index', ['category' => 'trucks', 'vehicleType' => 'trucks']);
+    })->name('pricing');
+    
     Route::get('/value', function () {
         return view('trucks.index', ['vehicleType' => 'trucks']);
     })->name('value');
@@ -462,7 +470,19 @@ Route::prefix('garage')->name('garage.')->group(function () {
     Route::get('/book-service', function () {
         return view('garage.book-service', ['vehicleType' => 'garage']);
     })->name('book-service');
+    
+    Route::get('/pricing', function () {
+        return view('pricing.index', ['category' => 'garage', 'vehicleType' => 'garage']);
+    })->name('pricing');
 });
+
+// ============================================
+// UNIFIED PRICING ROUTE (for use in components)
+// ============================================
+Route::get('/pricing/{category}', function ($category) {
+    $vehicleType = in_array($category, ['cars', 'trucks', 'garage']) ? $category : 'cars';
+    return view('pricing.index', ['category' => $category, 'vehicleType' => $vehicleType]);
+})->where('category', 'cars|trucks|garage')->name('pricing.show');
 
 // ============================================
 // DEALER PANEL ROUTES
@@ -994,6 +1014,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
             return view('admin.settings.billing');
         })->name('billing');
     });
+    
+    // Pricing Management
+    Route::get('/pricing', function () {
+        return view('admin.pricing.index');
+    })->name('pricing.index');
 });
 
 // ============================================

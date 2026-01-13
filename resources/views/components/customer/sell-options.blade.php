@@ -51,7 +51,18 @@
                 <button class="bg-green-600 hover:bg-green-700 text-white font-semibold px-8 py-3 rounded-full transition-colors">
                     Start an advert
                 </button>
-                <a href="#" class="text-green-600 hover:text-green-700 font-medium underline text-sm">
+                @php
+                    // Determine category based on current route
+                    $category = 'cars';
+                    if (request()->routeIs('trucks.*')) {
+                        $category = 'trucks';
+                    } elseif (request()->routeIs('garage.*')) {
+                        $category = 'garage';
+                    } elseif (request()->routeIs('cars.*')) {
+                        $category = 'cars';
+                    }
+                @endphp
+                <a href="{{ route('pricing.show', ['category' => $category]) }}" class="text-green-600 hover:text-green-700 font-medium underline text-sm">
                     See advertising prices
                 </a>
             </div>

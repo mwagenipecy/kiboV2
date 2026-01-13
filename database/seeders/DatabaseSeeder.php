@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             AdminUserSeeder::class,
             VehicleMakeModelSeeder::class,
             AgentSeeder::class,
+            PricingPlanSeeder::class,
         ]);
     }
 }

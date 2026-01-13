@@ -30,6 +30,9 @@
     <!-- Footer Component -->
     <x-customer.footer />
 
+    <!-- Chatbot Widget -->
+    <x-customer.chatbot />
+
     @stack('scripts')
     @livewireScripts
     
