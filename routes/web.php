@@ -484,6 +484,13 @@ Route::prefix('garage')->name('garage.')->group(function () {
 });
 
 // ============================================
+// LOAN CALCULATOR ROUTES
+// ============================================
+Route::prefix('loan-calculator')->name('loan-calculator.')->group(function () {
+    Route::get('/', \App\Livewire\Customer\LoanCalculator::class)->name('index');
+});
+
+// ============================================
 // UNIFIED PRICING ROUTE (for use in components)
 // ============================================
 Route::get('/pricing/{category}', function ($category) {
