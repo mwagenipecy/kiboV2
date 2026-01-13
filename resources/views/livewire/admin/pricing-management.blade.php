@@ -91,7 +91,7 @@
 
     <!-- Modal -->
     @if($showModal)
-        <div class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50" wire:click="closeModal">
+        <div class="fixed inset-0 bg-black/50 bg-opacity-50 overflow-y-auto h-full w-full z-50" wire:click="closeModal">
             <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white" wire:click.stop>
                 <div class="mt-3">
                     <h3 class="text-lg font-medium text-gray-900 mb-4">

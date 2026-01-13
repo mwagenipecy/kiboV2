@@ -70,34 +70,34 @@ class AgentList extends Component
                 session()->flash('success', 'Agent approved successfully!');
             } else {
                 // User doesn't exist (old agent created before user creation on save)
-                // Generate random password
-                $password = Str::random(12);
+            // Generate random password
+            $password = Str::random(12);
 
-                // Create user account
-                $user = User::create([
-                    'name' => $agent->name,
-                    'email' => $agent->email,
-                    'password' => Hash::make($password),
-                    'role' => 'agent',
-                ]);
+            // Create user account
+            $user = User::create([
+                'name' => $agent->name,
+                'email' => $agent->email,
+                'password' => Hash::make($password),
+                'role' => 'agent',
+            ]);
 
-                // Update agent with approval info
-                $agent->update([
-                    'approval_status' => 'approved',
-                    'user_id' => $user->id,
-                    'approved_at' => now(),
-                    'approved_by' => auth()->id(),
-                ]);
+            // Update agent with approval info
+            $agent->update([
+                'approval_status' => 'approved',
+                'user_id' => $user->id,
+                'approved_at' => now(),
+                'approved_by' => auth()->id(),
+            ]);
 
-                // Dispatch queued job to send credentials email
-                SendRegistrationCredentials::dispatch(
-                    $agent->email,
-                    $agent->name,
-                    $password,
-                    'agent'
-                );
+            // Dispatch queued job to send credentials email
+            SendRegistrationCredentials::dispatch(
+                $agent->email,
+                $agent->name,
+                $password,
+                'agent'
+            );
 
-                session()->flash('success', 'Agent approved successfully! Credentials have been sent via email.');
+            session()->flash('success', 'Agent approved successfully! Credentials have been sent via email.');
             }
         } catch (\Exception $e) {
             session()->flash('error', 'An error occurred: ' . $e->getMessage());

@@ -45,6 +45,13 @@ Route::prefix('cars')->name('cars.')->group(function () {
         return view('pricing.index', ['category' => 'cars', 'vehicleType' => 'cars']);
     })->name('pricing');
     
+    Route::get('/list-vehicle', function () {
+        return view('cars.list-vehicle', ['vehicleType' => 'cars']);
+    })->middleware('auth')->name('list-vehicle');
+    
+    Route::get('/sell-to-dealer', \App\Livewire\Customer\AuctionVehicleForm::class)
+        ->middleware('auth')->name('sell-to-dealer');
+    
     Route::get('/value', function () {
         return view('cars.value', ['vehicleType' => 'cars']);
     })->name('value');
@@ -514,6 +521,9 @@ Route::prefix('dealer')->name('dealer.')->middleware(['auth', 'verified'])->grou
         return view('dealer.offers');
     })->name('offers');
     
+    // Auctions - Buy from private sellers
+    Route::get('/auctions', \App\Livewire\Dealer\AuctionList::class)->name('auctions');
+    
     // Orders
     Route::get('/orders', function () {
         return view('dealer.orders');
@@ -697,6 +707,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
     
     // Spare Part Orders
     Route::get('/spare-part-orders', \App\Livewire\Admin\SparePartOrders::class)->name('spare-part-orders');
+    
+    // Auctions
+    Route::get('/auctions', \App\Livewire\Admin\AuctionManagement::class)->name('auctions');
+    Route::get('/auctions/{id}', \App\Livewire\Admin\AuctionDetail::class)->name('auctions.detail');
     
     // Orders
     Route::prefix('orders')->name('orders.')->group(function () {
@@ -1083,6 +1097,8 @@ Route::middleware(['auth'])->group(function () {
 
     // My Orders
     Route::get('my-orders', \App\Livewire\Customer\MyOrders::class)->name('my-orders');
+    Route::get('my-adverts', \App\Livewire\Customer\MyAdverts::class)->name('my-adverts');
+    Route::get('my-auctions', \App\Livewire\Customer\MyAuctions::class)->name('my-auctions');
 
     Route::get('settings/two-factor', function () {
         return view('customer.two-factor');

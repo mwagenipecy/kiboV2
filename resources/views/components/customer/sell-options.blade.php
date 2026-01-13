@@ -48,9 +48,15 @@
             </div>
             
             <div class="flex flex-col items-center gap-4">
-                <button class="bg-green-600 hover:bg-green-700 text-white font-semibold px-8 py-3 rounded-full transition-colors">
-                    Start an advert
-                </button>
+                @auth
+                    <a href="{{ route('cars.list-vehicle') }}" class="bg-green-600 hover:bg-green-700 text-white font-semibold px-8 py-3 rounded-full transition-colors text-center">
+                        Start an advert
+                    </a>
+                @else
+                    <button onclick="document.getElementById('openAuthModal').click()" class="bg-green-600 hover:bg-green-700 text-white font-semibold px-8 py-3 rounded-full transition-colors">
+                        Start an advert
+                    </button>
+                @endauth
                 @php
                     // Determine category based on current route
                     $category = 'cars';
@@ -98,11 +104,17 @@
             </div>
             
             <div class="flex flex-col items-center gap-4">
-                <button class="bg-green-600 hover:bg-green-700 text-white font-semibold px-8 py-3 rounded-full transition-colors">
-                    Sell for free
-                </button>
-                <a href="#" class="text-green-600 hover:text-green-700 font-medium underline text-sm">
-                    Learn more about selling to a dealer
+                @auth
+                    <a href="{{ route('cars.sell-to-dealer') }}" class="bg-green-600 hover:bg-green-700 text-white font-semibold px-8 py-3 rounded-full transition-colors text-center">
+                        Sell for free
+                    </a>
+                @else
+                    <button onclick="document.getElementById('openAuthModal').click()" class="bg-green-600 hover:bg-green-700 text-white font-semibold px-8 py-3 rounded-full transition-colors">
+                        Sell for free
+                    </button>
+                @endauth
+                <a href="{{ route('my-auctions') }}" class="text-green-600 hover:text-green-700 font-medium underline text-sm">
+                    View my auctions
                 </a>
             </div>
         </div>

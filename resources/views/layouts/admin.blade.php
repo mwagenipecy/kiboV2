@@ -104,6 +104,7 @@
         <!-- Page Content -->
         <main class="p-4 sm:p-6 lg:p-8">
             @yield('content')
+            {{ $slot ?? '' }}
         </main>
 
         <!-- Footer Component -->

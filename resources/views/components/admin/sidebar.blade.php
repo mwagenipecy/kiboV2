@@ -284,6 +284,20 @@
                     </div>
                 </div>
 
+                <!-- Auctions -->
+                <a href="{{ route('admin.auctions') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('admin.auctions*') ? 'text-white bg-gradient-to-r from-green-500 to-green-600 shadow-sm' : 'text-gray-700 hover:bg-green-50 hover:text-green-700' }} transition-colors group">
+                    <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <span class="menu-text">Auctions</span>
+                    @php
+                        $pendingAuctions = \App\Models\AuctionVehicle::where('status', 'pending')->where('admin_approved', false)->count();
+                    @endphp
+                    @if($pendingAuctions > 0)
+                    <span class="ml-auto px-2 py-0.5 text-xs font-semibold text-yellow-700 bg-yellow-100 rounded-full menu-text">{{ $pendingAuctions }}</span>
+                    @endif
+                </a>
+
                 <!-- Customers -->
                 <a href="{{ route('admin.customers.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('admin.customers.*') ? 'text-white bg-gradient-to-r from-green-500 to-green-600 shadow-sm' : 'text-gray-700 hover:bg-green-50 hover:text-green-700' }} transition-colors group">
                     <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
