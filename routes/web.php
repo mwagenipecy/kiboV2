@@ -1120,6 +1120,11 @@ Route::middleware(['auth'])->group(function () {
 });
 
 // ============================================
+// CHATBOT API ROUTE
+// ============================================
+Route::post('/api/chatbot/chat', [App\Http\Controllers\ChatbotController::class, 'chat'])->name('chatbot.chat');
+
+// ============================================
 // TEST ROUTES (For Development)
 // ============================================
 Route::get('/test', function () {

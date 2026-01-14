@@ -75,7 +75,7 @@
                     </svg>
                 </button>
             </form>
-            <p class="text-xs text-gray-500 text-center mt-2">Typically replies within a few minutes</p>
+            <p class="text-xs text-gray-500 text-center mt-2">Powered by AI • Typically replies within seconds</p>
         </div>
     </div>
 
@@ -120,6 +120,9 @@
         }
     }
 
+    // Store conversation history
+    let conversationHistory = [];
+
     function sendMessage(event) {
         event.preventDefault();
         const input = document.getElementById('chatbot-input');
@@ -129,13 +132,64 @@
         
         // Add user message
         addMessage(message, 'user');
+        conversationHistory.push({ role: 'user', content: message });
         input.value = '';
         
-        // Simulate bot response
-        setTimeout(() => {
-            const response = getBotResponse(message);
-            addMessage(response, 'bot');
-        }, 1000);
+        // Show loading indicator
+        const loadingDiv = document.createElement('div');
+        loadingDiv.id = 'chatbot-loading';
+        loadingDiv.className = 'flex items-start gap-2';
+        loadingDiv.innerHTML = `
+            <div class="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                </svg>
+            </div>
+            <div class="flex-1">
+                <div class="bg-white border border-gray-200 rounded-lg p-3 shadow-sm">
+                    <div class="flex gap-1">
+                        <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0s"></div>
+                        <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                        <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.4s"></div>
+                    </div>
+                </div>
+            </div>
+        `;
+        const messagesContainer = document.getElementById('chatbot-messages');
+        messagesContainer.appendChild(loadingDiv);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        
+        // Call OpenAI API
+        fetch('{{ route("chatbot.chat") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+            },
+            body: JSON.stringify({
+                message: message,
+                conversation_history: conversationHistory.slice(-10) // Last 10 messages for context
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Remove loading indicator
+            const loading = document.getElementById('chatbot-loading');
+            if (loading) loading.remove();
+            
+            if (data.error) {
+                addMessage('I apologize, but I\'m having trouble connecting right now. Please try again in a moment.', 'bot');
+            } else {
+                addMessage(data.response, 'bot');
+                conversationHistory.push({ role: 'bot', content: data.response });
+            }
+        })
+        .catch(error => {
+            console.error('Chatbot error:', error);
+            const loading = document.getElementById('chatbot-loading');
+            if (loading) loading.remove();
+            addMessage('I apologize, but I\'m having trouble connecting right now. Please try again in a moment.', 'bot');
+        });
     }
 
     function sendQuickMessage(message) {
