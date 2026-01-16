@@ -1,0 +1,83 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: kibo_app
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html
+      - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    networks:
+      - kibo_network
+    depends_on:
+      - db
+      - redis
+
+  nginx:
+    image: nginx:alpine
+    container_name: kibo_nginx
+    restart: unless-stopped
+    ports:
+      # Server IP: 40.127.10.196, Port: 8084
+      - "8084:80"
+    volumes:
+      - ./:/var/www/html
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - kibo_network
+    depends_on:
+      - app
+
+  db:
+    image: mysql:8.0
+    container_name: kibo_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-kiboAuto_2025}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-kiboAuto_2025}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-kiboAuto_2025}
+      MYSQL_USER: ${DB_USERNAME:-Kiboauto_2025_admin}
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mysql
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - kibo_network
+
+  redis:
+    image: redis:alpine
+    container_name: kibo_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - kibo_network
+
+  node:
+    image: node:20-alpine
+    container_name: kibo_node
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html
+      - /var/www/html/node_modules
+    networks:
+      - kibo_network
+    command: sh -c "npm install && tail -f /dev/null"
+    depends_on:
+      - app
+
+volumes:
+  db_data:
+    driver: local
+
+networks:
+  kibo_network:
+    driver: bridge
+
