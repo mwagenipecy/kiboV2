@@ -13,6 +13,21 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
+# Detect docker-compose command (v1 or v2)
+if command -v docker-compose &> /dev/null; then
+    DOCKER_COMPOSE="docker-compose"
+elif docker compose version &> /dev/null; then
+    DOCKER_COMPOSE="docker compose"
+else
+    echo -e "${RED}❌ Docker Compose is not installed or not found in PATH${NC}"
+    echo -e "${YELLOW}Please install Docker Compose or ensure it's in your PATH${NC}"
+    echo -e "${YELLOW}For Docker Compose v2, use: docker compose${NC}"
+    echo -e "${YELLOW}For Docker Compose v1, use: docker-compose${NC}"
+    exit 1
+fi
+
+echo -e "${GREEN}✅ Using: $DOCKER_COMPOSE${NC}"
+
 # Check if .env exists
 if [ ! -f .env ]; then
     echo -e "${YELLOW}⚠️  .env file not found. Creating from .env.example...${NC}"
@@ -111,19 +126,19 @@ echo -e "${GREEN}✅ Updated .env file${NC}"
 
 # Stop existing containers
 echo "🛑 Stopping existing containers..."
-docker-compose down
+$DOCKER_COMPOSE down
 
 # Build and start containers
 echo "🏗️  Building and starting Docker containers..."
-docker-compose up -d --build
+$DOCKER_COMPOSE up -d --build
 
 # Wait for database to be ready
 echo "⏳ Waiting for database to be ready..."
 sleep 15
 
 # Check if containers are running
-if ! docker-compose ps | grep -q "Up"; then
-    echo -e "${RED}❌ Some containers failed to start. Check logs with: docker-compose logs${NC}"
+if ! $DOCKER_COMPOSE ps | grep -q "Up"; then
+    echo -e "${RED}❌ Some containers failed to start. Check logs with: $DOCKER_COMPOSE logs${NC}"
     exit 1
 fi
 
@@ -131,36 +146,36 @@ echo -e "${GREEN}✅ Containers are running${NC}"
 
 # Install PHP dependencies
 echo "📦 Installing PHP dependencies..."
-docker-compose exec -T app composer install --optimize-autoloader --no-dev
+$DOCKER_COMPOSE exec -T app composer install --optimize-autoloader --no-dev
 
 # Install Node dependencies
 echo "📦 Installing Node.js dependencies..."
-docker-compose exec -T node npm install
+$DOCKER_COMPOSE exec -T node npm install
 
 # Generate application key if not set
 if ! grep -q "APP_KEY=base64:" .env; then
     echo "🔑 Generating application key..."
-    docker-compose exec -T app php artisan key:generate
+    $DOCKER_COMPOSE exec -T app php artisan key:generate
 fi
 
 # Set permissions
 echo "🔐 Setting storage permissions..."
-docker-compose exec -T app chmod -R 775 storage bootstrap/cache
-docker-compose exec -T app chown -R www-data:www-data storage bootstrap/cache
+$DOCKER_COMPOSE exec -T app chmod -R 775 storage bootstrap/cache
+$DOCKER_COMPOSE exec -T app chown -R www-data:www-data storage bootstrap/cache
 
 # Run migrations
 echo "🗄️  Running database migrations..."
-docker-compose exec -T app php artisan migrate --force
+$DOCKER_COMPOSE exec -T app php artisan migrate --force
 
 # Build frontend assets
 echo "🎨 Building frontend assets..."
-docker-compose exec -T node npm run build
+$DOCKER_COMPOSE exec -T node npm run build
 
 # Cache configuration for production
 echo "⚡ Caching configuration for production..."
-docker-compose exec -T app php artisan config:cache
-docker-compose exec -T app php artisan route:cache
-docker-compose exec -T app php artisan view:cache
+$DOCKER_COMPOSE exec -T app php artisan config:cache
+$DOCKER_COMPOSE exec -T app php artisan route:cache
+$DOCKER_COMPOSE exec -T app php artisan view:cache
 
 echo ""
 echo -e "${GREEN}✅ Deployment complete!${NC}"
@@ -174,9 +189,9 @@ echo "  - Password: kiboAuto_2025"
 echo "  - Database: kiboAuto_2025"
 echo ""
 echo "Useful commands:"
-echo "  - View logs: docker-compose logs -f"
-echo "  - Check status: docker-compose ps"
-echo "  - Restart services: docker-compose restart"
-echo "  - Stop services: docker-compose stop"
+echo "  - View logs: $DOCKER_COMPOSE logs -f"
+echo "  - Check status: $DOCKER_COMPOSE ps"
+echo "  - Restart services: $DOCKER_COMPOSE restart"
+echo "  - Stop services: $DOCKER_COMPOSE stop"
 echo ""
 
