@@ -63,9 +63,9 @@ if [ ! -f .env ]; then
         echo "APP_URL=http://40.127.10.196:8084" >> .env
         echo "" >> .env
         echo "DB_CONNECTION=mysql" >> .env
-        echo "DB_HOST=db" >> .env
+        echo "DB_HOST=host.docker.internal" >> .env
         echo "DB_PORT=3306" >> .env
-        echo "DB_DATABASE=kiboAuto_2025" >> .env
+        echo "DB_DATABASE=kiboV2" >> .env
         echo "DB_USERNAME=Kiboauto_2025_admin" >> .env
         echo "DB_PASSWORD=kiboAuto_2025" >> .env
         echo "" >> .env
@@ -77,11 +77,11 @@ fi
 
 # Update .env with production database settings
 echo "📝 Updating .env with production database configuration..."
-# Update or add database configuration
+# Update or add database configuration (external MySQL)
 if grep -q "^DB_HOST=" .env; then
-    sed -i.bak 's/^DB_HOST=.*/DB_HOST=db/' .env 2>/dev/null || sed -i '' 's/^DB_HOST=.*/DB_HOST=db/' .env
+    sed -i.bak 's/^DB_HOST=.*/DB_HOST=host.docker.internal/' .env 2>/dev/null || sed -i '' 's/^DB_HOST=.*/DB_HOST=host.docker.internal/' .env
 else
-    echo "DB_HOST=db" >> .env
+    echo "DB_HOST=host.docker.internal" >> .env
 fi
 
 if grep -q "^DB_CONNECTION=" .env; then
@@ -91,9 +91,9 @@ else
 fi
 
 if grep -q "^DB_DATABASE=" .env; then
-    sed -i.bak 's/^DB_DATABASE=.*/DB_DATABASE=kiboAuto_2025/' .env 2>/dev/null || sed -i '' 's/^DB_DATABASE=.*/DB_DATABASE=kiboAuto_2025/' .env
+    sed -i.bak 's/^DB_DATABASE=.*/DB_DATABASE=kiboV2/' .env 2>/dev/null || sed -i '' 's/^DB_DATABASE=.*/DB_DATABASE=kiboV2/' .env
 else
-    echo "DB_DATABASE=kiboAuto_2025" >> .env
+    echo "DB_DATABASE=kiboV2" >> .env
 fi
 
 if grep -q "^DB_USERNAME=" .env; then
@@ -151,9 +151,9 @@ $DOCKER_COMPOSE down
 echo "🏗️  Building and starting Docker containers..."
 $DOCKER_COMPOSE up -d --build
 
-# Wait for database to be ready
-echo "⏳ Waiting for database to be ready..."
-sleep 15
+# Wait for services to be ready
+echo "⏳ Waiting for services to be ready..."
+sleep 5
 
 # Check if containers are running
 if ! $DOCKER_COMPOSE ps | grep -q "Up"; then
