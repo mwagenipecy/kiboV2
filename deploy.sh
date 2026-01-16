@@ -63,7 +63,7 @@ if [ ! -f .env ]; then
         echo "APP_URL=http://40.127.10.196:8084" >> .env
         echo "" >> .env
         echo "DB_CONNECTION=mysql" >> .env
-        echo "DB_HOST=host.docker.internal" >> .env
+        echo "DB_HOST=127.0.0.1" >> .env
         echo "DB_PORT=3306" >> .env
         echo "DB_DATABASE=kiboV2" >> .env
         echo "DB_USERNAME=Kiboauto_2025_admin" >> .env
@@ -78,10 +78,13 @@ fi
 # Update .env with production database settings
 echo "📝 Updating .env with production database configuration..."
 # Update or add database configuration (external MySQL)
+# Try multiple host options for Linux Docker compatibility
+# First try host.docker.internal, if that doesn't work, use 172.17.0.1 (Docker bridge gateway)
 if grep -q "^DB_HOST=" .env; then
-    sed -i.bak 's/^DB_HOST=.*/DB_HOST=host.docker.internal/' .env 2>/dev/null || sed -i '' 's/^DB_HOST=.*/DB_HOST=host.docker.internal/' .env
+    # Try host.docker.internal first, fallback to Docker bridge gateway
+    sed -i.bak 's/^DB_HOST=.*/DB_HOST=127.0.0.1/' .env 2>/dev/null || sed -i '' 's/^DB_HOST=.*/DB_HOST=127.0.0.1/' .env
 else
-    echo "DB_HOST=host.docker.internal" >> .env
+    echo "DB_HOST=127.0.0.1" >> .env
 fi
 
 if grep -q "^DB_CONNECTION=" .env; then
