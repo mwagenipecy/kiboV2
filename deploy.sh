@@ -19,25 +19,90 @@ if [ ! -f .env ]; then
     if [ -f .env.example ]; then
         cp .env.example .env
         echo -e "${GREEN}✅ Created .env file${NC}"
-        echo -e "${YELLOW}⚠️  Please update .env with production values before continuing!${NC}"
-        exit 1
     else
-        echo -e "${RED}❌ .env.example not found. Please create .env manually.${NC}"
-        exit 1
+        echo -e "${YELLOW}⚠️  .env.example not found. Creating basic .env file...${NC}"
+        touch .env
+        echo "APP_NAME=Kibo" >> .env
+        echo "APP_ENV=production" >> .env
+        echo "APP_KEY=" >> .env
+        echo "APP_DEBUG=false" >> .env
+        echo "APP_URL=http://40.127.10.196:8084" >> .env
+        echo "" >> .env
+        echo "DB_CONNECTION=mysql" >> .env
+        echo "DB_HOST=db" >> .env
+        echo "DB_PORT=3306" >> .env
+        echo "DB_DATABASE=kiboAuto_2025" >> .env
+        echo "DB_USERNAME=Kiboauto_2025_admin" >> .env
+        echo "DB_PASSWORD=kiboAuto_2025" >> .env
+        echo "" >> .env
+        echo "REDIS_HOST=redis" >> .env
+        echo "REDIS_PASSWORD=null" >> .env
+        echo "REDIS_PORT=6379" >> .env
     fi
 fi
 
 # Update .env with production database settings
 echo "📝 Updating .env with production database configuration..."
-sed -i.bak 's/DB_HOST=.*/DB_HOST=db/' .env 2>/dev/null || sed -i '' 's/DB_HOST=.*/DB_HOST=db/' .env
-sed -i.bak 's/DB_CONNECTION=.*/DB_CONNECTION=mysql/' .env 2>/dev/null || sed -i '' 's/DB_CONNECTION=.*/DB_CONNECTION=mysql/' .env
-sed -i.bak 's/DB_DATABASE=.*/DB_DATABASE=kiboAuto_2025/' .env 2>/dev/null || sed -i '' 's/DB_DATABASE=.*/DB_DATABASE=kiboAuto_2025/' .env
-sed -i.bak 's/DB_USERNAME=.*/DB_USERNAME=Kiboauto_2025_admin/' .env 2>/dev/null || sed -i '' 's/DB_USERNAME=.*/DB_USERNAME=Kiboauto_2025_admin/' .env
-sed -i.bak 's/DB_PASSWORD=.*/DB_PASSWORD=kiboAuto_2025/' .env 2>/dev/null || sed -i '' 's/DB_PASSWORD=.*/DB_PASSWORD=kiboAuto_2025/' .env
-sed -i.bak 's/REDIS_HOST=.*/REDIS_HOST=redis/' .env 2>/dev/null || sed -i '' 's/REDIS_HOST=.*/REDIS_HOST=redis/' .env
-sed -i.bak 's|APP_URL=.*|APP_URL=http://40.127.10.196:8084|' .env 2>/dev/null || sed -i '' 's|APP_URL=.*|APP_URL=http://40.127.10.196:8084|' .env
-sed -i.bak 's/APP_ENV=.*/APP_ENV=production/' .env 2>/dev/null || sed -i '' 's/APP_ENV=.*/APP_ENV=production/' .env
-sed -i.bak 's/APP_DEBUG=.*/APP_DEBUG=false/' .env 2>/dev/null || sed -i '' 's/APP_DEBUG=.*/APP_DEBUG=false/' .env
+# Update or add database configuration
+if grep -q "^DB_HOST=" .env; then
+    sed -i.bak 's/^DB_HOST=.*/DB_HOST=db/' .env 2>/dev/null || sed -i '' 's/^DB_HOST=.*/DB_HOST=db/' .env
+else
+    echo "DB_HOST=db" >> .env
+fi
+
+if grep -q "^DB_CONNECTION=" .env; then
+    sed -i.bak 's/^DB_CONNECTION=.*/DB_CONNECTION=mysql/' .env 2>/dev/null || sed -i '' 's/^DB_CONNECTION=.*/DB_CONNECTION=mysql/' .env
+else
+    echo "DB_CONNECTION=mysql" >> .env
+fi
+
+if grep -q "^DB_DATABASE=" .env; then
+    sed -i.bak 's/^DB_DATABASE=.*/DB_DATABASE=kiboAuto_2025/' .env 2>/dev/null || sed -i '' 's/^DB_DATABASE=.*/DB_DATABASE=kiboAuto_2025/' .env
+else
+    echo "DB_DATABASE=kiboAuto_2025" >> .env
+fi
+
+if grep -q "^DB_USERNAME=" .env; then
+    sed -i.bak 's/^DB_USERNAME=.*/DB_USERNAME=Kiboauto_2025_admin/' .env 2>/dev/null || sed -i '' 's/^DB_USERNAME=.*/DB_USERNAME=Kiboauto_2025_admin/' .env
+else
+    echo "DB_USERNAME=Kiboauto_2025_admin" >> .env
+fi
+
+if grep -q "^DB_PASSWORD=" .env; then
+    sed -i.bak 's/^DB_PASSWORD=.*/DB_PASSWORD=kiboAuto_2025/' .env 2>/dev/null || sed -i '' 's/^DB_PASSWORD=.*/DB_PASSWORD=kiboAuto_2025/' .env
+else
+    echo "DB_PASSWORD=kiboAuto_2025" >> .env
+fi
+
+if grep -q "^DB_PORT=" .env; then
+    sed -i.bak 's/^DB_PORT=.*/DB_PORT=3306/' .env 2>/dev/null || sed -i '' 's/^DB_PORT=.*/DB_PORT=3306/' .env
+else
+    echo "DB_PORT=3306" >> .env
+fi
+
+if grep -q "^REDIS_HOST=" .env; then
+    sed -i.bak 's/^REDIS_HOST=.*/REDIS_HOST=redis/' .env 2>/dev/null || sed -i '' 's/^REDIS_HOST=.*/REDIS_HOST=redis/' .env
+else
+    echo "REDIS_HOST=redis" >> .env
+fi
+
+if grep -q "^APP_URL=" .env; then
+    sed -i.bak 's|^APP_URL=.*|APP_URL=http://40.127.10.196:8084|' .env 2>/dev/null || sed -i '' 's|^APP_URL=.*|APP_URL=http://40.127.10.196:8084|' .env
+else
+    echo "APP_URL=http://40.127.10.196:8084" >> .env
+fi
+
+if grep -q "^APP_ENV=" .env; then
+    sed -i.bak 's/^APP_ENV=.*/APP_ENV=production/' .env 2>/dev/null || sed -i '' 's/^APP_ENV=.*/APP_ENV=production/' .env
+else
+    echo "APP_ENV=production" >> .env
+fi
+
+if grep -q "^APP_DEBUG=" .env; then
+    sed -i.bak 's/^APP_DEBUG=.*/APP_DEBUG=false/' .env 2>/dev/null || sed -i '' 's/^APP_DEBUG=.*/APP_DEBUG=false/' .env
+else
+    echo "APP_DEBUG=false" >> .env
+fi
 
 # Remove backup file if created
 rm -f .env.bak

@@ -22,10 +22,7 @@ ssh your-user@40.127.10.196
 ### 2. Navigate to Project Directory
 
 ```bash
-cd /path/to/kibo_v2
-# Or clone the repository if not already present
-# git clone <repository-url> kibo_v2
-# cd kibo_v2
+cd /var/www/html/Kibo_version_2/kiboV2
 ```
 
 ### 3. Pull Latest Changes (if using Git)
@@ -173,11 +170,12 @@ Visit the application in your browser:
 
 ## Quick Deployment Script
 
-You can also use the automated setup script on the server:
+You can also use the automated deployment script on the server:
 
 ```bash
-chmod +x docker-setup.sh
-./docker-setup.sh
+cd /var/www/html/Kibo_version_2/kiboV2
+chmod +x deploy.sh
+./deploy.sh
 ```
 
 Then manually run the production optimizations:
