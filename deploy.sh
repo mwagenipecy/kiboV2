@@ -16,7 +16,7 @@ NC='\033[0m' # No Color
 # Detect docker-compose command (v1 or v2)
 if command -v docker-compose &> /dev/null; then
     DOCKER_COMPOSE="docker-compose"
-elif docker compose version &> /dev/null; then
+elif docker compose version &> /dev/null 2>&1; then
     DOCKER_COMPOSE="docker compose"
 else
     echo -e "${RED}❌ Docker Compose is not installed or not found in PATH${NC}"
@@ -27,6 +27,25 @@ else
 fi
 
 echo -e "${GREEN}✅ Using: $DOCKER_COMPOSE${NC}"
+
+# Check if Docker daemon is running
+if ! docker info &> /dev/null; then
+    echo -e "${RED}❌ Docker daemon is not running or you don't have permission to access it${NC}"
+    echo ""
+    echo -e "${YELLOW}Try one of the following:${NC}"
+    echo "  1. Start Docker daemon: sudo systemctl start docker"
+    echo "  2. Enable Docker to start on boot: sudo systemctl enable docker"
+    echo "  3. Add your user to docker group (recommended):"
+    echo "     sudo usermod -aG docker $USER"
+    echo "     Then log out and log back in"
+    echo "  4. Or run with sudo: sudo $0"
+    echo ""
+    echo -e "${YELLOW}Checking Docker service status...${NC}"
+    sudo systemctl status docker || echo -e "${YELLOW}Docker service not found. Please install Docker first.${NC}"
+    exit 1
+fi
+
+echo -e "${GREEN}✅ Docker daemon is running${NC}"
 
 # Check if .env exists
 if [ ! -f .env ]; then
