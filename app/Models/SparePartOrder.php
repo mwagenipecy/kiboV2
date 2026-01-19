@@ -34,10 +34,12 @@ class SparePartOrder extends Model
         'assigned_to',
         'quoted_price',
         'currency',
+        'chat_messages',
     ];
 
     protected $casts = [
         'images' => 'array',
+        'chat_messages' => 'array',
         'quoted_price' => 'decimal:2',
         'delivery_latitude' => 'decimal:8',
         'delivery_longitude' => 'decimal:8',

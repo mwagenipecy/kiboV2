@@ -455,6 +455,14 @@ Route::prefix('spare-parts')->name('spare-parts.')->group(function () {
         return view('spare-parts.sourcing', ['vehicleType' => 'spare-parts']);
     })->name('sourcing');
     
+    Route::get('/orders', function () {
+        return view('spare-parts.orders', ['vehicleType' => 'spare-parts']);
+    })->name('orders');
+    
+    Route::get('/order/{id}', function ($id) {
+        return view('spare-parts.order-detail', ['id' => $id, 'vehicleType' => 'spare-parts']);
+    })->name('order-detail');
+    
     Route::get('/supplier/{id}', \App\Livewire\Customer\SparePartSupplierDetail::class)->name('supplier');
 });
 

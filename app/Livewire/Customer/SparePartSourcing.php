@@ -15,42 +15,34 @@ class SparePartSourcing extends Component
 {
     use WithFileUploads;
 
-    // Order items (multiple orders)
-    public $orders = [];
-    public $currentOrderIndex = 0;
+    // Order type: single or bulk
+    public $orderType = 'single';
 
-    // Current order fields
-    public $vehicleMakeId = '';
-    public $vehicleModelId = '';
-    public $condition = 'new';
-    public $partName = '';
-    public $description = '';
-    public $images = [];
-    public $tempImages = [];
+    // Order items array
+    public $orderItems = [];
 
-    // Customer information (shared across orders)
+    // Customer information
     public $customerName = '';
     public $customerEmail = '';
     public $customerPhone = '';
+    public $company = '';
 
-    // Delivery information (shared across orders)
+    // Vehicle information
+    public $vehicleMakeId = '';
+    public $vehicleModelId = '';
+    public $vehicleYear = '';
+    public $vehicleVin = '';
+
+    // Delivery information
     public $deliveryAddress = '';
     public $deliveryCity = '';
     public $deliveryRegion = '';
     public $deliveryCountry = 'Tanzania';
     public $deliveryPostalCode = '';
-    public $deliveryLatitude = '';
-    public $deliveryLongitude = '';
-
-    // Contact information (shared across orders)
-    public $contactName = '';
-    public $contactPhone = '';
-    public $contactEmail = '';
 
     public $vehicleMakes = [];
     public $vehicleModels = [];
-    public $showLocationModal = false;
-    public $allVehicleModels = []; // Store all models for table display
+    public $submitted = false;
 
     public function mount()
     {
@@ -58,20 +50,22 @@ class SparePartSourcing extends Component
             ->orderBy('name')
             ->get();
         
-        $this->allVehicleModels = VehicleModel::with('vehicleMake')
-            ->orderBy('name')
-            ->get();
-        
-        // Initialize with one empty order
-        $this->addNewOrder();
+        // Initialize with one empty order item
+        $this->orderItems = [
+            [
+                'id' => 1,
+                'part_number' => '',
+                'part_name' => '',
+                'quantity' => 1,
+                'notes' => '',
+            ]
+        ];
         
         // Pre-fill user information if logged in
         if (Auth::check()) {
             $user = Auth::user();
             $this->customerName = $user->name;
             $this->customerEmail = $user->email;
-            $this->contactName = $user->name;
-            $this->contactEmail = $user->email;
         }
     }
 
@@ -85,222 +79,127 @@ class SparePartSourcing extends Component
         } else {
             $this->vehicleModels = [];
         }
-        // Auto-save when make changes
-        $this->saveCurrentOrder();
     }
 
-    public function addNewOrder()
+    public function updatedOrderType()
     {
-        // Save current order before adding new one
-        $this->saveCurrentOrder();
-        
-        $this->orders[] = [
-            'vehicle_make_id' => '',
-            'vehicle_model_id' => '',
-            'condition' => 'new',
-            'part_name' => '',
-            'description' => '',
-            'images' => [],
-        ];
-        $this->currentOrderIndex = count($this->orders) - 1;
-        $this->resetCurrentOrder();
-    }
-
-    public function removeOrder($index)
-    {
-        unset($this->orders[$index]);
-        $this->orders = array_values($this->orders); // Re-index array
-        
-        if ($this->currentOrderIndex >= count($this->orders)) {
-            $this->currentOrderIndex = max(0, count($this->orders) - 1);
-        }
-        
-        if (count($this->orders) === 0) {
-            $this->addNewOrder();
-        }
-    }
-
-    public function selectOrder($index)
-    {
-        if ($this->currentOrderIndex !== $index) {
-            $this->saveCurrentOrder();
-            $this->currentOrderIndex = $index;
-            $this->loadCurrentOrder();
-        }
-    }
-
-    public function resetCurrentOrder()
-    {
-        $this->vehicleMakeId = '';
-        $this->vehicleModelId = '';
-        $this->condition = 'new';
-        $this->partName = '';
-        $this->description = '';
-        $this->images = [];
-        $this->tempImages = [];
-        $this->vehicleModels = [];
-    }
-
-    public function loadCurrentOrder()
-    {
-        if (isset($this->orders[$this->currentOrderIndex])) {
-            $order = $this->orders[$this->currentOrderIndex];
-            $this->vehicleMakeId = $order['vehicle_make_id'] ?? '';
-            $this->vehicleModelId = $order['vehicle_model_id'] ?? '';
-            $this->condition = $order['condition'] ?? 'new';
-            $this->partName = $order['part_name'] ?? '';
-            $this->description = $order['description'] ?? '';
-            $this->images = $order['images'] ?? [];
-            
-            // Load models for the selected make without triggering save
-            if ($this->vehicleMakeId) {
-                $this->vehicleModels = VehicleModel::where('vehicle_make_id', $this->vehicleMakeId)
-                    ->orderBy('name')
-                    ->get();
-            } else {
-                $this->vehicleModels = [];
-            }
-        }
-    }
-
-    public function saveCurrentOrder()
-    {
-        if (isset($this->orders[$this->currentOrderIndex])) {
-            $this->orders[$this->currentOrderIndex] = [
-                'vehicle_make_id' => $this->vehicleMakeId,
-                'vehicle_model_id' => $this->vehicleModelId,
-                'condition' => $this->condition,
-                'part_name' => $this->partName,
-                'description' => $this->description,
-                'images' => $this->images,
+        // Reset to single item if switching to single order
+        if ($this->orderType === 'single') {
+            $this->orderItems = [
+                [
+                    'id' => 1,
+                    'part_number' => '',
+                    'part_name' => '',
+                    'quantity' => 1,
+                    'notes' => '',
+                ]
             ];
         }
     }
 
-    public function updatedVehicleModelId()
+    public function addOrderItem()
     {
-        $this->saveCurrentOrder();
+        $this->orderItems[] = [
+            'id' => count($this->orderItems) + 1,
+            'part_number' => '',
+            'part_name' => '',
+            'quantity' => 1,
+            'notes' => '',
+        ];
     }
 
-    public function updatedCondition()
+    public function removeOrderItem($id)
     {
-        $this->saveCurrentOrder();
-    }
-
-    public function updatedPartName()
-    {
-        $this->saveCurrentOrder();
-    }
-
-    public function updatedDescription()
-    {
-        $this->saveCurrentOrder();
-    }
-
-    public function updatedTempImages()
-    {
-        $this->validate([
-            'tempImages.*' => 'image|max:5120', // 5MB max
-        ]);
-
-        foreach ($this->tempImages as $image) {
-            $path = $image->store('spare-part-orders', 'public');
-            $this->images[] = $path;
-        }
-        
-        $this->tempImages = [];
-        // Auto-save when images are added
-        $this->saveCurrentOrder();
-    }
-
-    public function removeImage($index)
-    {
-        if (isset($this->images[$index])) {
-            $path = $this->images[$index];
-            Storage::disk('public')->delete($path);
-            unset($this->images[$index]);
-            $this->images = array_values($this->images);
-            // Auto-save when image is removed
-            $this->saveCurrentOrder();
+        if (count($this->orderItems) > 1) {
+            $this->orderItems = array_values(array_filter($this->orderItems, function($item) use ($id) {
+                return $item['id'] != $id;
+            }));
         }
     }
 
-    public function getCurrentLocation()
+    public function updateOrderItem($id, $field, $value)
     {
-        $this->showLocationModal = true;
-        $this->dispatch('request-location');
-    }
-
-    public function setLocation($latitude, $longitude)
-    {
-        $this->deliveryLatitude = $latitude;
-        $this->deliveryLongitude = $longitude;
-        $this->showLocationModal = false;
+        foreach ($this->orderItems as $key => $item) {
+            if ($item['id'] == $id) {
+                $this->orderItems[$key][$field] = $value;
+                break;
+            }
+        }
     }
 
     public function submitOrders()
     {
-        $this->saveCurrentOrder();
-
-        // Validate all orders
+        // Validate
         $this->validate([
             'customerName' => 'required|string|max:255',
             'customerEmail' => 'required|email|max:255',
             'customerPhone' => 'required|string|max:20',
+            'vehicleMakeId' => 'required|exists:vehicle_makes,id',
+            'vehicleModelId' => 'required|exists:vehicle_models,id',
             'deliveryAddress' => 'required|string',
-            'deliveryCity' => 'nullable|string|max:255',
-            'deliveryRegion' => 'nullable|string|max:255',
-            'contactName' => 'required|string|max:255',
-            'contactPhone' => 'required|string|max:20',
-            'contactEmail' => 'nullable|email|max:255',
-            'orders' => 'required|array|min:1',
-            'orders.*.vehicle_make_id' => 'required|exists:vehicle_makes,id',
-            'orders.*.vehicle_model_id' => 'required|exists:vehicle_models,id',
-            'orders.*.condition' => 'required|in:new,used',
+            'orderItems' => 'required|array|min:1',
+            'orderItems.*.part_number' => 'required|string|max:255',
+            'orderItems.*.part_name' => 'required|string|max:255',
+            'orderItems.*.quantity' => 'required|integer|min:1',
         ], [
-            'orders.*.vehicle_make_id.required' => 'Please select a vehicle make for all orders.',
-            'orders.*.vehicle_model_id.required' => 'Please select a vehicle model for all orders.',
+            'vehicleMakeId.required' => 'Please select a vehicle make.',
+            'vehicleModelId.required' => 'Please select a vehicle model.',
+            'orderItems.*.part_number.required' => 'Part number is required for all items.',
+            'orderItems.*.part_name.required' => 'Part name is required for all items.',
         ]);
 
-        // Create orders
+        // Create orders - one order per item
         $createdOrders = [];
-        foreach ($this->orders as $orderData) {
+        foreach ($this->orderItems as $item) {
             $order = SparePartOrder::create([
                 'order_number' => SparePartOrder::generateOrderNumber(),
                 'user_id' => Auth::id(),
                 'customer_name' => $this->customerName,
                 'customer_email' => $this->customerEmail,
                 'customer_phone' => $this->customerPhone,
-                'vehicle_make_id' => $orderData['vehicle_make_id'],
-                'vehicle_model_id' => $orderData['vehicle_model_id'],
-                'condition' => $orderData['condition'],
-                'part_name' => $orderData['part_name'] ?? null,
-                'description' => $orderData['description'] ?? null,
-                'images' => $orderData['images'] ?? [],
+                'vehicle_make_id' => $this->vehicleMakeId,
+                'vehicle_model_id' => $this->vehicleModelId,
+                'condition' => 'new', // Default to new
+                'part_name' => $item['part_name'],
+                'description' => ($item['part_number'] ?? '') . ($item['notes'] ? ' - ' . $item['notes'] : ''),
+                'images' => [],
                 'delivery_address' => $this->deliveryAddress,
                 'delivery_city' => $this->deliveryCity,
                 'delivery_region' => $this->deliveryRegion,
                 'delivery_country' => $this->deliveryCountry,
                 'delivery_postal_code' => $this->deliveryPostalCode,
-                'delivery_latitude' => $this->deliveryLatitude ?: null,
-                'delivery_longitude' => $this->deliveryLongitude ?: null,
-                'contact_name' => $this->contactName,
-                'contact_phone' => $this->contactPhone,
-                'contact_email' => $this->contactEmail,
+                'delivery_latitude' => null,
+                'delivery_longitude' => null,
+                'contact_name' => $this->customerName,
+                'contact_phone' => $this->customerPhone,
+                'contact_email' => $this->customerEmail,
                 'status' => 'pending',
             ]);
             
             $createdOrders[] = $order;
         }
 
+        $this->submitted = true;
         session()->flash('success', 'Your spare part order(s) have been submitted successfully! Order numbers: ' . implode(', ', array_column($createdOrders, 'order_number')));
         
-        // Reset form
-        $this->orders = [];
-        $this->addNewOrder();
-        $this->reset(['customerName', 'customerEmail', 'customerPhone', 'deliveryAddress', 'deliveryCity', 'deliveryRegion', 'deliveryPostalCode', 'deliveryLatitude', 'deliveryLongitude', 'contactName', 'contactPhone', 'contactEmail']);
-        
-        return redirect()->route('spare-parts.sourcing');
+        // Reset form after showing success
+        $this->resetForm();
+    }
+
+    public function resetForm()
+    {
+        $this->orderItems = [
+            [
+                'id' => 1,
+                'part_number' => '',
+                'part_name' => '',
+                'quantity' => 1,
+                'notes' => '',
+            ]
+        ];
+        $this->reset(['customerName', 'customerEmail', 'customerPhone', 'company', 'vehicleMakeId', 'vehicleModelId', 'vehicleYear', 'vehicleVin', 'deliveryAddress', 'deliveryCity', 'deliveryRegion', 'deliveryPostalCode']);
+        $this->submitted = false;
+        $this->vehicleModels = [];
     }
 
     public function render()
