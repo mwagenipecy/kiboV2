@@ -1,14 +1,14 @@
 # Server Deployment Guide
 
-This guide covers deploying the Kibo application to the server at `40.127.10.196:8084`.
+This guide covers deploying the Kibo application to the staging server at `stage.kiboauto.co.tz`.
 
 ## Prerequisites
 
 - SSH access to the server
 - Docker and Docker Compose installed on the server
 - Git installed on the server
-- Server IP: `40.127.10.196`
-- Application Port: `8084`
+- Staging Domain: `stage.kiboauto.co.tz`
+- Alternative: `www.stage.kiboauto.co.tz` (redirects to non-www)
 - Database credentials configured
 
 ## Step-by-Step Deployment
@@ -16,7 +16,7 @@ This guide covers deploying the Kibo application to the server at `40.127.10.196
 ### 1. Connect to the Server
 
 ```bash
-ssh your-user@40.127.10.196
+ssh your-user@your-server-ip
 ```
 
 ### 2. Navigate to Project Directory
@@ -50,7 +50,7 @@ APP_NAME=Kibo
 APP_ENV=production
 APP_KEY=
 APP_DEBUG=false
-APP_URL=http://40.127.10.196:8084
+APP_URL=http://stage.kiboauto.co.tz
 
 LOG_CHANNEL=stack
 LOG_LEVEL=error
@@ -165,8 +165,10 @@ docker-compose logs -f nginx
 ### 16. Test the Application
 
 Visit the application in your browser:
-- **Application**: http://40.127.10.196:8084
-- **phpMyAdmin**: http://40.127.10.196:8083/
+- **Application**: http://stage.kiboauto.co.tz
+- **Alternative**: http://www.stage.kiboauto.co.tz (redirects to non-www)
+
+**Note:** Update `APP_URL` in `.env` to `https://stage.kiboauto.co.tz` once SSL certificate is configured.
 
 ## Quick Deployment Script
 
@@ -191,7 +193,7 @@ docker-compose exec node npm run build
 ## Post-Deployment Checklist
 
 - [ ] All containers are running (`docker-compose ps`)
-- [ ] Application is accessible at http://40.127.10.196:8084
+- [ ] Application is accessible at http://stage.kiboauto.co.tz
 - [ ] Database connection is working
 - [ ] Storage permissions are set correctly
 - [ ] Frontend assets are built
@@ -221,14 +223,31 @@ docker-compose restart app
 docker-compose restart nginx
 ```
 
-### Update Application
+### Update Application (After Git Pull)
+
+### Quick Method (Recommended)
+After pulling changes, simply run the post-pull script:
 
 ```bash
 # Pull latest code
-git pull
+git pull origin main
+# or
+git pull origin master
 
-# Rebuild containers (if Dockerfile changed)
-docker-compose up -d --build
+# Run post-pull deployment script
+chmod +x post-pull.sh
+./post-pull.sh
+```
+
+### Manual Method
+If you prefer to run commands manually:
+
+```bash
+# Pull latest code
+git pull origin main
+
+# Ensure containers are running
+docker-compose up -d
 
 # Install new dependencies
 docker-compose exec app composer install --optimize-autoloader --no-dev
@@ -240,11 +259,20 @@ docker-compose exec app php artisan migrate --force
 # Rebuild assets
 docker-compose exec node npm run build
 
+# Fix permissions
+docker-compose exec app chmod -R 775 storage bootstrap/cache
+docker-compose exec app chown -R www-data:www-data storage bootstrap/cache
+
 # Clear and recache
 docker-compose exec app php artisan config:clear
+docker-compose exec app php artisan route:clear
+docker-compose exec app php artisan view:clear
 docker-compose exec app php artisan config:cache
 docker-compose exec app php artisan route:cache
 docker-compose exec app php artisan view:cache
+
+# Restart containers
+docker-compose restart app nginx
 ```
 
 ### Backup Database
