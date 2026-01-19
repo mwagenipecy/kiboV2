@@ -262,6 +262,14 @@
                     @endif
                 </a>
 
+                <!-- Car Requests -->
+                <a href="{{ route('admin.car-requests') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('admin.car-requests') ? 'text-white bg-gradient-to-r from-green-500 to-green-600 shadow-sm' : 'text-gray-700 hover:bg-green-50 hover:text-green-700' }} transition-colors group">
+                    <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h8M8 11h8M8 15h5M5 4h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z"/>
+                    </svg>
+                    <span class="menu-text">Car Requests</span>
+                </a>
+
                 <!-- Customers - Expandable -->
                 <div x-data="{ open: {{ request()->is('admin/customers*') ? 'true' : 'false' }} }">
                     <button @click="open = !open" class="w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-lg {{ request()->is('admin/customers*') ? 'text-white bg-gradient-to-r from-green-500 to-green-600 shadow-sm' : 'text-gray-700 hover:bg-green-50 hover:text-green-700' }} transition-colors group">

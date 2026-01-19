@@ -67,6 +67,17 @@
                 </a>
 
                 <a 
+                    href="{{ route('my-car-requests') }}" 
+                    @click="open = false"
+                    class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors"
+                >
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2a2 2 0 012-2h8m-6-4h6m-9 8h9a2 2 0 002-2V7a2 2 0 00-2-2h-9a2 2 0 00-2 2v10a2 2 0 002 2zM7 7H5a2 2 0 00-2 2v10a2 2 0 002 2h9" />
+                    </svg>
+                    My Car Requests
+                </a>
+
+                <a 
                     href="{{ route('my-auctions') }}" 
                     @click="open = false"
                     class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors"

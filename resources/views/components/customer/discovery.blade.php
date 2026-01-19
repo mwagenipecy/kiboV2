@@ -40,7 +40,7 @@
             <div class="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 md:col-span-1">
                 <!-- Card Image -->
                 <div class="h-64 md:h-80 overflow-hidden">
-                    <img src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&auto=format&fit=crop" 
+                    <img src="{{ asset('image/image.png') }}" 
                          alt="Sell your car" 
                          class="w-full h-full object-cover">
                 </div>

@@ -62,6 +62,14 @@
                     <p class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Sales</p>
                 </div>
 
+                <!-- Car Requests -->
+                <a href="{{ route('dealer.car-requests') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('dealer.car-requests') ? 'text-white bg-gradient-to-r from-green-500 to-green-600 shadow-sm' : 'text-gray-700 hover:bg-green-50 hover:text-green-700' }} transition-colors group">
+                    <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h8M8 11h8M8 15h5M5 4h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z"/>
+                    </svg>
+                    <span class="menu-text">Car Requests</span>
+                </a>
+
                 <!-- Offers -->
                 <a href="{{ route('dealer.offers') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('dealer.offers') ? 'text-white bg-gradient-to-r from-green-500 to-green-600 shadow-sm' : 'text-gray-700 hover:bg-green-50 hover:text-green-700' }} transition-colors group">
                     <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">

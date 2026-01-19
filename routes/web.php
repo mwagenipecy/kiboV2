@@ -52,6 +52,9 @@ Route::prefix('cars')->name('cars.')->group(function () {
     Route::get('/sell-to-dealer', \App\Livewire\Customer\AuctionVehicleForm::class)
         ->middleware('auth')->name('sell-to-dealer');
     
+    Route::get('/find-me-a-car', \App\Livewire\Customer\FindMeACar::class)
+        ->name('find');
+
     Route::get('/value', function () {
         return view('cars.value', ['vehicleType' => 'cars']);
     })->name('value');
@@ -535,6 +538,9 @@ Route::prefix('dealer')->name('dealer.')->middleware(['auth', 'verified'])->grou
     Route::get('/offers', function () {
         return view('dealer.offers');
     })->name('offers');
+
+    // Find-me-a-car requests (dealers submit offers)
+    Route::get('/car-requests', \App\Livewire\Dealer\CarRequests::class)->name('car-requests');
     
     // Auctions - Buy from private sellers
     Route::get('/auctions', \App\Livewire\Dealer\AuctionList::class)->name('auctions');
@@ -620,9 +626,12 @@ Route::prefix('lender')->name('lender.')->middleware(['auth', 'verified'])->grou
 // ADMIN PANEL ROUTES
 // ============================================
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(function () {
-    // Dashboard
+    // Dashboard - Shows different components based on user role (switch case)
     Route::get('/dashboard', function () {
-        return view('admin.dashboard');
+        $user = auth()->user();
+        $role = $user->role ?? 'customer';
+        
+        return view('admin.dashboard', ['userRole' => $role]);
     })->name('dashboard');
     
     // Analytics
@@ -722,6 +731,17 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
     
     // Spare Part Orders
     Route::get('/spare-part-orders', \App\Livewire\Admin\SparePartOrders::class)->name('spare-part-orders');
+
+    // Reports
+    Route::prefix('reports')->name('reports.')->group(function () {
+        Route::get('/sales', [\App\Http\Controllers\Admin\ReportController::class, 'sales'])->name('sales');
+        Route::get('/vehicles', [\App\Http\Controllers\Admin\ReportController::class, 'vehicles'])->name('vehicles');
+        Route::get('/users', [\App\Http\Controllers\Admin\ReportController::class, 'users'])->name('users');
+    });
+
+    // Find-me-a-car requests
+    Route::get('/car-requests', \App\Livewire\Admin\CarRequests::class)->name('car-requests');
+    Route::get('/car-requests/{id}', \App\Livewire\Admin\CarRequestDetail::class)->name('car-requests.view');
     
     // Auctions
     Route::get('/auctions', \App\Livewire\Admin\AuctionManagement::class)->name('auctions');
@@ -1090,10 +1110,10 @@ Route::middleware(['auth'])->group(function () {
 // ============================================
 // AUTHENTICATED ROUTES
 // ============================================
-// Dashboard route disabled - redirect to home if accessed
-Route::get('dashboard', function () {
-    return redirect()->route('cars.index');
-})->name('dashboard');
+// Unified dashboard route – redirects by user role
+Route::get('dashboard', \App\Http\Controllers\DashboardController::class)
+    ->middleware(['auth', 'verified'])
+    ->name('dashboard');
 
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');
@@ -1114,6 +1134,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('my-orders', \App\Livewire\Customer\MyOrders::class)->name('my-orders');
     Route::get('my-adverts', \App\Livewire\Customer\MyAdverts::class)->name('my-adverts');
     Route::get('my-auctions', \App\Livewire\Customer\MyAuctions::class)->name('my-auctions');
+
+    // My car requests (Find-me-a-car)
+    Route::get('my-car-requests', \App\Livewire\Customer\MyCarRequests::class)->name('my-car-requests');
 
     Route::get('settings/two-factor', function () {
         return view('customer.two-factor');

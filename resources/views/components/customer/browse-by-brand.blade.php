@@ -21,7 +21,7 @@
         <!-- Featured Brands - Large Cards (Always Visible) -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             @foreach($featuredBrands as $brand)
-            <a href="{{ route('cars.search', ['make' => \Illuminate\Support\Str::slug($brand->name)]) }}" class="bg-white border border-gray-200 rounded-xl p-8 hover:shadow-lg hover:border-gray-300 transition-all duration-300 flex flex-col items-center justify-center min-h-[220px] group">
+            <a href="{{ route('cars.search', ['make' => $brand->id]) }}" class="bg-white border border-gray-200 rounded-xl p-8 hover:shadow-lg hover:border-gray-300 transition-all duration-300 flex flex-col items-center justify-center min-h-[220px] group">
                 <div class="mb-6 h-20 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                     @if($brand->icon)
                         <img src="{{ asset('storage/' . $brand->icon) }}" alt="{{ $brand->name }} logo" class="max-h-20 max-w-[140px] object-contain" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
@@ -52,7 +52,7 @@
         <!-- All Brands Grid - Smaller Cards (Expandable) -->
         <div id="allBrandsGrid" class="hidden grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-fadeIn">
             @foreach($allBrands as $brand)
-            <a href="{{ route('cars.search', ['make' => \Illuminate\Support\Str::slug($brand->name)]) }}" class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md hover:border-gray-300 transition-all duration-200 flex items-center gap-4 group">
+            <a href="{{ route('cars.search', ['make' => $brand->id]) }}" class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md hover:border-gray-300 transition-all duration-200 flex items-center gap-4 group">
                 <div class="w-12 h-12 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-200">
                     @if($brand->icon)
                         <img src="{{ asset('storage/' . $brand->icon) }}" alt="{{ $brand->name }} logo" class="max-h-12 max-w-12 object-contain" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">

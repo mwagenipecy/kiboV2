@@ -1,8 +1,3 @@
-@extends('layouts.dealer')
-
-@section('title', 'Dealer Dashboard')
-
-@section('content')
 @php
     use App\Models\Vehicle;
     use App\Models\Order;
@@ -12,41 +7,26 @@
     use App\Enums\VehicleStatus;
     
     $user = auth()->user();
-    $entityId = $user->entity_id;
+    $entityId = $user->entity_id ?? null;
     
     // Vehicle statistics
-    $totalVehicles = Vehicle::where('entity_id', $entityId)->count();
-    $activeVehicles = Vehicle::where('entity_id', $entityId)->where('status', VehicleStatus::AVAILABLE)->count();
-    $pendingVehicles = Vehicle::where('entity_id', $entityId)->where('status', VehicleStatus::PENDING)->count();
-    $soldVehicles = Vehicle::where('entity_id', $entityId)->where('status', VehicleStatus::SOLD)->count();
+    $totalVehicles = $totalVehicles ?? 0;
+    $activeVehicles = $activeVehicles ?? 0;
+    $pendingVehicles = $pendingVehicles ?? 0;
+    $soldVehicles = $soldVehicles ?? 0;
     
     // Car requests and offers
-    $openCarRequests = CarRequest::where('status', 'open')->count();
-    $myOffers = DealerCarOffer::where('entity_id', $entityId)->count();
-    $myAcceptedOffers = DealerCarOffer::where('entity_id', $entityId)->where('status', 'accepted')->count();
+    $openCarRequests = $openCarRequests ?? 0;
+    $myOffers = $myOffers ?? 0;
+    $myAcceptedOffers = $myAcceptedOffers ?? 0;
     
-    // Orders related to dealer vehicles
-    $totalOrders = Order::whereHas('vehicle', function($q) use ($entityId) {
-        $q->where('entity_id', $entityId);
-    })->count();
+    // Orders
+    $totalOrders = $totalOrders ?? 0;
+    $pendingOrders = $pendingOrders ?? 0;
     
-    $pendingOrders = Order::whereHas('vehicle', function($q) use ($entityId) {
-        $q->where('entity_id', $entityId);
-    })->where('status', OrderStatus::PENDING->value)->count();
-    
-    // Recent vehicles
-    $recentVehicles = Vehicle::where('entity_id', $entityId)
-        ->with(['make', 'model'])
-        ->latest()
-        ->limit(5)
-        ->get();
-    
-    // Recent car requests (open ones)
-    $recentCarRequests = CarRequest::where('status', 'open')
-        ->with(['make', 'model'])
-        ->latest()
-        ->limit(5)
-        ->get();
+    // Recent data
+    $recentVehicles = $recentVehicles ?? collect();
+    $recentCarRequests = $recentCarRequests ?? collect();
 @endphp
 
 <!-- Page Header -->
@@ -297,4 +277,4 @@
         @endforelse
     </div>
 </div>
-@endsection
+

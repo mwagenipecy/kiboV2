@@ -73,6 +73,7 @@ return [
     'new_cars' => 'Magari mapya',
     'sell_your_car' => 'Uza gari lako',
     'value_your_car' => 'Thamani ya gari lako',
+    'find_me_a_car' => 'Nipatie gari',
     'car_reviews' => 'Ukaguzi wa magari',
     'car_leasing' => 'Kukodisha gari',
     'electric_cars' => 'Magari ya umeme',

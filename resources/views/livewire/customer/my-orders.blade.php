@@ -1,8 +1,15 @@
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <!-- Header -->
     <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900">My Orders</h1>
-        <p class="mt-2 text-gray-600">Track your valuation reports, financing applications, and purchases</p>
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900">My Orders</h1>
+                <p class="mt-2 text-gray-600">Track your valuation reports, financing applications, and purchases</p>
+            </div>
+            <a href="{{ route('my-car-requests') }}" class="px-5 py-2 rounded-full border-2 border-green-600 text-green-700 font-semibold hover:bg-green-50 transition-colors">
+                My Car Requests
+            </a>
+        </div>
     </div>
 
     <!-- Stats Cards -->

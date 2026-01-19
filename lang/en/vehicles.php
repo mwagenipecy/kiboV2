@@ -73,6 +73,7 @@ return [
     'new_cars' => 'New cars',
     'sell_your_car' => 'Sell your car',
     'value_your_car' => 'Value your car',
+    'find_me_a_car' => 'Find me a car',
     'car_reviews' => 'Car reviews',
     'car_leasing' => 'Car leasing',
     'electric_cars' => 'Electric cars',
