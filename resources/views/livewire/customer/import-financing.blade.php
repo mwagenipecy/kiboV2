@@ -1,4 +1,382 @@
 <div class="min-h-screen bg-gradient-to-br from-slate-50 via-white to-emerald-50">
+    <!-- Login Modal -->
+    @if($showLoginModal)
+        <div class="fixed inset-0 bg-black/50 bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 text-center">
+                <div class="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <svg class="w-8 h-8 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                    </svg>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">Login Required</h2>
+                <p class="text-gray-600 mb-6">
+                    You need to be logged in to submit an import financing request. Please sign in to continue.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                    <button wire:click="openSideModal('login')" class="inline-flex items-center justify-center px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl transition-colors">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
+                        </svg>
+                        Sign In
+                    </button>
+                    <button wire:click="openSideModal('register')" class="inline-flex items-center justify-center px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl transition-colors">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+                        </svg>
+                        Create Account
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    <!-- Side Modal for Login/Register -->
+    @if($showSideModal)
+        <div class="fixed inset-0 bg-black/50 z-50">
+            <!-- Backdrop click to close -->
+            <div wire:click="closeSideModal" class="absolute inset-0"></div>
+
+            <!-- Modal Content -->
+            <div class="relative ml-auto w-full max-w-md bg-white shadow-2xl transform transition-transform duration-300 ease-in-out h-full overflow-y-auto">
+                <!-- Header -->
+                <div class="flex items-center justify-between p-6 border-b border-gray-200">
+                    <h2 class="text-xl font-bold text-gray-900">
+                        {{ $sideModalType === 'login' ? 'Sign In' : 'Create Account' }}
+                    </h2>
+                    <button wire:click="closeSideModal" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                        <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Form Content -->
+                <div class="p-6">
+                    <!-- Success/Error Messages -->
+                    @if (session()->has('message'))
+                        <div class="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+                            <div class="flex items-center">
+                                <svg class="w-5 h-5 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                                <span class="text-green-800">{{ session('message') }}</span>
+                            </div>
+                        </div>
+                    @endif
+
+                    @if (session()->has('error'))
+                        <div class="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                            <div class="flex items-center">
+                                <svg class="w-5 h-5 text-red-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <span class="text-red-800">{{ session('error') }}</span>
+                            </div>
+                        </div>
+                    @endif
+
+                    @if($sideModalType === 'login')
+                        <!-- Login Form (matching common login page) -->
+                        <div class="text-center mb-6">
+                            <div class="flex justify-center mb-4">
+                                <img src="{{ asset('logo/green.png') }}" alt="Logo" class="h-12 w-auto">
+                            </div>
+                            <h3 class="text-xl font-bold text-gray-900 mb-2">Welcome back</h3>
+                            <p class="text-sm text-gray-600">Sign in to access your account</p>
+                        </div>
+
+                        <form wire:submit.prevent="login" class="space-y-4">
+                            <!-- Email Address -->
+                            <div>
+                                <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Email address
+                                </label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"/>
+                                        </svg>
+                                    </div>
+                                    <input
+                                        id="email"
+                                        type="email"
+                                        wire:model="loginEmail"
+                                        autocomplete="email"
+                                        required
+                                        value="{{ old('email') }}"
+                                        class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent text-gray-900 placeholder-gray-400"
+                                        placeholder="you@example.com"
+                                    >
+                                </div>
+                                @error('loginEmail')
+                                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <!-- Password -->
+                            <div>
+                                <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Password
+                                </label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                                        </svg>
+                                    </div>
+                                    <input
+                                        id="password"
+                                        type="password"
+                                        wire:model="loginPassword"
+                                        autocomplete="current-password"
+                                        required
+                                        class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent text-gray-900 placeholder-gray-400"
+                                        placeholder="Enter your password"
+                                    >
+                                </div>
+                                @error('loginPassword')
+                                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <!-- Remember Me and Forgot Password -->
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <input
+                                        id="remember"
+                                        name="remember"
+                                        type="checkbox"
+                                        class="h-4 w-4 text-green-600 focus:ring-green-600 border-gray-300 rounded"
+                                    >
+                                    <label for="remember" class="ml-2 block text-sm text-gray-700">
+                                        Remember me
+                                    </label>
+                                </div>
+
+                                <div class="text-sm">
+                                    <a href="{{ route('password.request') }}" class="font-medium text-green-700 hover:text-green-800">
+                                        Forgot password?
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <div>
+                                <button
+                                    type="submit"
+                                    wire:loading.attr="disabled"
+                                    class="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-600 transition-all"
+                                >
+                                    <span wire:loading.remove wire:target="login">
+                                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
+                                        </svg>
+                                        Sign in
+                                    </span>
+                                    <span wire:loading wire:target="login" class="flex items-center">
+                                        <svg class="animate-spin w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        Signing in...
+                                    </span>
+                                </button>
+                            </div>
+                        </form>
+
+                        <!-- Divider -->
+                        <div class="mt-6">
+                            <div class="relative">
+                                <div class="absolute inset-0 flex items-center">
+                                    <div class="w-full border-t border-gray-300"></div>
+                                </div>
+                                <div class="relative flex justify-center text-sm">
+                                    <span class="px-2 bg-white text-gray-500">
+                                        Or continue with
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Social Login Buttons -->
+                            <div class="mt-6 grid grid-cols-2 gap-3">
+                                <button type="button" class="w-full inline-flex justify-center py-2.5 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M6.29 18.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0020 3.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.073 4.073 0 01.8 7.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 010 16.407a11.616 11.616 0 006.29 1.84"/>
+                                    </svg>
+                                </button>
+                                <button type="button" class="w-full inline-flex justify-center py-2.5 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 0C4.477 0 0 4.484 0 10.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0110 4.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.942.359.31.678.921.678 1.856 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0020 10.017C20 4.484 15.522 0 10 0z" clip-rule="evenodd"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Back Button -->
+                        <div class="mt-6 flex justify-center">
+                            <button wire:click="backToInitialModal" class="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-colors text-sm">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                                </svg>
+                                Back
+                            </button>
+                        </div>
+                    @else
+                        <!-- Register Form (matching login page style) -->
+                        <div class="text-center mb-6">
+                            <div class="flex justify-center mb-4">
+                                <img src="{{ asset('logo/green.png') }}" alt="Logo" class="h-12 w-auto">
+                            </div>
+                            <h3 class="text-xl font-bold text-gray-900 mb-2">Create an account</h3>
+                            <p class="text-sm text-gray-600">Enter your details below to create your account</p>
+                        </div>
+
+                        <form wire:submit.prevent="register" class="space-y-4">
+                            <!-- Name -->
+                            <div>
+                                <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Full name
+                                </label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                        </svg>
+                                    </div>
+                                    <input
+                                        id="name"
+                                        type="text"
+                                        wire:model="registerName"
+                                        autocomplete="name"
+                                        required
+                                        value="{{ old('name') }}"
+                                        class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent text-gray-900 placeholder-gray-400"
+                                        placeholder="Enter your full name"
+                                    >
+                                </div>
+                                @error('registerName')
+                                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <!-- Email Address -->
+                            <div>
+                                <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Email address
+                                </label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"/>
+                                        </svg>
+                                    </div>
+                                    <input
+                                        id="email"
+                                        type="email"
+                                        wire:model="registerEmail"
+                                        autocomplete="email"
+                                        required
+                                        value="{{ old('email') }}"
+                                        class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent text-gray-900 placeholder-gray-400"
+                                        placeholder="you@example.com"
+                                    >
+                                </div>
+                                @error('registerEmail')
+                                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <!-- Password -->
+                            <div>
+                                <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Password
+                                </label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                                        </svg>
+                                    </div>
+                                    <input
+                                        id="password"
+                                        type="password"
+                                        wire:model="registerPassword"
+                                        autocomplete="new-password"
+                                        required
+                                        class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent text-gray-900 placeholder-gray-400"
+                                        placeholder="Create a password (min 8 characters)"
+                                    >
+                                </div>
+                                @error('registerPassword')
+                                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <!-- Confirm Password -->
+                            <div>
+                                <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Confirm password
+                                </label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                                        </svg>
+                                    </div>
+                                    <input
+                                        id="password_confirmation"
+                                        type="password"
+                                        wire:model="registerPasswordConfirmation"
+                                        autocomplete="new-password"
+                                        required
+                                        class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent text-gray-900 placeholder-gray-400"
+                                        placeholder="Confirm your password"
+                                    >
+                                </div>
+                                @error('registerPassword')
+                                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <!-- Submit Button -->
+                            <div>
+                                <button
+                                    type="submit"
+                                    wire:loading.attr="disabled"
+                                    class="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-600 transition-all"
+                                >
+                                    <span wire:loading.remove wire:target="register">
+                                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+                                        </svg>
+                                        Create account
+                                    </span>
+                                    <span wire:loading wire:target="register" class="flex items-center">
+                                        <svg class="animate-spin w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        Creating account...
+                                    </span>
+                                </button>
+                            </div>
+                        </form>
+
+                        <!-- Back Button -->
+                        <div class="mt-6 flex justify-center">
+                            <button wire:click="backToInitialModal" class="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-colors text-sm">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                                </svg>
+                                Back
+                            </button>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+    @endif
+
     <!-- Hero Section -->
     <div class="py-8">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -28,6 +406,7 @@
         </div>
     </div>
 
+    @auth
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         @if($showSuccess)
             <!-- Success Message -->
@@ -125,7 +504,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <!-- Buy Car Option -->
                         <label class="relative cursor-pointer group">
-                            <input type="radio" wire:model="requestType" value="buy_car" class="sr-only peer">
+                            <input type="radio" wire:model.live ="requestType" value="buy_car" class="sr-only peer">
                             <div class="p-6 rounded-2xl border-2 transition-all duration-300 {{ $requestType === 'buy_car' ? 'border-emerald-500 bg-emerald-50 ring-4 ring-emerald-100' : 'border-gray-200 hover:border-emerald-300 hover:bg-gray-50' }}">
                                 <div class="w-14 h-14 rounded-2xl flex items-center justify-center mb-4 {{ $requestType === 'buy_car' ? 'bg-emerald-500 text-white' : 'bg-gray-100 text-gray-600 group-hover:bg-emerald-100 group-hover:text-emerald-600' }} transition-colors">
                                     <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -145,7 +524,7 @@
 
                         <!-- Tax & Transport Option -->
                         <label class="relative cursor-pointer group">
-                            <input type="radio" wire:model="requestType" value="tax_transport" class="sr-only peer">
+                            <input type="radio" wire:model.live="requestType" value="tax_transport" class="sr-only peer">
                             <div class="p-6 rounded-2xl border-2 transition-all duration-300 {{ $requestType === 'tax_transport' ? 'border-emerald-500 bg-emerald-50 ring-4 ring-emerald-100' : 'border-gray-200 hover:border-emerald-300 hover:bg-gray-50' }}">
                                 <div class="w-14 h-14 rounded-2xl flex items-center justify-center mb-4 {{ $requestType === 'tax_transport' ? 'bg-emerald-500 text-white' : 'bg-gray-100 text-gray-600 group-hover:bg-emerald-100 group-hover:text-emerald-600' }} transition-colors">
                                     <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -296,13 +675,15 @@
                             <label class="block text-sm font-medium text-gray-700 mb-2">Vehicle Make {{ $requestType === 'buy_car' ? '*' : '' }}</label>
                             <div class="relative">
                                 <select
-                                    wire:model="vehicleMake"
+                                    wire:model.live="vehicleMake"
                                     class="appearance-none w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors bg-white"
                                 >
                                     <option value="">Select make</option>
-                                    @foreach(array_keys($vehicleMakes) as $make)
-                                        <option value="{{ $make }}">{{ $make }}</option>
-                                    @endforeach
+                                    @if(isset($vehicleMakes) && is_array($vehicleMakes))
+                                        @foreach($vehicleMakes as $makeId => $makeName)
+                                            <option value="{{ $makeId }}">{{ $makeName }}</option>
+                                        @endforeach
+                                    @endif
                                 </select>
                                 <span class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -319,13 +700,15 @@
                             <label class="block text-sm font-medium text-gray-700 mb-2">Vehicle Model {{ $requestType === 'buy_car' ? '*' : '' }}</label>
                             <div class="relative">
                                 <select
-                                    wire:model="vehicleModel"
+                                    wire:model.live="vehicleModel"
                                     class="appearance-none w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors bg-white"
                                 >
                                     <option value="">Select model</option>
-                                    @foreach($vehicleModelOptions as $model)
-                                        <option value="{{ $model }}">{{ $model }}</option>
-                                    @endforeach
+                                    @if(isset($vehicleModelOptions) && is_array($vehicleModelOptions))
+                                        @foreach($vehicleModelOptions as $model)
+                                            <option value="{{ $model }}">{{ $model }}</option>
+                                        @endforeach
+                                    @endif
                                 </select>
                                 <span class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -333,7 +716,7 @@
                                     </svg>
                                 </span>
                             </div>
-                            @if(empty($vehicleModelOptions))
+                            @if(!isset($vehicleModelOptions) || empty($vehicleModelOptions))
                                 <p class="mt-2 text-xs text-gray-500">
                                     Choose a make above to load available models.
                                 </p>
@@ -644,5 +1027,6 @@
             </div>
         @endif
     </div>
+    @endauth
 </div>
 

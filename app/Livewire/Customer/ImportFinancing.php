@@ -3,6 +3,9 @@
 namespace App\Livewire\Customer;
 
 use App\Models\ImportFinancingRequest;
+use App\Models\VehicleMake;
+use App\Models\VehicleModel;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Validate;
@@ -68,17 +71,9 @@ class ImportFinancing extends Component
     #[Validate('nullable|numeric|min:0')]
     public ?float $totalClearingCost = null;
 
-    // Dropdown data
-    public array $vehicleMakes = [
-        'Toyota' => ['Land Cruiser', 'Hilux', 'Prado', 'Corolla', 'HiAce', 'Rav4'],
-        'Mercedes-Benz' => ['G-Class', 'E-Class', 'Sprinter', 'GLE', 'GLC'],
-        'BMW' => ['X5', 'X3', 'Series 5', 'Series 3', 'X6'],
-        'Land Rover' => ['Range Rover', 'Discovery', 'Defender'],
-        'Nissan' => ['Patrol', 'X-Trail', 'Navara', 'Skyline'],
-        'Ford' => ['Ranger', 'Mustang', 'Explorer'],
-        'Honda' => ['CR-V', 'Civic', 'Pilot'],
-        'Hyundai' => ['Santa Fe', 'Tucson', 'Palisade'],
-    ];
+    // Dropdown data - loaded from database
+    public $vehicleMakes = [];
+    public $vehicleModels = [];
 
     public ?string $selectedMake = '';
 
@@ -103,15 +98,140 @@ class ImportFinancing extends Component
     public int $currentStep = 1;
     public bool $showSuccess = false;
     public ?string $referenceNumber = null;
+    public bool $showLoginModal = false;
+    public bool $showSideModal = false;
+    public string $sideModalType = 'login'; // 'login' or 'register'
+
+    // Login/Register form fields
+    public string $loginEmail = '';
+    public string $loginPassword = '';
+    public string $registerName = '';
+    public string $registerEmail = '';
+    public string $registerPassword = '';
+    public string $registerPasswordConfirmation = '';
 
     public function mount()
     {
+        $this->loadVehicleData();
+
         if (auth()->check()) {
             $user = auth()->user();
             $this->customerName = $user->name;
             $this->customerEmail = $user->email;
             $this->customerPhone = $user->phone ?? '';
+        } else {
+            $this->showLoginModal = true;
         }
+    }
+
+    protected function loadVehicleData()
+    {
+        // Load all active vehicle makes with their models
+        $this->vehicleMakes = VehicleMake::where('status', 'active')
+            ->orderBy('name')
+            ->get()
+            ->mapWithKeys(function ($make) {
+                return [$make->id => $make->name];
+            });
+
+        // Load all active vehicle models grouped by make_id
+        $this->vehicleModels = VehicleModel::where('status', 'active')
+            ->with('vehicleMake')
+            ->get()
+            ->groupBy('vehicle_make_id')
+            ->map(function ($models) {
+                return $models->pluck('name')->toArray();
+            });
+    }
+
+    public function openSideModal($type)
+    {
+        $this->sideModalType = $type;
+        $this->showSideModal = true;
+
+        // Only hide the initial login modal if we're opening from there
+        if ($this->showLoginModal) {
+            $this->showLoginModal = false;
+        }
+
+        $this->resetFormFields();
+
+        // Clear any session messages when switching forms
+        session()->forget(['message', 'error']);
+    }
+
+    public function closeSideModal()
+    {
+        $this->showSideModal = false;
+        $this->showLoginModal = true;
+        $this->resetFormFields();
+    }
+
+    public function backToInitialModal()
+    {
+        $this->showSideModal = false;
+        $this->showLoginModal = true;
+        $this->resetFormFields();
+    }
+
+    protected function resetFormFields()
+    {
+        $this->loginEmail = '';
+        $this->loginPassword = '';
+        $this->registerName = '';
+        $this->registerEmail = '';
+        $this->registerPassword = '';
+        $this->registerPasswordConfirmation = '';
+    }
+
+    public function login()
+    {
+        $this->validate([
+            'loginEmail' => 'required|email',
+            'loginPassword' => 'required|min:8',
+        ]);
+
+        if (Auth::attempt(['email' => $this->loginEmail, 'password' => $this->loginPassword])) {
+            $this->showSideModal = false;
+            $this->showLoginModal = false;
+
+            // Pre-fill user data
+            $user = auth()->user();
+            $this->customerName = $user->name;
+            $this->customerEmail = $user->email;
+            $this->customerPhone = $user->phone ?? '';
+
+            session()->flash('message', 'Successfully logged in!');
+        } else {
+            session()->flash('error', 'Invalid credentials. Please try again.');
+        }
+    }
+
+    public function register()
+    {
+        $this->validate([
+            'registerName' => 'required|string|max:255',
+            'registerEmail' => 'required|email|unique:users,email',
+            'registerPassword' => 'required|min:8|confirmed',
+        ]);
+
+        $user = \App\Models\User::create([
+            'name' => $this->registerName,
+            'email' => $this->registerEmail,
+            'password' => bcrypt($this->registerPassword),
+        ]);
+
+        Auth::login($user);
+
+        $this->showSideModal = false;
+        $this->showLoginModal = false;
+
+        // Pre-fill user data
+        $this->customerName = $user->name;
+        $this->customerEmail = $user->email;
+        $this->customerPhone = $user->phone ?? '';
+
+        session()->flash('message', 'Account created successfully!');
     }
 
     public function updatedRequestType()
@@ -131,11 +251,9 @@ class ImportFinancing extends Component
     {
         $this->vehicleMake = $value;
 
-        if ($value && isset($this->vehicleMakes[$value])) {
-            $models = $this->vehicleMakes[$value];
-            if ($this->vehicleModel && !in_array($this->vehicleModel, $models)) {
-                $this->vehicleModel = null;
-            }
+        // Clear model selection if it's not available for the new make
+        if ($this->vehicleModel && (!isset($this->vehicleModels[$value]) || !in_array($this->vehicleModel, $this->vehicleModels[$value]))) {
+            $this->vehicleModel = null;
         }
     }
 
@@ -146,8 +264,8 @@ class ImportFinancing extends Component
 
     public function getVehicleModelOptionsProperty(): array
     {
-        if ($this->vehicleMake && isset($this->vehicleMakes[$this->vehicleMake])) {
-            return $this->vehicleMakes[$this->vehicleMake];
+        if (!empty($this->vehicleMake) && isset($this->vehicleModels[$this->vehicleMake])) {
+            return $this->vehicleModels[$this->vehicleMake];
         }
 
         return [];
