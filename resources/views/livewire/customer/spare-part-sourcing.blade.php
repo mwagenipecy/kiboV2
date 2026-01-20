@@ -1,9 +1,4 @@
-<div class="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 py-8 px-4 sm:px-6 lg:px-8">
-    <!-- Animated background pattern -->
-    <div class="fixed inset-0 opacity-5 pointer-events-none">
-        <div class="absolute inset-0" style="background-image: repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(0,0,0,.02) 35px, rgba(0,0,0,.02) 70px);"></div>
-    </div>
-
+<div class="min-h-screen bg-white py-2 px-4 sm:px-6 lg:px-8">
     <div class="max-w-5xl mx-auto relative z-10">
         @if (session()->has('success'))
             <div class="mb-6 p-4 bg-green-50 border-l-4 border-green-500 text-green-700 rounded-lg shadow-sm animate-fadeIn">
@@ -16,21 +11,10 @@
             </div>
         @endif
 
-        <!-- Header -->
-        <div class="text-center mb-12 animate-fadeIn">
-            <h1 class="text-5xl font-black text-gray-900 mb-3 tracking-tight">
-                SPARE PARTS
-                <span class="block text-transparent bg-clip-text bg-gradient-to-r from-green-500 to-green-600 text-6xl mt-1">
-                    ORDER SYSTEM
-                </span>
-            </h1>
-            <p class="text-gray-600 text-lg font-medium">Fast. Simple. Reliable.</p>
-        </div>
-
         <!-- Main Form Card -->
-        <div class="bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-gray-200 overflow-hidden">
+        <div class="bg-white  rounded-3xl  border border-gray-200 overflow-hidden">
             <!-- Order Type Selector -->
-            <div class="bg-gradient-to-r from-gray-50 to-gray-100 p-6 border-b border-gray-200">
+            <div class="bg-gradient-to-r from-gray-50 to-gray-100 p-2 border-b border-gray-200">
                 <label class="block text-sm font-bold text-gray-700 mb-3 uppercase tracking-wider">
                     Order Type
                 </label>

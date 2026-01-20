@@ -1,12 +1,16 @@
-<div class="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50">
+<div class="min-h-screen bg-white via-white to-emerald-50">
     <!-- Hero Section -->
     <div class="py-8">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="bg-gradient-to-r from-green-700 to-emerald-600 text-white py-8 px-8 rounded-2xl shadow-lg">
-                <div class="flex flex-col md:flex-row items-center justify-between gap-6">
-                    <div>
+            <div
+                class="relative h-64 md:h-72 rounded-2xl overflow-hidden bg-center bg-cover shadow-lg"
+                style="background-image: url('{{ asset('image/loanCalu.png') }}');"
+            >
+                <div class="absolute inset-0 bg-black/45"></div>
+                <div class="relative h-full flex flex-col md:flex-row items-center justify-between gap-6 px-8 py-8 text-white">
+                    <div class="max-w-2xl">
                         <h1 class="text-2xl md:text-3xl font-bold mb-2">Vehicle Loan Calculator</h1>
-                        <p class="text-green-100 text-sm md:text-base max-w-xl">
+                        <p class="text-gray-100 text-sm md:text-base">
                             Calculate your monthly payments, compare loan terms, and plan your vehicle purchase with confidence.
                         </p>
                     </div>
@@ -29,7 +33,7 @@
             <!-- Calculator Form -->
             <div class="lg:col-span-2 space-y-6">
                 <!-- Loan Details Card -->
-                <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+                <div class="bg-white rounded-2xl  p-6 border border-gray-100">
                     <div class="flex items-center gap-3 mb-6">
                         <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
                             <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -133,7 +137,7 @@
                 </div>
 
                 <!-- Additional Costs Card -->
-                <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+                <div class="bg-white rounded-2xl  p-6 border border-gray-100">
                     <div class="flex items-center gap-3 mb-6">
                         <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
                             <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -223,7 +227,7 @@
                 </div>
 
                 <!-- Term Comparison -->
-                <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+                <div class="bg-white rounded-2xl  p-6 border border-gray-100">
                     <div class="flex items-center justify-between mb-6">
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -303,7 +307,7 @@
                 </div>
 
                 <!-- Amortization Schedule -->
-                <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+                <div class="bg-white rounded-2xl  p-6 border border-gray-100">
                     <div class="flex items-center justify-between mb-6">
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
@@ -356,7 +360,7 @@
             <div class="lg:col-span-1">
                 <div class="sticky top-24 space-y-6">
                     <!-- Main Results Card -->
-                    <div class="bg-gradient-to-br from-green-600 to-emerald-700 rounded-2xl shadow-xl p-6 text-white">
+                    <div class=" bg-green-800 rounded-2xl shadow-xl p-6 text-white">
                         <h3 class="text-lg font-semibold mb-4 opacity-90">Monthly Payment</h3>
                         <div class="text-4xl font-bold mb-2">
                             {{ $currency }} {{ number_format($monthlyPayment, 0) }}

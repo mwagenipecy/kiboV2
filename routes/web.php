@@ -458,13 +458,15 @@ Route::prefix('spare-parts')->name('spare-parts.')->group(function () {
         return view('spare-parts.sourcing', ['vehicleType' => 'spare-parts']);
     })->name('sourcing');
     
-    Route::get('/orders', function () {
-        return view('spare-parts.orders', ['vehicleType' => 'spare-parts']);
-    })->name('orders');
-    
-    Route::get('/order/{id}', function ($id) {
-        return view('spare-parts.order-detail', ['id' => $id, 'vehicleType' => 'spare-parts']);
-    })->name('order-detail');
+    Route::middleware('auth')->group(function () {
+        Route::get('/orders', function () {
+            return view('spare-parts.orders', ['vehicleType' => 'spare-parts']);
+        })->name('orders');
+        
+        Route::get('/order/{id}', function ($id) {
+            return view('spare-parts.order-detail', ['id' => $id, 'vehicleType' => 'spare-parts']);
+        })->name('order-detail');
+    });
     
     Route::get('/supplier/{id}', \App\Livewire\Customer\SparePartSupplierDetail::class)->name('supplier');
 });
@@ -499,6 +501,18 @@ Route::prefix('garage')->name('garage.')->group(function () {
 // ============================================
 Route::prefix('loan-calculator')->name('loan-calculator.')->group(function () {
     Route::get('/', \App\Livewire\Customer\LoanCalculator::class)->name('index');
+});
+
+// ============================================
+// IMPORT FINANCING ROUTES
+// ============================================
+Route::prefix('import-financing')->name('import-financing.')->group(function () {
+    Route::get('/', \App\Livewire\Customer\ImportFinancing::class)->name('index');
+    
+    Route::middleware('auth')->group(function () {
+        Route::get('/requests', \App\Livewire\Customer\ImportFinancingRequests::class)->name('requests');
+        Route::get('/requests/{id}', \App\Livewire\Customer\ImportFinancingRequestDetail::class)->name('request-detail');
+    });
 });
 
 // ============================================
@@ -746,6 +760,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
     // Auctions
     Route::get('/auctions', \App\Livewire\Admin\AuctionManagement::class)->name('auctions');
     Route::get('/auctions/{id}', \App\Livewire\Admin\AuctionDetail::class)->name('auctions.detail');
+    
+    // Import Financing Requests
+    Route::get('/import-financing', \App\Livewire\Admin\ImportFinancingRequests::class)->name('import-financing');
+    Route::get('/import-financing/{id}', \App\Livewire\Admin\ImportFinancingRequestDetail::class)->name('import-financing.detail');
     
     // Orders
     Route::prefix('orders')->name('orders.')->group(function () {
@@ -1095,6 +1113,12 @@ Route::prefix('lender')->name('lender.')->group(function () {
         Route::get('/{id}', function ($id) {
             return view('lender.applications.detail', ['applicationId' => $id]);
         })->name('detail');
+    });
+    
+    // Import Financing Requests
+    Route::prefix('import-financing')->name('import-financing.')->group(function () {
+        Route::get('/', \App\Livewire\Lender\ImportFinancingRequests::class)->name('index');
+        Route::get('/{id}', \App\Livewire\Lender\ImportFinancingRequestDetail::class)->name('detail');
     });
 });
 

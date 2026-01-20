@@ -27,48 +27,9 @@
                 </select>
             </div>
 
-            {{-- Sort By --}}
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Sort By</label>
-                <select
-                    wire:model.live="sortBy"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                >
-                    <option value="distance">Distance</option>
-                    <option value="name">Name</option>
-                </select>
-            </div>
         </div>
 
-        {{-- Location Controls --}}
-        <div class="mt-4 flex items-center gap-4">
-            @if($userLatitude && $userLongitude)
-                <div class="flex items-center gap-2 text-sm text-green-600">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                    </svg>
-                    <span>Location: {{ number_format($userLatitude, 4) }}, {{ number_format($userLongitude, 4) }}</span>
-                </div>
-                <button
-                    wire:click="clearLocation"
-                    class="text-sm text-gray-600 hover:text-gray-900 underline"
-                >
-                    Clear Location
-                </button>
-            @else
-                <button
-                    wire:click="getCurrentLocation"
-                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-                >
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                    </svg>
-                    Use My Location
-                </button>
-            @endif
-        </div>
+        {{-- Location Controls removed per request --}}
     </div>
 
     {{-- Results --}}
@@ -77,8 +38,8 @@
             @foreach($garages as $garage)
                 <div class="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow overflow-hidden">
                     {{-- Garage Image/Icon --}}
-                    <div class="h-48 bg-gradient-to-br from-green-500 to-green-700 flex items-center justify-center">
-                        <svg class="w-24 h-24 text-white opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="h-48 bg-gray-200 flex items-center justify-center">
+                        <svg class="w-24 h-24 text-gray-400 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
                         </svg>
                     </div>
@@ -193,25 +154,51 @@
     {{-- JavaScript for Geolocation --}}
     <script>
         document.addEventListener('livewire:init', () => {
+            const isLocalhost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+            const isSecure = window.isSecureContext || isLocalhost;
+
+            const getErrorMessage = (error) => {
+                if (!isSecure) {
+                    return 'Location is blocked on non-HTTPS pages. Use HTTPS or run on localhost (127.0.0.1).';
+                }
+                switch (error.code) {
+                    case error.PERMISSION_DENIED:
+                        return 'Location permission denied. Please allow location access in your browser.';
+                    case error.POSITION_UNAVAILABLE:
+                        return 'Location information is unavailable. Try again in an open area or check network.';
+                    case error.TIMEOUT:
+                        return 'Location request timed out. Please try again.';
+                    default:
+                        return 'Unable to get your location. Please enable location access in your browser settings.';
+                }
+            };
+
             Livewire.on('request-location', () => {
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(
-                        function(position) {
-                            @this.setLocation(
-                                position.coords.latitude,
-                                position.coords.longitude
-                            );
-                        },
-                        function(error) {
-                            alert('Unable to get your location. Please enable location access in your browser settings.');
-                            @this.showLocationModal = false;
-                        },
-                        { enableHighAccuracy: true, timeout: 10000 }
-                    );
-                } else {
+                if (!navigator.geolocation) {
                     alert('Geolocation is not supported by your browser.');
                     @this.showLocationModal = false;
+                    return;
                 }
+
+                if (!isSecure) {
+                    alert('Location is blocked on non-HTTPS pages. Use HTTPS or run on localhost (127.0.0.1).');
+                    @this.showLocationModal = false;
+                    return;
+                }
+
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        @this.setLocation(
+                            position.coords.latitude,
+                            position.coords.longitude
+                        );
+                    },
+                    (error) => {
+                        alert(getErrorMessage(error));
+                        @this.showLocationModal = false;
+                    },
+                    { enableHighAccuracy: true, timeout: 12000, maximumAge: 5000 }
+                );
             });
         });
     </script>

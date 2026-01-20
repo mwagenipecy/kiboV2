@@ -16,6 +16,13 @@ class SparePartOrders extends Component
 
     protected $queryString = ['search', 'statusFilter'];
 
+    public function mount()
+    {
+        if (!Auth::check()) {
+            return redirect()->route('login');
+        }
+    }
+
     public function updatingSearch()
     {
         $this->resetPage();

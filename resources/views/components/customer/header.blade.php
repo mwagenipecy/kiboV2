@@ -9,6 +9,7 @@
             <a href="{{ route('spare-parts.index') }}" class="text-sm font-medium {{ $vehicleType === 'spare-parts' || request()->routeIs('spare-parts.*') ? 'text-gray-900 font-semibold border-b-2 border-green-600 pb-1' : 'text-gray-600' }} hover:text-green-700 transition-colors">Spare Parts</a>
             <a href="{{ route('garage.index') }}" class="text-sm font-medium {{ $vehicleType === 'garage' || request()->routeIs('garage.*') ? 'text-gray-900 font-semibold border-b-2 border-green-600 pb-1' : 'text-gray-600' }} hover:text-green-700 transition-colors">Garage</a>
             <a href="{{ route('loan-calculator.index') }}" class="text-sm font-medium {{ $vehicleType === 'loan-calculator' || request()->routeIs('loan-calculator.*') ? 'text-gray-900 font-semibold border-b-2 border-green-600 pb-1' : 'text-gray-600' }} hover:text-green-700 transition-colors">Loan Calculator</a>
+            <a href="{{ route('import-financing.index') }}" class="text-sm font-medium {{ $vehicleType === 'import-financing' || request()->routeIs('import-financing.*') ? 'text-gray-900 font-semibold border-b-2 border-green-600 pb-1' : 'text-gray-600' }} hover:text-green-700 transition-colors">Import Financing</a>
             {{-- Hidden menus --}}
             {{-- <a href="{{ route('vans.index') }}" class="text-sm font-medium {{ $vehicleType === 'vans' ? 'text-gray-900' : 'text-gray-600' }} hover:text-green-700">{{ __('vehicles.vans') }}</a> --}}
             {{-- <a href="{{ route('bikes.index') }}" class="text-sm font-medium {{ $vehicleType === 'bikes' ? 'text-gray-900' : 'text-gray-600' }} hover:text-green-700">{{ __('vehicles.bikes') }}</a> --}}
@@ -121,6 +122,9 @@
                     <a href="{{ route('loan-calculator.index') }}" @click="mobileMenuOpen = false" class="block px-3 py-2 rounded-lg text-sm font-medium {{ $vehicleType === 'loan-calculator' || request()->routeIs('loan-calculator.*') ? 'bg-green-50 text-green-700' : 'text-gray-700 hover:bg-gray-50' }} transition-colors">
                         Loan Calculator
                     </a>
+                    <a href="{{ route('import-financing.index') }}" @click="mobileMenuOpen = false" class="block px-3 py-2 rounded-lg text-sm font-medium {{ $vehicleType === 'import-financing' || request()->routeIs('import-financing.*') ? 'bg-green-50 text-green-700' : 'text-gray-700 hover:bg-gray-50' }} transition-colors">
+                        Import Financing
+                    </a>
                 </div>
             </div>
 
@@ -149,12 +153,11 @@
                     @elseif($vehicleType === 'garage')
                         <a href="{{ route('garage.index') }}" @click="mobileMenuOpen = false" class="block px-3 py-2 rounded-lg text-sm font-medium {{ request()->routeIs('garage.index') ? 'bg-green-50 text-green-700' : 'text-gray-700 hover:bg-gray-50' }} transition-colors">Find a Garage</a>
                         <a href="{{ route('garage.services') }}" @click="mobileMenuOpen = false" class="block px-3 py-2 rounded-lg text-sm font-medium {{ request()->routeIs('garage.services') ? 'bg-green-50 text-green-700' : 'text-gray-700 hover:bg-gray-50' }} transition-colors">Services</a>
-                        <a href="{{ route('garage.by-location') }}" @click="mobileMenuOpen = false" class="block px-3 py-2 rounded-lg text-sm font-medium {{ request()->routeIs('garage.by-location') ? 'bg-green-50 text-green-700' : 'text-gray-700 hover:bg-gray-50' }} transition-colors">By Location</a>
-                        <a href="{{ route('garage.book-service') }}" @click="mobileMenuOpen = false" class="block px-3 py-2 rounded-lg text-sm font-medium {{ request()->routeIs('garage.book-service') ? 'bg-green-50 text-green-700' : 'text-gray-700 hover:bg-gray-50' }} transition-colors">Book Service</a>
                     @elseif($vehicleType === 'loan-calculator')
-                        <a href="{{ route('loan-calculator.index') }}" @click="mobileMenuOpen = false" class="block px-3 py-2 rounded-lg text-sm font-medium {{ request()->routeIs('loan-calculator.index') ? 'bg-green-50 text-green-700' : 'text-gray-700 hover:bg-gray-50' }} transition-colors">Calculate Payment</a>
-                        <a href="{{ route('cars.index') }}" @click="mobileMenuOpen = false" class="block px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">Browse Cars</a>
-                        <a href="{{ route('trucks.index') }}" @click="mobileMenuOpen = false" class="block px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">Browse Trucks</a>
+                        <a href="{{ route('loan-calculator.index') }}" @click="mobileMenuOpen = false" class="block px-3 py-2 rounded-lg text-sm font-medium {{ request()->routeIs('loan-calculator.*') ? 'bg-green-50 text-green-700' : 'text-gray-700 hover:bg-gray-50' }} transition-colors">Loan Calculator</a>
+                    @elseif($vehicleType === 'import-financing')
+                        <a href="{{ route('import-financing.index') }}" @click="mobileMenuOpen = false" class="block px-3 py-2 rounded-lg text-sm font-medium {{ request()->routeIs('import-financing.*') ? 'bg-green-50 text-green-700' : 'text-gray-700 hover:bg-gray-50' }} transition-colors">Apply for Financing</a>
+                        <a href="{{ route('import-financing.requests') }}" @click="mobileMenuOpen = false" class="block px-3 py-2 rounded-lg text-sm font-medium {{ request()->routeIs('import-financing.requests') ? 'bg-green-50 text-green-700' : 'text-gray-700 hover:bg-gray-50' }} transition-colors">My Requests</a>
                     @endif
                 </div>
             </div>
