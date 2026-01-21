@@ -1,4 +1,11 @@
 <div>
+    <style>
+        .kibo-text { color: #009866 !important; }
+        .kibo-bg { background-color: #009866 !important; }
+        .kibo-bg:hover { background-color: #007a52 !important; }
+        .kibo-border { border-color: #009866 !important; }
+        .kibo-bg-light { background-color: rgba(0, 152, 102, 0.1) !important; }
+    </style>
     {{-- Filters --}}
     <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -9,7 +16,8 @@
                     type="text"
                     wire:model.live.debounce.300ms="search"
                     placeholder="Search by name, company, or location..."
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
+                    style="--tw-ring-color: #009866;"
                 >
             </div>
 
@@ -18,7 +26,8 @@
                 <label class="block text-sm font-medium text-gray-700 mb-2">Vehicle Make</label>
                 <select
                     wire:model.live="selectedMake"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
+                    style="--tw-ring-color: #009866;"
                 >
                     <option value="">All Makes</option>
                     @foreach($vehicleMakes as $make)
@@ -63,10 +72,10 @@
                         {{-- Distance --}}
                         @if($garage->distance !== null)
                             <div class="flex items-center gap-2 mb-3">
-                                <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5" style="color: #009866;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
                                 </svg>
-                                <span class="text-sm font-medium text-green-600">{{ $garage->distance }} km away</span>
+                                <span class="text-sm font-medium" style="color: #009866;">{{ $garage->distance }} km away</span>
                             </div>
                         @endif
 
@@ -94,10 +103,10 @@
                                 <p class="text-xs text-gray-500 mb-1">Services:</p>
                                 <div class="flex flex-wrap gap-1">
                                     @foreach(array_slice($garage->services, 0, 3) as $service)
-                                        <span class="px-2 py-1 bg-green-50 text-green-700 text-xs rounded-full capitalize">{{ str_replace('_', ' ', $service) }}</span>
+                                        <span class="px-2 py-1 text-xs rounded-full capitalize" style="background-color: rgba(0, 152, 102, 0.1); color: #007a52;">{{ str_replace('_', ' ', $service) }}</span>
                                     @endforeach
                                     @if(count($garage->services) > 3)
-                                        <span class="px-2 py-1 bg-green-50 text-green-700 text-xs rounded-full">+{{ count($garage->services) - 3 }} more</span>
+                                        <span class="px-2 py-1 text-xs rounded-full" style="background-color: rgba(0, 152, 102, 0.1); color: #007a52;">+{{ count($garage->services) - 3 }} more</span>
                                     @endif
                                 </div>
                             </div>
@@ -106,11 +115,11 @@
                         {{-- Contact Button --}}
                         <div class="flex gap-2">
                             @if($garage->phone_number)
-                                <a href="tel:{{ $garage->phone_number }}" class="flex-1 px-4 py-2 bg-white border-2 border-green-600 text-green-600 text-center font-semibold rounded-lg hover:bg-green-50 transition-colors">
+                                <a href="tel:{{ $garage->phone_number }}" class="flex-1 px-4 py-2 bg-white border-2 text-center font-semibold rounded-lg transition-colors" style="border-color: #009866; color: #009866;">
                                     Call
                                 </a>
                             @endif
-                            <a href="mailto:{{ $garage->email }}" class="flex-1 px-4 py-2 bg-green-600 text-white text-center font-semibold rounded-lg hover:bg-green-700 transition-colors">
+                            <a href="mailto:{{ $garage->email }}" class="flex-1 px-4 py-2 text-white text-center font-semibold rounded-lg transition-colors" style="background-color: #009866;">
                                 Email
                             </a>
                         </div>

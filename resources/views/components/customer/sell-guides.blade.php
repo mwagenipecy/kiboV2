@@ -37,7 +37,7 @@
             <h3 class="text-xl font-bold text-slate-900 mb-3">Keep it snappy</h3>
             <p class="text-slate-600 leading-relaxed">
                 There are a few documents you'll need to make sure you have before you sell your car. 
-                <a href="#" class="text-green-600 hover:text-green-700 underline">Learn more about documents needed to sell</a>
+                <a href="#" class="underline" style="color: #009866;">Learn more about documents needed to sell</a>
             </p>
         </div>
 

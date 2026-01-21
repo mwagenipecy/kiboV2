@@ -1,3 +1,6 @@
+<style>
+    .kibo-text { color: #009866 !important; }
+</style>
 <!-- Lease Carousel Section -->
 <section class="bg-white py-16 px-4 sm:px-6 lg:px-8">
     <div class="max-w-7xl mx-auto">
@@ -62,7 +65,7 @@
                         <div class="mb-4">
                             <div class="flex items-baseline gap-2 mb-2">
                                 <span class="text-sm text-gray-600">From</span>
-                                <span class="text-4xl font-bold text-green-600">${{ number_format($lease->monthly_payment, 0) }}</span>
+                                <span class="text-4xl font-bold kibo-text">${{ number_format($lease->monthly_payment, 0) }}</span>
                                 <div class="text-xs text-gray-600 ml-auto text-right">
                                     <div class="font-semibold">${{ number_format($lease->total_upfront_cost, 0) }} initial payment</div>
                                     <div>{{ $lease->lease_term_months }} month contract</div>
@@ -78,7 +81,7 @@
                             Available from {{ $lease->available_from->format('F Y') }}
                         </div>
                         @else
-                        <div class="text-sm font-medium text-green-600 mb-4 pb-4 border-b border-gray-200">
+                        <div class="text-sm font-medium kibo-text mb-4 pb-4 border-b border-gray-200">
                             Available Now
                         </div>
                         @endif
@@ -124,7 +127,7 @@
         @else
         <div class="text-center py-12">
             <p class="text-gray-600">No featured lease vehicles available at the moment.</p>
-            <a href="{{ route('cars.lease.index') }}" class="inline-block mt-4 text-green-600 hover:text-green-700 font-semibold">
+            <a href="{{ route('cars.lease.index') }}" class="inline-block mt-4 font-semibold" style="color: #009866;">
                 Browse all lease vehicles →
             </a>
         </div>

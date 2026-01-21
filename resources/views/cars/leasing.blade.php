@@ -2,9 +2,19 @@
 
 @section('title', 'Car Leasing | Flexible Lease Deals')
 
+@push('styles')
+<style>
+    .kibo-text { color: #009866 !important; }
+    .kibo-bg { background-color: #009866 !important; }
+    .kibo-bg-light { background-color: rgba(0, 152, 102, 0.1) !important; }
+    .kibo-gradient-bg { background: linear-gradient(to bottom right, rgba(0, 152, 102, 0.1), white, rgba(0, 152, 102, 0.1)) !important; }
+    .kibo-gradient-line { background: linear-gradient(to right, rgba(0, 152, 102, 0.3), rgba(0, 152, 102, 0.15), transparent) !important; }
+</style>
+@endpush
+
 @section('content')
     <!-- Hero Section -->
-    <section class="relative bg-gradient-to-br from-green-50 via-white to-green-50 py-20 overflow-hidden">
+    <section class="relative kibo-gradient-bg py-20 overflow-hidden">
         <div class="absolute inset-0 bg-grid-gray-900/[0.04] bg-[size:20px_20px]"></div>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -13,7 +23,7 @@
                     
                     <h1 class="text-3xl md:text-3xl font-bold text-gray-900 mb-6 leading-tight">
                         Lease Your Dream Car
-                        <span class="block text-green-600 mt-2">Today</span>
+                        <span class="block kibo-text mt-2">Today</span>
                     </h1>
                     
                     <p class="text-xl text-gray-600 mb-8 leading-relaxed">
@@ -22,13 +32,13 @@
                     </p>
                     
                     <div class="flex flex-col sm:flex-row gap-4 mb-8">
-                        <a href="{{ route('cars.lease.index') }}" class="inline-flex items-center justify-center px-8 py-4 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-all transform hover:scale-105 shadow-lg hover:shadow-xl">
+                        <a href="{{ route('cars.lease.index') }}" class="inline-flex items-center justify-center px-8 py-4 kibo-bg text-white font-semibold rounded-lg transition-all transform hover:scale-105 shadow-lg hover:shadow-xl">
                             <span>Browse Available Leases</span>
                             <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
                             </svg>
                         </a>
-                        <a href="#how-it-works" class="inline-flex items-center justify-center px-8 py-4 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:border-green-600 hover:text-green-600 transition-colors">
+                        <a href="#how-it-works" class="inline-flex items-center justify-center px-8 py-4 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg transition-colors" style="--hover-color: #009866;" onmouseover="this.style.borderColor='#009866'; this.style.color='#009866';" onmouseout="this.style.borderColor='#d1d5db'; this.style.color='#374151';">
                             How It Works
                         </a>
                     </div>
@@ -36,7 +46,7 @@
                     <!-- Key Stats -->
                     <div class="grid grid-cols-3 gap-6 pt-8 border-t border-gray-200">
                         <div>
-                            <div class="text-3xl font-bold text-green-600 mb-1">
+                            <div class="text-3xl font-bold kibo-text mb-1">
                                 @php
                                     $activeLeases = \App\Models\VehicleLease::active()->count();
                                 @endphp
@@ -45,7 +55,7 @@
                             <div class="text-sm text-gray-600">Available Leases</div>
                         </div>
                         <div>
-                            <div class="text-3xl font-bold text-green-600 mb-1">
+                            <div class="text-3xl font-bold kibo-text mb-1">
                                 @php
                                     $avgPayment = \App\Models\VehicleLease::active()->avg('monthly_payment');
                                 @endphp
@@ -54,7 +64,7 @@
                             <div class="text-sm text-gray-600">Avg. Monthly</div>
                         </div>
                         <div>
-                            <div class="text-3xl font-bold text-green-600 mb-1">24-60</div>
+                            <div class="text-3xl font-bold kibo-text mb-1">24-60</div>
                             <div class="text-sm text-gray-600">Month Terms</div>
                         </div>
                     </div>
@@ -62,8 +72,8 @@
                 
                 <div class="hidden lg:block">
                     <div class="relative">
-                        <div class="absolute inset-0 bg-green-200 rounded-3xl transform rotate-6"></div>
-                        <div class="relative bg-white rounded-3xl shadow-2xl p-8 border-2 border-green-100">
+                        <div class="absolute inset-0 kibo-bg-light rounded-3xl transform rotate-6"></div>
+                        <div class="relative bg-white rounded-3xl shadow-2xl p-8 border-2" style="border-color: rgba(0, 152, 102, 0.2);">
                             <img 
                                 src="https://images.unsplash.com/photo-1617531653332-bd46c24f2068?auto=format&fit=crop&w=800&q=80" 
                                 alt="Car Leasing" 
@@ -93,50 +103,50 @@
                 <!-- Step 1 -->
                 <div class="relative">
                     <div class="flex flex-col items-center text-center">
-                        <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mb-6 relative z-10">
-                            <span class="text-3xl font-bold text-green-600">1</span>
+                        <div class="w-20 h-20 kibo-bg-light rounded-full flex items-center justify-center mb-6 relative z-10">
+                            <span class="text-3xl font-bold kibo-text">1</span>
                         </div>
                         <h3 class="text-xl font-bold text-gray-900 mb-3">Browse & Select</h3>
                         <p class="text-gray-600 leading-relaxed">
                             Explore our wide selection of lease vehicles. Filter by price, term, make, and model to find your perfect match.
                         </p>
                     </div>
-                    <div class="hidden lg:block absolute top-10 left-1/2 w-full h-0.5 bg-gradient-to-r from-green-200 via-green-100 to-transparent transform translate-x-10"></div>
+                    <div class="hidden lg:block absolute top-10 left-1/2 w-full h-0.5 kibo-gradient-line transform translate-x-10"></div>
                 </div>
                 
                 <!-- Step 2 -->
                 <div class="relative">
                     <div class="flex flex-col items-center text-center">
-                        <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mb-6 relative z-10">
-                            <span class="text-3xl font-bold text-green-600">2</span>
+                        <div class="w-20 h-20 kibo-bg-light rounded-full flex items-center justify-center mb-6 relative z-10">
+                            <span class="text-3xl font-bold kibo-text">2</span>
                         </div>
                         <h3 class="text-xl font-bold text-gray-900 mb-3">Apply Online</h3>
                         <p class="text-gray-600 leading-relaxed">
                             Complete our quick online application form. Provide your details, income information, and select your preferred lease term.
                         </p>
                     </div>
-                    <div class="hidden lg:block absolute top-10 left-1/2 w-full h-0.5 bg-gradient-to-r from-green-200 via-green-100 to-transparent transform translate-x-10"></div>
+                    <div class="hidden lg:block absolute top-10 left-1/2 w-full h-0.5 kibo-gradient-line transform translate-x-10"></div>
                 </div>
                 
                 <!-- Step 3 -->
                 <div class="relative">
                     <div class="flex flex-col items-center text-center">
-                        <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mb-6 relative z-10">
-                            <span class="text-3xl font-bold text-green-600">3</span>
+                        <div class="w-20 h-20 kibo-bg-light rounded-full flex items-center justify-center mb-6 relative z-10">
+                            <span class="text-3xl font-bold kibo-text">3</span>
                         </div>
                         <h3 class="text-xl font-bold text-gray-900 mb-3">Get Approved</h3>
                         <p class="text-gray-600 leading-relaxed">
                             Our team reviews your application quickly. Once approved, we'll contact you to finalize the lease agreement and schedule delivery.
                         </p>
                     </div>
-                    <div class="hidden lg:block absolute top-10 left-1/2 w-full h-0.5 bg-gradient-to-r from-green-200 via-green-100 to-transparent transform translate-x-10"></div>
+                    <div class="hidden lg:block absolute top-10 left-1/2 w-full h-0.5 kibo-gradient-line transform translate-x-10"></div>
                 </div>
                 
                 <!-- Step 4 -->
                 <div class="relative">
                     <div class="flex flex-col items-center text-center">
-                        <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mb-6 relative z-10">
-                            <span class="text-3xl font-bold text-green-600">4</span>
+                        <div class="w-20 h-20 kibo-bg-light rounded-full flex items-center justify-center mb-6 relative z-10">
+                            <span class="text-3xl font-bold kibo-text">4</span>
                         </div>
                         <h3 class="text-xl font-bold text-gray-900 mb-3">Drive Away</h3>
                         <p class="text-gray-600 leading-relaxed">
@@ -163,9 +173,9 @@
             <div class="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
                 <div class="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-200">
                     <!-- Leasing Column -->
-                    <div class="p-8 md:p-12 bg-gradient-to-br from-green-50 to-white">
+                    <div class="p-8 md:p-12 kibo-gradient-bg">
                         <div class="text-center mb-8">
-                            <div class="inline-flex items-center justify-center w-16 h-16 bg-green-600 rounded-full mb-4">
+                            <div class="inline-flex items-center justify-center w-16 h-16 kibo-bg rounded-full mb-4">
                                 <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                 </svg>
@@ -176,7 +186,7 @@
                         
                         <ul class="space-y-4">
                             <li class="flex items-start">
-                                <svg class="w-6 h-6 text-green-600 mr-3 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                <svg class="w-6 h-6 kibo-text mr-3 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                                 </svg>
                                 <div>
@@ -185,7 +195,7 @@
                                 </div>
                             </li>
                             <li class="flex items-start">
-                                <svg class="w-6 h-6 text-green-600 mr-3 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                <svg class="w-6 h-6 kibo-text mr-3 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                                 </svg>
                                 <div>
@@ -194,7 +204,7 @@
                                 </div>
                             </li>
                             <li class="flex items-start">
-                                <svg class="w-6 h-6 text-green-600 mr-3 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                <svg class="w-6 h-6 kibo-text mr-3 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                                 </svg>
                                 <div>
@@ -203,7 +213,7 @@
                                 </div>
                             </li>
                             <li class="flex items-start">
-                                <svg class="w-6 h-6 text-green-600 mr-3 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                <svg class="w-6 h-6 kibo-text mr-3 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                                 </svg>
                                 <div>
@@ -255,7 +265,7 @@
                                 </div>
                             </li>
                             <li class="flex items-start">
-                                <svg class="w-6 h-6 text-green-600 mr-3 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                <svg class="w-6 h-6 kibo-text mr-3 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                                 </svg>
                                 <div>
@@ -285,8 +295,8 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <!-- Benefit 1 -->
                 <div class="bg-white rounded-xl p-8 shadow-sm hover:shadow-lg transition-shadow border border-gray-100">
-                    <div class="w-14 h-14 bg-green-100 rounded-lg flex items-center justify-center mb-6">
-                        <svg class="w-7 h-7 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="w-14 h-14 kibo-bg-light rounded-lg flex items-center justify-center mb-6">
+                        <svg class="w-7 h-7 kibo-text" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
                     </div>
@@ -298,8 +308,8 @@
                 
                 <!-- Benefit 2 -->
                 <div class="bg-white rounded-xl p-8 shadow-sm hover:shadow-lg transition-shadow border border-gray-100">
-                    <div class="w-14 h-14 bg-green-100 rounded-lg flex items-center justify-center mb-6">
-                        <svg class="w-7 h-7 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="w-14 h-14 kibo-bg-light rounded-lg flex items-center justify-center mb-6">
+                        <svg class="w-7 h-7 kibo-text" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
                     </div>
@@ -311,8 +321,8 @@
                 
                 <!-- Benefit 3 -->
                 <div class="bg-white rounded-xl p-8 shadow-sm hover:shadow-lg transition-shadow border border-gray-100">
-                    <div class="w-14 h-14 bg-green-100 rounded-lg flex items-center justify-center mb-6">
-                        <svg class="w-7 h-7 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="w-14 h-14 kibo-bg-light rounded-lg flex items-center justify-center mb-6">
+                        <svg class="w-7 h-7 kibo-text" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                         </svg>
                     </div>
@@ -324,8 +334,8 @@
                 
                 <!-- Benefit 4 -->
                 <div class="bg-white rounded-xl p-8 shadow-sm hover:shadow-lg transition-shadow border border-gray-100">
-                    <div class="w-14 h-14 bg-green-100 rounded-lg flex items-center justify-center mb-6">
-                        <svg class="w-7 h-7 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="w-14 h-14 kibo-bg-light rounded-lg flex items-center justify-center mb-6">
+                        <svg class="w-7 h-7 kibo-text" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                         </svg>
                     </div>
@@ -337,8 +347,8 @@
                 
                 <!-- Benefit 5 -->
                 <div class="bg-white rounded-xl p-8 shadow-sm hover:shadow-lg transition-shadow border border-gray-100">
-                    <div class="w-14 h-14 bg-green-100 rounded-lg flex items-center justify-center mb-6">
-                        <svg class="w-7 h-7 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="w-14 h-14 kibo-bg-light rounded-lg flex items-center justify-center mb-6">
+                        <svg class="w-7 h-7 kibo-text" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
                         </svg>
                     </div>
@@ -350,8 +360,8 @@
                 
                 <!-- Benefit 6 -->
                 <div class="bg-white rounded-xl p-8 shadow-sm hover:shadow-lg transition-shadow border border-gray-100">
-                    <div class="w-14 h-14 bg-green-100 rounded-lg flex items-center justify-center mb-6">
-                        <svg class="w-7 h-7 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="w-14 h-14 kibo-bg-light rounded-lg flex items-center justify-center mb-6">
+                        <svg class="w-7 h-7 kibo-text" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
                     </div>
@@ -440,7 +450,7 @@
                             <div class="mb-4">
                                 <div class="flex items-baseline gap-2 mb-2">
                                     <span class="text-sm text-gray-600">From</span>
-                                    <span class="text-4xl font-bold text-green-600">${{ number_format($lease->monthly_payment, 0) }}</span>
+                                    <span class="text-4xl font-bold kibo-text">${{ number_format($lease->monthly_payment, 0) }}</span>
                                     <div class="text-xs text-gray-600 ml-auto text-right">
                                         <div class="font-semibold">${{ number_format($lease->total_upfront_cost, 0) }} initial</div>
                                         <div>{{ $lease->lease_term_months }} months</div>
@@ -456,7 +466,7 @@
                                 Available from {{ $lease->available_from->format('F Y') }}
                             </div>
                             @else
-                            <div class="text-sm font-medium text-green-600 mb-4 pb-4 border-b border-gray-200">
+                            <div class="text-sm font-medium kibo-text mb-4 pb-4 border-b border-gray-200">
                                 Available Now
                             </div>
                             @endif

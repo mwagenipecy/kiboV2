@@ -7,7 +7,7 @@
 
     <!-- Success Message -->
     @if (session()->has('find_me_success'))
-        <div class="mb-6 rounded-xl bg-green-50 px-4 py-3 text-green-800 text-center">
+        <div class="mb-6 rounded-xl px-4 py-3 text-center" style="background-color: rgba(0, 152, 102, 0.1); color: #007a52;">
             {{ session('find_me_success') }}
         </div>
     @endif
@@ -209,7 +209,7 @@
         <div class="pt-4">
             <button 
                 type="submit" 
-                class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-4 px-6 rounded-xl transition-colors duration-200 text-lg"
+                class="w-full text-white font-semibold py-4 px-6 rounded-xl transition-colors duration-200 text-lg" style="background-color: #009866;"
             >
                 Find My Car
             </button>

@@ -55,7 +55,7 @@
             <div class="w-full md:w-auto">
                 <button type="submit" 
                         wire:loading.attr="disabled"
-                        class="w-full bg-green-700 hover:bg-green-800 disabled:bg-green-400 disabled:cursor-not-allowed text-white px-8 py-3 rounded-lg font-medium flex items-center justify-center gap-2 whitespace-nowrap transition-colors">
+                        class="w-full disabled:opacity-50 disabled:cursor-not-allowed text-white px-8 py-3 rounded-lg font-medium flex items-center justify-center gap-2 whitespace-nowrap transition-colors" style="background-color: #009866;">
                     <!-- Loading Spinner -->
                     <svg wire:loading wire:target="search" class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>

@@ -1086,6 +1086,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
     Route::get('/pricing', function () {
         return view('admin.pricing.index');
     })->name('pricing.index');
+    
+    // Valuation Pricing Management
+    Route::get('/valuation-pricing', \App\Livewire\Admin\ValuationPriceManager::class)->name('valuation-pricing.index');
 });
 
 // ============================================

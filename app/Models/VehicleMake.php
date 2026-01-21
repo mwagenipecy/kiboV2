@@ -31,4 +31,12 @@ class VehicleMake extends Model
     {
         return $this->hasMany(LeasingCar::class, 'vehicle_make_id');
     }
+
+    /**
+     * Scope for active makes
+     */
+    public function scopeActive($query)
+    {
+        return $query->where('status', 'active');
+    }
 }

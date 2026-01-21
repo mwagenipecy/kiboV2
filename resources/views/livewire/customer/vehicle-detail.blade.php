@@ -1,8 +1,13 @@
 <div class="min-h-screen bg-gray-50">
+    <style>
+        .kibo-text { color: #009866 !important; }
+        .kibo-bg { background-color: #009866 !important; }
+        .kibo-border { border-color: #009866 !important; }
+    </style>
     {{-- Header --}}
     <div class="bg-white border-b border-gray-200 sticky top-0 z-30">
         <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-            <a href="{{ route('cars.search') }}" class="flex items-center gap-2 text-green-600 hover:text-green-700 font-medium">
+            <a href="{{ route('cars.search') }}" class="flex items-center gap-2 kibo-text hover:opacity-80 font-medium">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                 </svg>
@@ -250,7 +255,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                         @foreach($vehicle->features as $feature)
                         <div class="flex items-center gap-2">
-                            <svg class="w-5 h-5 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-5 h-5 kibo-text flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                             </svg>
                             <span class="text-gray-700">{{ $feature }}</span>
@@ -268,7 +273,7 @@
                     <div class="space-y-4">
                         {{-- History Check --}}
                         <button wire:click="openInfoModal('history')" class="w-full flex items-start gap-4 p-4 border border-gray-200 rounded-lg hover:border-gray-300 hover:shadow-md transition-all cursor-pointer text-left">
-                            <svg class="w-6 h-6 text-green-600 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-6 h-6 kibo-text flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                             </svg>
                             <div class="flex-1">
@@ -282,7 +287,7 @@
 
                         {{-- Insurance Quote --}}
                         <button wire:click="openInfoModal('insurance')" class="w-full flex items-start gap-4 p-4 border border-gray-200 rounded-lg hover:border-gray-300 hover:shadow-md transition-all cursor-pointer text-left">
-                            <svg class="w-6 h-6 text-green-600 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-6 h-6 kibo-text flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
                             </svg>
                             <div class="flex-1">
@@ -311,7 +316,7 @@
                         This rating comes from our Kibo Auto vehicle experts, and is based on running costs, reliability, safety, comfort, features and power.
                     </p>
 
-                    <button wire:click="openInfoModal('review')" class="flex items-center gap-2 text-green-600 hover:text-green-700 font-medium">
+                    <button wire:click="openInfoModal('review')" class="flex items-center gap-2 kibo-text hover:opacity-80 font-medium">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                         </svg>
@@ -327,7 +332,7 @@
                     <h2 class="text-2xl font-bold text-gray-900 mb-4">Buying a car safely</h2>
                     <p class="text-gray-600 mb-6">Learn how to stay safe and protect your money with our handy guide</p>
 
-                    <button wire:click="openInfoModal('safety')" class="flex items-center gap-2 text-green-600 hover:text-green-700 font-medium">
+                    <button wire:click="openInfoModal('safety')" class="flex items-center gap-2 kibo-text hover:opacity-80 font-medium">
                         Read our guide on buying safely
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
@@ -338,7 +343,7 @@
                 {{-- Report --}}
                 <div class="bg-white rounded-xl p-6 shadow-sm">
                     <h2 class="text-2xl font-bold text-gray-900 mb-4">Spotted something fishy?</h2>
-                    <button class="text-green-600 hover:text-green-700 font-medium underline">
+                    <button class="kibo-text hover:opacity-80 font-medium underline">
                         Report this advert
                     </button>
                 </div>
@@ -366,7 +371,7 @@
                             {{-- Financing - Only show if there are matching lenders --}}
                             @if(count($matchingLenders) > 0)
                             <button wire:click="openFinancingModal({{ $vehicle->id }})" class="w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors flex items-start gap-3 border border-gray-200 rounded-lg">
-                                <svg class="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-6 h-6 kibo-text flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                 </svg>
                                 <div class="flex-1">
@@ -379,7 +384,7 @@
 
                             {{-- Cash Purchase --}}
                             <button wire:click="openCashPurchaseModal({{ $vehicle->id }})" class="w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors flex items-start gap-3 border border-gray-200 rounded-lg">
-                                <svg class="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-6 h-6 kibo-text flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
                                 </svg>
                                 <div class="flex-1">
@@ -393,7 +398,7 @@
                     <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-6 shadow-sm border border-green-200">
                         <h3 class="text-lg font-bold text-gray-900 mb-2">Interested in this vehicle?</h3>
                         <p class="text-sm text-gray-700 mb-4">Login to access valuation reports, financing options, and more!</p>
-                        <a href="{{ route('login') }}" class="block w-full px-6 py-3 bg-green-600 text-white text-center font-semibold rounded-lg hover:bg-green-700 transition-colors">
+                        <a href="{{ route('login') }}" class="block w-full px-6 py-3 text-white text-center font-semibold rounded-lg transition-colors" style="background-color: #009866;">
                             Login to Continue
                         </a>
                     </div>
@@ -402,7 +407,7 @@
                     {{-- Insurance Request Card --}}
                     <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-6 shadow-sm border border-green-200">
                         <div class="flex items-center gap-3 mb-4">
-                            <div class="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center">
+                            <div class="w-12 h-12 rounded-full flex items-center justify-center" style="background-color: #009866;">
                                 <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
                                 </svg>
@@ -415,7 +420,7 @@
                         <p class="text-sm text-gray-700 mb-4">
                             Get an instant insurance quote for this {{ $vehicle->year }} {{ $vehicle->make->name ?? '' }} {{ $vehicle->model->name ?? '' }}. Compare quotes from multiple insurers.
                         </p>
-                        <a href="{{ route('cars.insurance') }}?vehicle_id={{ $vehicle->id }}" class="w-full bg-green-600 text-white py-3 px-6 rounded-full font-semibold hover:bg-green-700 transition-colors flex items-center justify-center gap-2">
+                        <a href="{{ route('cars.insurance') }}?vehicle_id={{ $vehicle->id }}" class="w-full text-white py-3 px-6 rounded-full font-semibold transition-colors flex items-center justify-center gap-2" style="background-color: #009866;">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
                             </svg>
@@ -434,7 +439,7 @@
                         <p class="text-gray-700 mb-6">{{ $vehicle->entity->name }}</p>
 
                         @if($vehicle->entity->phone)
-                        <a href="tel:{{ $vehicle->entity->phone }}" class="w-full bg-white border-2 border-green-600 text-green-600 py-3 px-6 rounded-full font-semibold hover:bg-green-50 transition-colors flex items-center justify-center gap-2 mb-4">
+                        <a href="tel:{{ $vehicle->entity->phone }}" class="w-full bg-white border-2 py-3 px-6 rounded-full font-semibold hover:bg-green-50 transition-colors flex items-center justify-center gap-2 mb-4" style="border-color: #009866; color: #009866;">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
                             </svg>
@@ -443,7 +448,7 @@
                         @endif
 
                         @if($vehicle->entity->email)
-                        <a href="mailto:{{ $vehicle->entity->email }}" class="w-full bg-green-600 text-white py-3 px-6 rounded-full font-semibold hover:bg-green-700 transition-colors flex items-center justify-center gap-2">
+                        <a href="mailto:{{ $vehicle->entity->email }}" class="w-full text-white py-3 px-6 rounded-full font-semibold transition-colors flex items-center justify-center gap-2" style="background-color: #009866;">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                             </svg>
@@ -566,7 +571,7 @@
                     <div class="mb-6">
                         <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
                             <div class="flex items-start gap-3">
-                                <svg class="w-6 h-6 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-6 h-6 kibo-text flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                 </svg>
                                 <div>
@@ -579,7 +584,7 @@
                         <h3 class="text-lg font-bold text-gray-900 mb-4">What's included:</h3>
                         <div class="space-y-3 mb-6">
                             <div class="flex items-start gap-3">
-                                <svg class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5 kibo-text flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                 </svg>
                                 <div>
@@ -588,7 +593,7 @@
                                 </div>
                             </div>
                             <div class="flex items-start gap-3">
-                                <svg class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5 kibo-text flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                 </svg>
                                 <div>
@@ -597,7 +602,7 @@
                                 </div>
                             </div>
                             <div class="flex items-start gap-3">
-                                <svg class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5 kibo-text flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                 </svg>
                                 <div>
@@ -606,7 +611,7 @@
                                 </div>
                             </div>
                             <div class="flex items-start gap-3">
-                                <svg class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5 kibo-text flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                 </svg>
                                 <div>
@@ -615,7 +620,7 @@
                                 </div>
                             </div>
                             <div class="flex items-start gap-3">
-                                <svg class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5 kibo-text flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                 </svg>
                                 <div>
@@ -625,7 +630,7 @@
                             </div>
                         </div>
 
-                        <button class="w-full bg-green-600 text-white py-3 px-6 rounded-full font-semibold hover:bg-green-700 transition-colors">
+                        <button class="w-full text-white py-3 px-6 rounded-full font-semibold transition-colors" style="background-color: #009866;">
                             Buy History Check - £4.95
                         </button>
                     </div>
@@ -646,25 +651,25 @@
                         <h3 class="text-lg font-bold text-gray-900 mb-4">Why get a quote?</h3>
                         <div class="space-y-3 mb-6">
                             <div class="flex items-start gap-3">
-                                <svg class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5 kibo-text flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                 </svg>
                                 <p class="text-gray-700">Compare quotes from over 100 insurers</p>
                             </div>
                             <div class="flex items-start gap-3">
-                                <svg class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5 kibo-text flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                 </svg>
                                 <p class="text-gray-700">Quick and easy online process</p>
                             </div>
                             <div class="flex items-start gap-3">
-                                <svg class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5 kibo-text flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                 </svg>
                                 <p class="text-gray-700">See prices before you buy</p>
                             </div>
                             <div class="flex items-start gap-3">
-                                <svg class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5 kibo-text flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                 </svg>
                                 <p class="text-gray-700">Potentially save hundreds on your premium</p>
@@ -675,7 +680,7 @@
                             Vehicle Details: {{ $vehicle->year }} {{ $vehicle->make->name ?? '' }} {{ $vehicle->model->name ?? '' }}
                         </p>
 
-                        <a href="{{ route('cars.insurance') }}?vehicle_id={{ $vehicle->id }}" class="w-full bg-green-600 text-white py-3 px-6 rounded-full font-semibold hover:bg-green-700 transition-colors flex items-center justify-center gap-2">
+                        <a href="{{ route('cars.insurance') }}?vehicle_id={{ $vehicle->id }}" class="w-full text-white py-3 px-6 rounded-full font-semibold transition-colors flex items-center justify-center gap-2" style="background-color: #009866;">
                             Get Insurance Quote
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
@@ -707,7 +712,7 @@
                                     <span class="text-gray-600">4.0</span>
                                 </div>
                                 <div class="w-full bg-gray-200 rounded-full h-2">
-                                    <div class="bg-green-600 h-2 rounded-full" style="width: 80%"></div>
+                                    <div class="kibo-bg h-2 rounded-full" style="width: 80%"></div>
                                 </div>
                             </div>
                             <div>
@@ -716,7 +721,7 @@
                                     <span class="text-gray-600">3.5</span>
                                 </div>
                                 <div class="w-full bg-gray-200 rounded-full h-2">
-                                    <div class="bg-green-600 h-2 rounded-full" style="width: 70%"></div>
+                                    <div class="kibo-bg h-2 rounded-full" style="width: 70%"></div>
                                 </div>
                             </div>
                             <div>
@@ -725,7 +730,7 @@
                                     <span class="text-gray-600">4.2</span>
                                 </div>
                                 <div class="w-full bg-gray-200 rounded-full h-2">
-                                    <div class="bg-green-600 h-2 rounded-full" style="width: 84%"></div>
+                                    <div class="kibo-bg h-2 rounded-full" style="width: 84%"></div>
                                 </div>
                             </div>
                             <div>
@@ -734,7 +739,7 @@
                                     <span class="text-gray-600">3.8</span>
                                 </div>
                                 <div class="w-full bg-gray-200 rounded-full h-2">
-                                    <div class="bg-green-600 h-2 rounded-full" style="width: 76%"></div>
+                                    <div class="kibo-bg h-2 rounded-full" style="width: 76%"></div>
                                 </div>
                             </div>
                             <div>
@@ -743,7 +748,7 @@
                                     <span class="text-gray-600">3.5</span>
                                 </div>
                                 <div class="w-full bg-gray-200 rounded-full h-2">
-                                    <div class="bg-green-600 h-2 rounded-full" style="width: 70%"></div>
+                                    <div class="kibo-bg h-2 rounded-full" style="width: 70%"></div>
                                 </div>
                             </div>
                             <div>
@@ -752,7 +757,7 @@
                                     <span class="text-gray-600">3.5</span>
                                 </div>
                                 <div class="w-full bg-gray-200 rounded-full h-2">
-                                    <div class="bg-green-600 h-2 rounded-full" style="width: 70%"></div>
+                                    <div class="kibo-bg h-2 rounded-full" style="width: 70%"></div>
                                 </div>
                             </div>
                         </div>

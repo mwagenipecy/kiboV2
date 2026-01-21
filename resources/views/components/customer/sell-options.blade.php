@@ -26,21 +26,21 @@
             
             <div class="space-y-4 mb-8">
                 <div class="flex items-start gap-3">
-                    <svg class="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-6 h-6 flex-shrink-0 mt-0.5" style="color: #009866;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                     </svg>
                     <p class="text-slate-700">Maximise your selling price</p>
                 </div>
                 
                 <div class="flex items-start gap-3">
-                    <svg class="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-6 h-6 flex-shrink-0 mt-0.5" style="color: #009866;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                     </svg>
                     <p class="text-slate-700">Advertise to over 10 million people each month—4x more than any other site*</p>
                 </div>
                 
                 <div class="flex items-start gap-3">
-                    <svg class="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-6 h-6 flex-shrink-0 mt-0.5" style="color: #009866;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                     </svg>
                     <p class="text-slate-700">Your sale, your terms. Sell when you're happy with the offer</p>
@@ -49,11 +49,11 @@
             
             <div class="flex flex-col items-center gap-4">
                 @auth
-                    <a href="{{ route('cars.list-vehicle') }}" class="bg-green-600 hover:bg-green-700 text-white font-semibold px-8 py-3 rounded-full transition-colors text-center">
+                    <a href="{{ route('cars.list-vehicle') }}" class="text-white font-semibold px-8 py-3 rounded-full transition-colors text-center" style="background-color: #009866;">
                         Start an advert
                     </a>
                 @else
-                    <button onclick="document.getElementById('openAuthModal').click()" class="bg-green-600 hover:bg-green-700 text-white font-semibold px-8 py-3 rounded-full transition-colors">
+                    <button onclick="document.getElementById('openAuthModal').click()" class="text-white font-semibold px-8 py-3 rounded-full transition-colors" style="background-color: #009866;">
                         Start an advert
                     </button>
                 @endauth
@@ -68,7 +68,7 @@
                         $category = 'cars';
                     }
                 @endphp
-                <a href="{{ route('pricing.show', ['category' => $category]) }}" class="text-green-600 hover:text-green-700 font-medium underline text-sm">
+                <a href="{{ route('pricing.show', ['category' => $category]) }}" class="font-medium underline text-sm" style="color: #009866;">
                     See advertising prices
                 </a>
             </div>
@@ -82,21 +82,21 @@
             
             <div class="space-y-4 mb-8">
                 <div class="flex items-start gap-3">
-                    <svg class="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-6 h-6 flex-shrink-0 mt-0.5" style="color: #009866;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                     </svg>
                     <p class="text-slate-700">Sell in as little as 48 hours**</p>
                 </div>
                 
                 <div class="flex items-start gap-3">
-                    <svg class="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-6 h-6 flex-shrink-0 mt-0.5" style="color: #009866;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                     </svg>
                     <p class="text-slate-700">Get the best price from thousands of verified dealers</p>
                 </div>
                 
                 <div class="flex items-start gap-3">
-                    <svg class="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-6 h-6 flex-shrink-0 mt-0.5" style="color: #009866;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                     </svg>
                     <p class="text-slate-700">Free collection and same-day payment</p>
@@ -105,15 +105,15 @@
             
             <div class="flex flex-col items-center gap-4">
                 @auth
-                    <a href="{{ route('cars.sell-to-dealer') }}" class="bg-green-600 hover:bg-green-700 text-white font-semibold px-8 py-3 rounded-full transition-colors text-center">
+                    <a href="{{ route('cars.sell-to-dealer') }}" class="text-white font-semibold px-8 py-3 rounded-full transition-colors text-center" style="background-color: #009866;">
                         Sell for free
                     </a>
                 @else
-                    <button onclick="document.getElementById('openAuthModal').click()" class="bg-green-600 hover:bg-green-700 text-white font-semibold px-8 py-3 rounded-full transition-colors">
+                    <button onclick="document.getElementById('openAuthModal').click()" class="text-white font-semibold px-8 py-3 rounded-full transition-colors" style="background-color: #009866;">
                         Sell for free
                     </button>
                 @endauth
-                <a href="{{ route('my-auctions') }}" class="text-green-600 hover:text-green-700 font-medium underline text-sm">
+                <a href="{{ route('my-auctions') }}" class="font-medium underline text-sm" style="color: #009866;">
                     View my auctions
                 </a>
             </div>

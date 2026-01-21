@@ -1,3 +1,6 @@
+<style>
+    .kibo-text { color: #009866 !important; }
+</style>
 <!-- Seller Reviews Section -->
 <section class="bg-white py-16 px-4 sm:px-6 lg:px-8">
     <div class="max-w-7xl mx-auto">
@@ -11,7 +14,7 @@
             <div class="flex flex-col items-center gap-4">
                 <div class="flex items-center gap-2">
                     <span class="text-gray-700 font-medium">Kibo Auto Trustpilot rating:</span>
-                    <span class="text-green-600 font-bold">Excellent</span>
+                    <span class="kibo-text font-bold">Excellent</span>
                 </div>
                 
                 <!-- Trustpilot Logo Placeholder -->
@@ -19,7 +22,7 @@
                     <div class="flex items-center gap-1">
                         <!-- 5 Stars -->
                         @for($i = 0; $i < 5; $i++)
-                        <svg class="w-6 h-6 text-green-600 fill-current" viewBox="0 0 24 24">
+                        <svg class="w-6 h-6 kibo-text fill-current" viewBox="0 0 24 24">
                             <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                         </svg>
                         @endfor
@@ -43,7 +46,7 @@
                 <!-- Stars -->
                 <div class="flex items-center gap-1 mb-4">
                     @for($i = 0; $i < 5; $i++)
-                    <svg class="w-5 h-5 text-green-600 fill-current" viewBox="0 0 24 24">
+                    <svg class="w-5 h-5 kibo-text fill-current" viewBox="0 0 24 24">
                         <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                     </svg>
                     @endfor
@@ -72,7 +75,7 @@
                 <!-- Stars -->
                 <div class="flex items-center gap-1 mb-4">
                     @for($i = 0; $i < 5; $i++)
-                    <svg class="w-5 h-5 text-green-600 fill-current" viewBox="0 0 24 24">
+                    <svg class="w-5 h-5 kibo-text fill-current" viewBox="0 0 24 24">
                         <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                     </svg>
                     @endfor
@@ -101,7 +104,7 @@
                 <!-- Stars -->
                 <div class="flex items-center gap-1 mb-4">
                     @for($i = 0; $i < 4; $i++)
-                    <svg class="w-5 h-5 text-green-600 fill-current" viewBox="0 0 24 24">
+                    <svg class="w-5 h-5 kibo-text fill-current" viewBox="0 0 24 24">
                         <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                     </svg>
                     @endfor

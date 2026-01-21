@@ -29,7 +29,7 @@
 
                     <div class="pt-2">
                         <a href="{{ route('cars.leasing') }}" 
-                           class="inline-block px-6 py-3 border-2 border-green-700 text-green-700 rounded-full font-medium hover:bg-green-50 transition-colors duration-200">
+                           class="inline-block px-6 py-3 border-2 rounded-full font-medium transition-colors duration-200" style="border-color: #009866; color: #009866;">
                             Find your lease
                         </a>
                     </div>
@@ -57,7 +57,7 @@
 
                     <div class="pt-2">
                         <a href="{{ route('cars.sell') }}" 
-                           class="inline-block px-6 py-3 border-2 border-green-700 text-green-700 rounded-full font-medium hover:bg-green-50 transition-colors duration-200">
+                           class="inline-block px-6 py-3 border-2 rounded-full font-medium transition-colors duration-200" style="border-color: #009866; color: #009866;">
                             Sell your car
                         </a>
                     </div>
@@ -86,12 +86,12 @@
                     <div class="pt-2">
                         @auth
                             <a href="{{ route('dashboard') }}" 
-                               class="inline-block px-6 py-3 border-2 border-green-700 text-green-700 rounded-full font-medium hover:bg-green-50 transition-colors duration-200">
+                               class="inline-block px-6 py-3 border-2 rounded-full font-medium transition-colors duration-200" style="border-color: #009866; color: #009866;">
                                 Go to Dashboard
                             </a>
                         @else
                             <a href="{{ route('login') }}" 
-                               class="inline-block px-6 py-3 border-2 border-green-700 text-green-700 rounded-full font-medium hover:bg-green-50 transition-colors duration-200">
+                               class="inline-block px-6 py-3 border-2 rounded-full font-medium transition-colors duration-200" style="border-color: #009866; color: #009866;">
                                 Sign in
                             </a>
                         @endauth

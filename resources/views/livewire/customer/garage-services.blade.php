@@ -1,4 +1,8 @@
 <div>
+    <style>
+        .kibo-bg { background-color: #009866 !important; }
+        .kibo-bg:hover { background-color: #007a52 !important; }
+    </style>
     <!-- Hero -->
     <section class="relative bg-white mb-16">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -14,7 +18,7 @@
                         Browse services offered by our trusted garages across Tanzania.
                     </p>
                     <div class="mt-6 flex flex-col sm:flex-row justify-center gap-3">
-                        <a href="{{ route('garage.index') }}" class="px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors">
+                        <a href="{{ route('garage.index') }}" class="px-6 py-3 text-white font-semibold rounded-lg transition-colors" style="background-color: #009866;" onmouseover="this.style.backgroundColor='#007a52'" onmouseout="this.style.backgroundColor='#009866'">
                             Find a Garage
                         </a>
                         <a href="#services" class="px-6 py-3 bg-white/90 text-gray-900 font-semibold rounded-lg hover:bg-white transition-colors">
@@ -33,7 +37,7 @@
                 <h2 class="text-3xl font-bold text-gray-900">Available Services</h2>
                 <p class="text-gray-600 mt-1">Aggregated from all active garages.</p>
             </div>
-            <a href="{{ route('garage.index') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+            <a href="{{ route('garage.index') }}" class="inline-flex items-center gap-2 px-4 py-2 text-white rounded-lg transition-colors" style="background-color: #009866;" onmouseover="this.style.backgroundColor='#007a52'" onmouseout="this.style.backgroundColor='#009866'">
                 Find a Garage
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
@@ -100,14 +104,20 @@
                             @if($primaryGarage && ($primaryGarage['phone'] ?? false))
                                 <a
                                     href="tel:{{ $primaryPhoneLink }}"
-                                    class="flex-1 px-4 py-2 text-center bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                                    class="flex-1 px-4 py-2 text-center text-white rounded-lg transition-colors"
+                                    style="background-color: #009866;"
+                                    onmouseover="this.style.backgroundColor='#007a52'"
+                                    onmouseout="this.style.backgroundColor='#009866'"
                                 >
                                     Book service
                                 </a>
                             @elseif($primaryGarage && $primaryEmailLink)
                                 <a
                                     href="mailto:{{ $primaryEmailLink }}?subject={{ $emailSubject }}"
-                                    class="flex-1 px-4 py-2 text-center bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                                    class="flex-1 px-4 py-2 text-center text-white rounded-lg transition-colors"
+                                    style="background-color: #009866;"
+                                    onmouseover="this.style.backgroundColor='#007a52'"
+                                    onmouseout="this.style.backgroundColor='#009866'"
                                 >
                                     Book service
                                 </a>
@@ -155,7 +165,7 @@
                                 </div>
                                 <div class="mt-3 flex flex-wrap gap-2">
                             @if(!empty($garage['phone']))
-                                <a href="tel:{{ preg_replace('/\\s+/', '', $garage['phone']) }}" class="px-3 py-2 text-sm bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors">
+                                <a href="tel:{{ preg_replace('/\\s+/', '', $garage['phone']) }}" class="px-3 py-2 text-sm text-white rounded-md transition-colors" style="background-color: #009866;" onmouseover="this.style.backgroundColor='#007a52'" onmouseout="this.style.backgroundColor='#009866'">
                                             Call
                                         </a>
                                     @endif

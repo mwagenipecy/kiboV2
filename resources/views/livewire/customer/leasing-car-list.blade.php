@@ -1,3 +1,9 @@
+<style>
+    .kibo-text { color: #009866 !important; }
+    .kibo-bg { background-color: #009866 !important; }
+    .kibo-border { border-color: #009866 !important; }
+    .kibo-radio:checked, .kibo-checkbox:checked { accent-color: #009866 !important; }
+</style>
 <div class="min-h-screen bg-white">
     {{-- Filter Bar --}}
     <div class="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
@@ -7,14 +13,14 @@
                 <div class="flex items-center gap-3 flex-wrap">
                     {{-- Make Filter Chip --}}
                     @if($make)
-                        <button wire:click="$toggle('showFilters')" class="px-6 py-2 bg-green-600 text-white rounded-full font-medium hover:bg-green-700 transition-colors">
+                        <button wire:click="$toggle('showFilters')" class="px-6 py-2 kibo-bg text-white rounded-full font-medium transition-colors">
                             {{ $make }}
                         </button>
                     @endif
 
                     {{-- Model Filter Chip --}}
                     @if($model)
-                        <button wire:click="$toggle('showFilters')" class="px-6 py-2 bg-green-600 text-white rounded-full font-medium hover:bg-green-700 transition-colors">
+                        <button wire:click="$toggle('showFilters')" class="px-6 py-2 kibo-bg text-white rounded-full font-medium transition-colors">
                             {{ $model }}
                         </button>
                     @endif
@@ -41,7 +47,7 @@
                 </div>
 
                 {{-- Right side - Filter and sort button --}}
-                <button wire:click="$toggle('showFilters')" class="px-6 py-2 bg-green-600 text-white rounded-full font-medium hover:bg-green-700 transition-colors flex items-center gap-2 whitespace-nowrap">
+                <button wire:click="$toggle('showFilters')" class="px-6 py-2 kibo-bg text-white rounded-full font-medium transition-colors flex items-center gap-2 whitespace-nowrap">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
                     </svg>
@@ -93,23 +99,23 @@
                 @if($expandedSections['sort'])
                 <div class="space-y-2 pl-8">
                     <label class="flex items-center gap-3 py-2 cursor-pointer hover:bg-gray-50 rounded px-2">
-                        <input wire:model.live="sortBy" type="radio" value="relevance" class="w-4 h-4 text-green-600">
+                        <input wire:model.live="sortBy" type="radio" value="relevance" class="w-4 h-4 kibo-text">
                         <span class="text-gray-700">Relevance</span>
                     </label>
                     <label class="flex items-center gap-3 py-2 cursor-pointer hover:bg-gray-50 rounded px-2">
-                        <input wire:model.live="sortBy" type="radio" value="payment_low" class="w-4 h-4 text-green-600">
+                        <input wire:model.live="sortBy" type="radio" value="payment_low" class="w-4 h-4 kibo-text">
                         <span class="text-gray-700">Payment: Low to High</span>
                     </label>
                     <label class="flex items-center gap-3 py-2 cursor-pointer hover:bg-gray-50 rounded px-2">
-                        <input wire:model.live="sortBy" type="radio" value="payment_high" class="w-4 h-4 text-green-600">
+                        <input wire:model.live="sortBy" type="radio" value="payment_high" class="w-4 h-4 kibo-text">
                         <span class="text-gray-700">Payment: High to Low</span>
                     </label>
                     <label class="flex items-center gap-3 py-2 cursor-pointer hover:bg-gray-50 rounded px-2">
-                        <input wire:model.live="sortBy" type="radio" value="year_new" class="w-4 h-4 text-green-600">
+                        <input wire:model.live="sortBy" type="radio" value="year_new" class="w-4 h-4 kibo-text">
                         <span class="text-gray-700">Year: Newest first</span>
                     </label>
                     <label class="flex items-center gap-3 py-2 cursor-pointer hover:bg-gray-50 rounded px-2">
-                        <input wire:model.live="sortBy" type="radio" value="term_short" class="w-4 h-4 text-green-600">
+                        <input wire:model.live="sortBy" type="radio" value="term_short" class="w-4 h-4 kibo-text">
                         <span class="text-gray-700">Term: Shortest First</span>
                     </label>
                 </div>
@@ -135,7 +141,7 @@
                 <div class="space-y-3 pl-8">
                     <div>
                         <label class="text-sm text-gray-600 mb-1 block">Make</label>
-                        <select wire:model.live="make" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                        <select wire:model.live="make" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#009866] focus:border-[#009866]">
                             <option value="">Any</option>
                             @foreach($availableMakes as $makeOption)
                                 <option value="{{ $makeOption }}">{{ $makeOption }}</option>
@@ -145,7 +151,7 @@
                     @if($make && $availableModels->count() > 0)
                     <div>
                         <label class="text-sm text-gray-600 mb-1 block">Model</label>
-                        <select wire:model.live="model" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                        <select wire:model.live="model" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#009866] focus:border-[#009866]">
                             <option value="">Any</option>
                             @foreach($availableModels as $modelOption)
                                 <option value="{{ $modelOption }}">{{ $modelOption }}</option>
@@ -177,11 +183,11 @@
                     <div class="grid grid-cols-2 gap-3">
                         <div>
                             <label class="text-sm text-gray-600 mb-1 block">Min year</label>
-                            <input wire:model.live="minYear" type="number" placeholder="No min" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                            <input wire:model.live="minYear" type="number" placeholder="No min" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#009866] focus:border-[#009866]">
                         </div>
                         <div>
                             <label class="text-sm text-gray-600 mb-1 block">Max year</label>
-                            <input wire:model.live="maxYear" type="number" placeholder="No max" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                            <input wire:model.live="maxYear" type="number" placeholder="No max" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#009866] focus:border-[#009866]">
                         </div>
                     </div>
                 </div>
@@ -206,11 +212,11 @@
                     <div class="grid grid-cols-2 gap-3">
                         <div>
                             <label class="text-sm text-gray-600 mb-1 block">Min payment</label>
-                            <input wire:model.live="minPayment" type="number" placeholder="No min" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                            <input wire:model.live="minPayment" type="number" placeholder="No min" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#009866] focus:border-[#009866]">
                         </div>
                         <div>
                             <label class="text-sm text-gray-600 mb-1 block">Max payment</label>
-                            <input wire:model.live="maxPayment" type="number" placeholder="No max" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                            <input wire:model.live="maxPayment" type="number" placeholder="No max" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#009866] focus:border-[#009866]">
                         </div>
                     </div>
                 </div>
@@ -236,7 +242,7 @@
                 <div class="pl-8 space-y-2">
                     @foreach($availableTerms as $term)
                     <label class="flex items-center gap-3 py-2 cursor-pointer hover:bg-gray-50 rounded px-2">
-                        <input wire:model.live="leaseTerm" type="checkbox" value="{{ $term }}" class="w-4 h-4 text-green-600 rounded">
+                        <input wire:model.live="leaseTerm" type="checkbox" value="{{ $term }}" class="w-4 h-4 kibo-text rounded">
                         <span class="text-gray-700">{{ $term }} months</span>
                     </label>
                     @endforeach
@@ -263,35 +269,35 @@
                 @if($expandedSections['bodyType'])
                 <div class="pl-8 space-y-2">
                     <label class="flex items-center gap-3 py-2 cursor-pointer hover:bg-gray-50 rounded px-2">
-                        <input wire:model.live="bodyType" type="checkbox" value="Sedan" class="w-4 h-4 text-green-600 rounded">
+                        <input wire:model.live="bodyType" type="checkbox" value="Sedan" class="w-4 h-4 kibo-text rounded">
                         <span class="text-gray-700">Sedan</span>
                     </label>
                     <label class="flex items-center gap-3 py-2 cursor-pointer hover:bg-gray-50 rounded px-2">
-                        <input wire:model.live="bodyType" type="checkbox" value="SUV" class="w-4 h-4 text-green-600 rounded">
+                        <input wire:model.live="bodyType" type="checkbox" value="SUV" class="w-4 h-4 kibo-text rounded">
                         <span class="text-gray-700">SUV</span>
                     </label>
                     <label class="flex items-center gap-3 py-2 cursor-pointer hover:bg-gray-50 rounded px-2">
-                        <input wire:model.live="bodyType" type="checkbox" value="Hatchback" class="w-4 h-4 text-green-600 rounded">
+                        <input wire:model.live="bodyType" type="checkbox" value="Hatchback" class="w-4 h-4 kibo-text rounded">
                         <span class="text-gray-700">Hatchback</span>
                     </label>
                     <label class="flex items-center gap-3 py-2 cursor-pointer hover:bg-gray-50 rounded px-2">
-                        <input wire:model.live="bodyType" type="checkbox" value="Coupe" class="w-4 h-4 text-green-600 rounded">
+                        <input wire:model.live="bodyType" type="checkbox" value="Coupe" class="w-4 h-4 kibo-text rounded">
                         <span class="text-gray-700">Coupe</span>
                     </label>
                     <label class="flex items-center gap-3 py-2 cursor-pointer hover:bg-gray-50 rounded px-2">
-                        <input wire:model.live="bodyType" type="checkbox" value="Convertible" class="w-4 h-4 text-green-600 rounded">
+                        <input wire:model.live="bodyType" type="checkbox" value="Convertible" class="w-4 h-4 kibo-text rounded">
                         <span class="text-gray-700">Convertible</span>
                     </label>
                     <label class="flex items-center gap-3 py-2 cursor-pointer hover:bg-gray-50 rounded px-2">
-                        <input wire:model.live="bodyType" type="checkbox" value="Truck" class="w-4 h-4 text-green-600 rounded">
+                        <input wire:model.live="bodyType" type="checkbox" value="Truck" class="w-4 h-4 kibo-text rounded">
                         <span class="text-gray-700">Truck</span>
                     </label>
                     <label class="flex items-center gap-3 py-2 cursor-pointer hover:bg-gray-50 rounded px-2">
-                        <input wire:model.live="bodyType" type="checkbox" value="Van" class="w-4 h-4 text-green-600 rounded">
+                        <input wire:model.live="bodyType" type="checkbox" value="Van" class="w-4 h-4 kibo-text rounded">
                         <span class="text-gray-700">Van</span>
                     </label>
                     <label class="flex items-center gap-3 py-2 cursor-pointer hover:bg-gray-50 rounded px-2">
-                        <input wire:model.live="bodyType" type="checkbox" value="Wagon" class="w-4 h-4 text-green-600 rounded">
+                        <input wire:model.live="bodyType" type="checkbox" value="Wagon" class="w-4 h-4 kibo-text rounded">
                         <span class="text-gray-700">Wagon</span>
                     </label>
                 </div>
@@ -301,10 +307,10 @@
 
         {{-- Footer --}}
         <div class="sticky bottom-0 bg-white border-t border-gray-200 px-6 py-4 flex items-center justify-between gap-4">
-            <button wire:click="clearFilters" class="text-green-600 font-semibold hover:text-green-700">
+            <button wire:click="clearFilters" class="kibo-text font-semibold">
                 Clear all
             </button>
-            <button wire:click="$set('showFilters', false)" class="px-8 py-3 bg-green-600 text-white rounded-full font-semibold hover:bg-green-700 transition-colors">
+            <button wire:click="$set('showFilters', false)" class="px-8 py-3 kibo-bg text-white rounded-full font-semibold transition-colors">
                 Search {{ number_format($totalCount) }} leases
             </button>
         </div>
@@ -451,7 +457,7 @@
 
                     {{-- Price and Location --}}
                     <div class="mt-auto">
-                        <div class="text-2xl font-bold text-green-600 mb-2">
+                        <div class="text-2xl font-bold kibo-text mb-2">
                             ${{ number_format($lease->monthly_payment, 0) }}/mo
                         </div>
                         <div class="text-sm text-gray-600 mb-2">
@@ -471,7 +477,7 @@
 
                 {{-- Action Button --}}
                 <div class="px-4 pb-4">
-                    <a href="{{ route('cars.lease.detail', $lease->id) }}" class="block w-full px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors text-center">
+                    <a href="{{ route('cars.lease.detail', $lease->id) }}" class="block w-full px-4 py-2 kibo-bg text-white text-sm font-medium rounded-lg transition-colors text-center">
                         View Details
                     </a>
                 </div>
@@ -483,7 +489,7 @@
                 </svg>
                 <h3 class="text-xl font-semibold text-gray-900 mb-2">No leases found</h3>
                 <p class="text-gray-600 mb-6">We couldn't find any leases matching your search criteria.</p>
-                <button wire:click="clearFilters" class="inline-flex items-center gap-2 px-6 py-3 bg-green-700 hover:bg-green-800 text-white rounded-lg font-medium transition-colors">
+                <button wire:click="clearFilters" class="inline-flex items-center gap-2 px-6 py-3 kibo-bg text-white rounded-lg font-medium transition-colors">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                     </svg>
@@ -500,7 +506,7 @@
     </div>
 
     {{-- Scroll to top --}}
-    <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="fixed bottom-8 right-8 w-12 h-12 bg-green-600 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-green-700">
+    <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="fixed bottom-8 right-8 w-12 h-12 kibo-bg text-white rounded-full flex items-center justify-center shadow-lg">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
         </svg>
