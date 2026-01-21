@@ -253,7 +253,7 @@ class ImportFinancing extends Component
 
         // Clear model selection if it's not available for the new make
         if ($this->vehicleModel && (!isset($this->vehicleModels[$value]) || !in_array($this->vehicleModel, $this->vehicleModels[$value]))) {
-            $this->vehicleModel = null;
+                $this->vehicleModel = null;
         }
     }
 

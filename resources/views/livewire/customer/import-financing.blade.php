@@ -1,7 +1,7 @@
 <div class="min-h-screen bg-gradient-to-br from-slate-50 via-white to-emerald-50">
     <!-- Login Modal -->
     @if($showLoginModal)
-        <div class="fixed inset-0 bg-black/50 bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="fixed inset-0 bg-black/50 bg-opacity-50 flex items-center justify-center z-[9999] p-4">
             <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 text-center">
                 <div class="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6">
                     <svg class="w-8 h-8 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -32,12 +32,12 @@
 
     <!-- Side Modal for Login/Register -->
     @if($showSideModal)
-        <div class="fixed inset-0 bg-black/50 z-50">
+        <div class="fixed inset-0 bg-black/50 z-[9999]">
             <!-- Backdrop click to close -->
             <div wire:click="closeSideModal" class="absolute inset-0"></div>
 
             <!-- Modal Content -->
-            <div class="relative ml-auto w-full max-w-md bg-white shadow-2xl transform transition-transform duration-300 ease-in-out h-full overflow-y-auto">
+            <div class="relative ml-auto w-full max-w-md bg-white shadow-2xl transform transition-transform duration-300 ease-in-out h-full overflow-y-auto z-[10000]">
                 <!-- Header -->
                 <div class="flex items-center justify-between p-6 border-b border-gray-200">
                     <h2 class="text-xl font-bold text-gray-900">

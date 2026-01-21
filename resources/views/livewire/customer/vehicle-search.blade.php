@@ -545,7 +545,18 @@
                     {{-- Price and Location --}}
                     <div class="mt-auto">
                         <div class="text-2xl font-bold text-gray-900 mb-2">
-                            £{{ number_format($vehicle->price, 0) }}
+                            @php
+                                $currencySymbols = [
+                                    'TZS' => 'TSh',
+                                    'USD' => '$',
+                                    'GBP' => '£',
+                                    'EUR' => '€',
+                                    'KES' => 'KSh',
+                                    'UGX' => 'UGX',
+                                ];
+                                $symbol = $currencySymbols[$vehicle->currency] ?? $vehicle->currency;
+                            @endphp
+                            {{ $symbol }} {{ number_format($vehicle->price, 0) }}
                         </div>
                         @if($vehicle->entity)
                         <div class="flex items-center gap-1 text-gray-600 text-xs mb-3">

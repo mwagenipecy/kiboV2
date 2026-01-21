@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Actions\Fortify\CreateNewUser;
 use App\Actions\Fortify\ResetUserPassword;
+use App\Jobs\SendLoginOtp;
 use App\Mail\LoginOtpMail;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -38,8 +39,8 @@ class FortifyServiceProvider extends ServiceProvider
                     'otp_expires_at' => now()->addMinutes(5),
                 ]);
                 
-                // Send OTP email
-                Mail::to($user->email)->send(new LoginOtpMail($user, $otpCode));
+                // Send OTP email asynchronously via queue
+                SendLoginOtp::dispatch($user->email, $user->name, $otpCode);
                 
                 // Store intended URL in session for after OTP verification
                 $intendedUrl = $user->isAdmin() ? route('admin.dashboard') : route('cars.index');

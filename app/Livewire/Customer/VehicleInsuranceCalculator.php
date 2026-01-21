@@ -13,6 +13,12 @@ class VehicleInsuranceCalculator extends Component
     public $year = '';
     public $startDate = '';
     
+    // Currency conversion
+    public $vehicleCurrency = 'TZS';
+    public $vehiclePriceOriginal = '';
+    public $conversionRate = 2850; // Default USD to TZS rate
+    public $showCurrencyConverter = false;
+    
     // Step 2: Vehicle Class and Details
     public $vehicleClass = '';
     public $carryingPassengers = 'No';
@@ -146,8 +152,19 @@ class VehicleInsuranceCalculator extends Component
             $this->vehicle = Vehicle::with(['make', 'model'])->find($vehicleId);
             
             if ($this->vehicle) {
-                // Pre-fill with vehicle data
-                $this->insurableValue = $this->vehicle->price ?? 2500000;
+                // Check currency and handle conversion
+                $this->vehicleCurrency = $this->vehicle->currency ?? 'TZS';
+                $this->vehiclePriceOriginal = $this->vehicle->price ?? 2500000;
+                
+                // If price is in foreign currency, show converter
+                if ($this->vehicleCurrency !== 'TZS') {
+                    $this->showCurrencyConverter = true;
+                    // Auto-convert with default rate
+                    $this->insurableValue = round($this->vehiclePriceOriginal * $this->conversionRate);
+                } else {
+                    $this->insurableValue = $this->vehicle->price ?? 2500000;
+                }
+                
                 $this->year = $this->vehicle->year ?? date('Y');
                 $this->startDate = date('Y-m-d');
                 
@@ -229,6 +246,14 @@ class VehicleInsuranceCalculator extends Component
             } else {
                 $this->noPassengers = 4;
             }
+        }
+    }
+    
+    public function updatedConversionRate()
+    {
+        // Recalculate insurable value when conversion rate changes
+        if ($this->showCurrencyConverter && $this->vehiclePriceOriginal && $this->conversionRate > 0) {
+            $this->insurableValue = round($this->vehiclePriceOriginal * $this->conversionRate);
         }
     }
 

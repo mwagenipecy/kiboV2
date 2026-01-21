@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\SendLoginOtp;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
@@ -34,7 +35,8 @@ class OtpVerificationController extends Controller
                 'otp_expires_at' => now()->addMinutes(5),
             ]);
             
-            \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\LoginOtpMail($user, $otpCode));
+            // Send OTP email asynchronously via queue
+            SendLoginOtp::dispatch($user->email, $user->name, $otpCode);
         }
 
         return view('auth.verify-otp');
@@ -104,8 +106,8 @@ class OtpVerificationController extends Controller
             'otp_expires_at' => now()->addMinutes(5),
         ]);
         
-        // Send OTP email
-        \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\LoginOtpMail($user, $otpCode));
+        // Send OTP email asynchronously via queue
+        SendLoginOtp::dispatch($user->email, $user->name, $otpCode);
 
         // Determine redirect based on user role
         $redirectRoute = $user->isAdmin() ? route('admin.dashboard') : route('cars.index');

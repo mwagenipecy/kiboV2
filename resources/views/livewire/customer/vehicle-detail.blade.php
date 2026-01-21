@@ -81,7 +81,20 @@
                     <p class="text-lg text-gray-700 mb-4">{{ $vehicle->variant }}</p>
                     @endif
                     
-                    <div class="text-4xl font-bold text-gray-900">£{{ number_format($vehicle->price, 0) }}</div>
+                    <div class="text-4xl font-bold text-gray-900">
+                        @php
+                            $currencySymbols = [
+                                'TZS' => 'TSh',
+                                'USD' => '$',
+                                'GBP' => '£',
+                                'EUR' => '€',
+                                'KES' => 'KSh',
+                                'UGX' => 'UGX',
+                            ];
+                            $symbol = $currencySymbols[$vehicle->currency] ?? $vehicle->currency;
+                        @endphp
+                        {{ $symbol }} {{ number_format($vehicle->price, 0) }}
+                    </div>
                 </div>
 
                 {{-- Overview Section --}}

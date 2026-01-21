@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Customer;
 
+use App\Jobs\SendNewCarRequestEmail;
 use App\Mail\NewCarRequestMail;
 use App\Models\CarRequest;
 use App\Models\Entity;
@@ -137,8 +138,9 @@ class FindMeACar extends Component
             ->flatMap(fn ($e) => $e->users)
             ->filter(fn ($u) => !empty($u->email));
 
+        // Send emails asynchronously via queue
         foreach ($dealerUsers as $dealerUser) {
-            Mail::to($dealerUser->email)->send(new NewCarRequestMail($carRequest));
+            SendNewCarRequestEmail::dispatch($dealerUser->email, $carRequest->id);
         }
 
         session()->flash('find_me_success', 'Your request was sent to dealers. You will receive offers soon.');
