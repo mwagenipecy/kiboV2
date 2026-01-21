@@ -7,8 +7,8 @@
     <section class="relative bg-white mb-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div class="relative">
-                <!-- Hero Text Section (Instead of Image) -->
-                <div class="relative h-80 rounded-2xl overflow-hidden bg-gradient-to-r from-green-600 to-green-800 flex items-center justify-center">
+                <!-- Hero Section with Image -->
+                <div class="relative h-80 rounded-2xl overflow-hidden flex items-center justify-center bg-cover bg-center bg-no-repeat" style="background-image: url('{{ asset('image/electricCar.png') }}');">
                     <div class="text-center text-white px-4">
                         <h1 class="text-5xl md:text-6xl font-bold mb-4">Electric cars</h1>
                         <p class="text-xl md:text-2xl text-white">Zero emissions, maximum performance</p>
