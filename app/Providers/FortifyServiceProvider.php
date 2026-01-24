@@ -43,7 +43,12 @@ class FortifyServiceProvider extends ServiceProvider
                 SendLoginOtp::dispatch($user->email, $user->name, $otpCode);
                 
                 // Store intended URL in session for after OTP verification
-                $intendedUrl = $user->isAdmin() ? route('admin.dashboard') : route('cars.index');
+                // If user is not a customer and has a role, redirect to admin dashboard
+                if ($user->role && $user->role !== 'customer') {
+                    $intendedUrl = route('admin.dashboard');
+                } else {
+                    $intendedUrl = route('cars.index');
+                }
                 session()->put('otp_intended_url', $intendedUrl);
                 
                 // Redirect to home page with flag to show OTP form in modal

@@ -165,15 +165,21 @@
             <!-- Mobile Menu Footer -->
             <div class="px-4 py-4 border-t border-gray-200">
                 @auth
-                    <a href="{{ route('my-adverts') }}" @click="mobileMenuOpen = false" class="block px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 mb-2">
-                        My Adverts
-                    </a>
-                    <a href="{{ route('my-orders') }}" @click="mobileMenuOpen = false" class="block px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 mb-2">
-                        My Orders
-                    </a>
-                    <a href="{{ route('profile.edit') }}" @click="mobileMenuOpen = false" class="block px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">
-                        Profile Settings
-                    </a>
+                    @if(auth()->user()->role === 'customer')
+                        <a href="{{ route('my-adverts') }}" @click="mobileMenuOpen = false" class="block px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 mb-2">
+                            My Adverts
+                        </a>
+                        <a href="{{ route('my-orders') }}" @click="mobileMenuOpen = false" class="block px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 mb-2">
+                            My Orders
+                        </a>
+                        <a href="{{ route('profile.edit') }}" @click="mobileMenuOpen = false" class="block px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">
+                            Profile Settings
+                        </a>
+                    @else
+                        <a href="{{ route('admin.dashboard') }}" @click="mobileMenuOpen = false" class="block px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">
+                            Dashboard
+                        </a>
+                    @endif
                 @else
                     <button onclick="document.getElementById('openAuthModal').click()" @click="mobileMenuOpen = false" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded-lg transition-colors">
                         Sign In
