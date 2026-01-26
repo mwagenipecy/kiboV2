@@ -4,6 +4,8 @@ namespace App\Livewire\Customer;
 
 use App\Models\Agent;
 use App\Models\VehicleMake;
+use App\Models\GarageServiceOrder;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -21,6 +23,11 @@ class GarageSearch extends Component
     public $page = 1;
 
     public $vehicleMakes = [];
+    
+    // Order search properties
+    public $showOrderModal = false;
+    public $selectedOrder = null;
+    public $orderNotFound = false;
 
     protected $queryString = ['search', 'selectedMake', 'sortBy'];
 
@@ -66,6 +73,84 @@ class GarageSearch extends Component
     public function updatingSearch()
     {
         $this->resetPage();
+        $this->orderNotFound = false;
+        $this->showOrderModal = false;
+        $this->selectedOrder = null;
+        
+        // Check if search looks like an order number
+        if ($this->isOrderNumber($this->search)) {
+            $this->searchOrder();
+        }
+    }
+    
+    /**
+     * Check if search string looks like an order number
+     */
+    private function isOrderNumber($search)
+    {
+        if (empty($search)) {
+            return false;
+        }
+        
+        // Check if it starts with "GS-" or is numeric/alphanumeric
+        return preg_match('/^GS-?[A-Z0-9]+$/i', trim($search)) || 
+               preg_match('/^[A-Z0-9]{6,}$/i', trim($search));
+    }
+    
+    /**
+     * Search for order by order number
+     */
+    public function searchOrder()
+    {
+        $this->orderNotFound = false;
+        $this->selectedOrder = null;
+        
+        if (empty($this->search)) {
+            return;
+        }
+        
+        // Normalize order number (remove spaces, ensure GS- prefix)
+        $orderNumber = strtoupper(trim($this->search));
+        if (!str_starts_with($orderNumber, 'GS-')) {
+            // Try to find with or without prefix
+            $order = GarageServiceOrder::where(function($query) use ($orderNumber) {
+                $query->where('order_number', $orderNumber)
+                      ->orWhere('order_number', 'GS-' . $orderNumber)
+                      ->orWhere('order_number', 'like', '%' . $orderNumber . '%');
+            });
+        } else {
+            $order = GarageServiceOrder::where('order_number', $orderNumber);
+        }
+        
+        // Only show orders belonging to the logged-in user
+        if (Auth::check()) {
+            $order->where('user_id', Auth::id());
+        } else {
+            // If not logged in, don't show any orders
+            $this->orderNotFound = true;
+            return;
+        }
+        
+        $order = $order->with(['agent', 'user'])->first();
+        
+        if ($order) {
+            $this->selectedOrder = $order;
+            $this->showOrderModal = true;
+        } else {
+            $this->orderNotFound = true;
+            $this->showOrderModal = true;
+        }
+    }
+    
+    /**
+     * Close order modal
+     */
+    public function closeOrderModal()
+    {
+        $this->showOrderModal = false;
+        $this->selectedOrder = null;
+        $this->orderNotFound = false;
+        $this->search = '';
     }
 
     public function updatingSelectedMake()
@@ -104,6 +189,23 @@ class GarageSearch extends Component
 
     public function render()
     {
+        // If searching for an order number, skip garage search
+        if ($this->search && $this->isOrderNumber($this->search)) {
+            $emptyCollection = collect([]);
+            $perPage = 12;
+            $paginatedGarages = new \Illuminate\Pagination\LengthAwarePaginator(
+                $emptyCollection,
+                0,
+                $perPage,
+                1,
+                ['path' => request()->url(), 'query' => request()->query()]
+            );
+            
+            return view('livewire.customer.garage-search', [
+                'garages' => $paginatedGarages,
+            ]);
+        }
+        
         $query = Agent::where('agent_type', 'garage_owner')
             ->where('approval_status', 'approved')
             ->where('status', 'active');

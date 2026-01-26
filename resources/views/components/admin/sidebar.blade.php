@@ -274,6 +274,45 @@
                 </div>
                 @endif
 
+                <!-- Garage Service Orders - Expandable (Admin and Agent) -->
+                @if($userRole === 'admin' || $userRole === 'agent')
+                <div x-data="{ open: {{ request()->is('admin/garage-orders*') ? 'true' : 'false' }} }">
+                    <button @click="open = !open" class="w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium text-gray-700 rounded-lg kibo-sidebar-hover transition-colors group">
+                        <div class="flex items-center min-w-0">
+                            <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0h-.01M15 17a2 2 0 104 0m-4 0h-.01"></path>
+                            </svg>
+                            <span class="menu-text">Garage Service Orders</span>
+                            @php
+                                // For agents, show only their garage's pending orders
+                                if ($userRole === 'agent') {
+                                    $agent = \App\Models\Agent::where('user_id', auth()->id())->first();
+                                    $garageOrdersPendingCount = $agent 
+                                        ? \App\Models\GarageServiceOrder::where('agent_id', $agent->id)->where('status', 'pending')->count()
+                                        : 0;
+                                } else {
+                                    $garageOrdersPendingCount = \App\Models\GarageServiceOrder::where('status', 'pending')->count();
+                                }
+                            @endphp
+                            @if($garageOrdersPendingCount > 0)
+                            <span class="ml-auto mr-2 px-2 py-0.5 text-xs font-semibold text-yellow-700 bg-yellow-100 rounded-full menu-text">{{ $garageOrdersPendingCount }}</span>
+                            @endif
+                        </div>
+                        <svg class="w-4 h-4 transition-transform menu-text flex-shrink-0" :class="open ? 'rotate-90' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </button>
+                    <div x-show="open" x-collapse class="ml-8 mt-1 space-y-1 submenu">
+                        <a href="{{ route('admin.garage-orders') }}" class="block px-3 py-2 text-sm text-gray-600 rounded-lg kibo-sidebar-hover transition-colors">All Orders</a>
+                        <a href="{{ route('admin.garage-orders') }}?filter=pending" class="block px-3 py-2 text-sm text-gray-600 rounded-lg kibo-sidebar-hover transition-colors">Pending</a>
+                        <a href="{{ route('admin.garage-orders') }}?filter=confirmed" class="block px-3 py-2 text-sm text-gray-600 rounded-lg kibo-sidebar-hover transition-colors">Confirmed</a>
+                        <a href="{{ route('admin.garage-orders') }}?filter=quoted" class="block px-3 py-2 text-sm text-gray-600 rounded-lg kibo-sidebar-hover transition-colors">Quoted</a>
+                        <a href="{{ route('admin.garage-orders') }}?filter=completed" class="block px-3 py-2 text-sm text-gray-600 rounded-lg kibo-sidebar-hover transition-colors">Completed</a>
+                    </div>
+                </div>
+                @endif
+
                 <!-- Auctions (Admin and Dealer) -->
                 @if($userRole === 'admin' || $userRole === 'dealer')
                 <a href="{{ route('admin.auctions') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('admin.auctions*') ? 'text-white kibo-sidebar-active shadow-sm' : 'text-gray-700 kibo-sidebar-hover' }} transition-colors group">

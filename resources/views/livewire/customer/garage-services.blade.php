@@ -101,29 +101,20 @@
                                 View garages
                             </button>
 
-                            @if($primaryGarage && ($primaryGarage['phone'] ?? false))
-                                <a
-                                    href="tel:{{ $primaryPhoneLink }}"
+                            @if($primaryGarage)
+                                <button
+                                    type="button"
                                     class="flex-1 px-4 py-2 text-center text-white rounded-lg transition-colors"
                                     style="background-color: #009866;"
                                     onmouseover="this.style.backgroundColor='#007a52'"
                                     onmouseout="this.style.backgroundColor='#009866'"
+                                    wire:click="$dispatch('openBookingModal', { services: ['{{ $service }}'], serviceType: '{{ $service }}', agentId: {{ $primaryGarage['id'] ?? 'null' }}, agentName: '{{ $primaryGarage['name'] ?? 'Garage' }}' })"
                                 >
-                                    Book service
-                                </a>
-                            @elseif($primaryGarage && $primaryEmailLink)
-                                <a
-                                    href="mailto:{{ $primaryEmailLink }}?subject={{ $emailSubject }}"
-                                    class="flex-1 px-4 py-2 text-center text-white rounded-lg transition-colors"
-                                    style="background-color: #009866;"
-                                    onmouseover="this.style.backgroundColor='#007a52'"
-                                    onmouseout="this.style.backgroundColor='#009866'"
-                                >
-                                    Book service
-                                </a>
+                                    Schedule Service
+                                </button>
                             @else
                                 <span class="flex-1 px-4 py-2 text-center bg-gray-200 text-gray-500 rounded-lg cursor-not-allowed">
-                                    No contact
+                                    No garage
                                 </span>
                             @endif
                         </div>
@@ -164,16 +155,16 @@
                                     <span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-700">Garage</span>
                                 </div>
                                 <div class="mt-3 flex flex-wrap gap-2">
-                            @if(!empty($garage['phone']))
-                                <a href="tel:{{ preg_replace('/\\s+/', '', $garage['phone']) }}" class="px-3 py-2 text-sm text-white rounded-md transition-colors" style="background-color: #009866;" onmouseover="this.style.backgroundColor='#007a52'" onmouseout="this.style.backgroundColor='#009866'">
-                                            Call
-                                        </a>
-                                    @endif
-                                    @if(!empty($garage['email']))
-                                <a href="mailto:{{ $garage['email'] }}?subject={{ rawurlencode('Garage Service Inquiry - ' . ($modalService ?? 'Service')) }}" class="px-3 py-2 text-sm border border-gray-300 text-gray-800 rounded-md hover:bg-gray-50 transition-colors">
-                                            Email
-                                        </a>
-                                    @endif
+                                    <button
+                                        type="button"
+                                        class="px-3 py-2 text-sm text-white rounded-md transition-colors"
+                                        style="background-color: #009866;"
+                                        onmouseover="this.style.backgroundColor='#007a52'"
+                                        onmouseout="this.style.backgroundColor='#009866'"
+                                        wire:click="$dispatch('openBookingModal', { services: ['{{ $modalServiceKey }}'], serviceType: '{{ $modalServiceKey }}', agentId: {{ $garage['id'] ?? 'null' }}, agentName: '{{ $garage['name'] ?? 'Garage' }}' })"
+                                    >
+                                        Schedule Service
+                                    </button>
                                 </div>
                             </div>
                         @endforeach
@@ -186,5 +177,104 @@
             </div>
         </div>
     @endif
+
+    <!-- Order Tracking Section -->
+    @auth
+    <section id="tracking" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 mt-12">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-900">Track Your Orders</h2>
+                    <p class="text-gray-600 mt-1">View and track your garage service bookings</p>
+                </div>
+                <button
+                    type="button"
+                    wire:click="toggleTracking"
+                    class="px-4 py-2 text-white rounded-lg transition-colors"
+                    style="background-color: #009866;"
+                    onmouseover="this.style.backgroundColor='#007a52'"
+                    onmouseout="this.style.backgroundColor='#009866'"
+                >
+                    {{ $showTracking ? 'Hide' : 'Show' }} Orders
+                </button>
+            </div>
+
+            @if($showTracking)
+                @if(!empty($userOrders))
+                    <div class="space-y-4">
+                        @foreach($userOrders as $order)
+                        <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                            <div class="flex items-start justify-between mb-3">
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-900">{{ ucwords(str_replace('_', ' ', $order['service_type'])) }}</h3>
+                                    <p class="text-sm text-gray-600">Order #{{ $order['order_number'] }}</p>
+                                    @if(isset($order['agent']['company_name']))
+                                    <p class="text-sm text-gray-600">Garage: {{ $order['agent']['company_name'] ?? $order['agent']['name'] ?? 'N/A' }}</p>
+                                    @endif
+                                </div>
+                                <span class="px-3 py-1 text-xs font-semibold rounded-full
+                                    @if($order['status'] === 'pending') bg-yellow-100 text-yellow-800
+                                    @elseif($order['status'] === 'confirmed') bg-blue-100 text-blue-800
+                                    @elseif($order['status'] === 'rejected') bg-red-100 text-red-800
+                                    @elseif($order['status'] === 'in_progress') bg-purple-100 text-purple-800
+                                    @elseif($order['status'] === 'completed') bg-green-100 text-green-800
+                                    @else bg-gray-100 text-gray-800 @endif">
+                                    {{ ucfirst(str_replace('_', ' ', $order['status'])) }}
+                                </span>
+                            </div>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                                <div>
+                                    <p class="text-gray-600">Booking Type</p>
+                                    <p class="font-semibold text-gray-900">{{ ucfirst($order['booking_type']) }}</p>
+                                </div>
+                                @if($order['booking_type'] === 'scheduled' && $order['scheduled_date'])
+                                <div>
+                                    <p class="text-gray-600">Scheduled Date</p>
+                                    <p class="font-semibold text-gray-900">{{ \Carbon\Carbon::parse($order['scheduled_date'])->format('M d, Y') }}</p>
+                                </div>
+                                @if($order['scheduled_time'])
+                                <div>
+                                    <p class="text-gray-600">Scheduled Time</p>
+                                    <p class="font-semibold text-gray-900">{{ \Carbon\Carbon::parse($order['scheduled_time'])->format('h:i A') }}</p>
+                                </div>
+                                @endif
+                                @endif
+                                @if($order['quoted_price'])
+                                <div>
+                                    <p class="text-gray-600">Quoted Price</p>
+                                    <p class="font-semibold text-gray-900">{{ $order['currency'] }} {{ number_format($order['quoted_price'], 2) }}</p>
+                                </div>
+                                @endif
+                            </div>
+                            @if($order['rejection_reason'])
+                            <div class="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+                                <p class="text-sm text-red-800"><span class="font-semibold">Rejection Reason:</span> {{ $order['rejection_reason'] }}</p>
+                            </div>
+                            @endif
+                            @if($order['quotation_notes'])
+                            <div class="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                                <p class="text-sm text-blue-800"><span class="font-semibold">Quotation Notes:</span> {{ $order['quotation_notes'] }}</p>
+                            </div>
+                            @endif
+                        </div>
+                        @endforeach
+                    </div>
+                @else
+                    <div class="text-center py-8">
+                        <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                        </svg>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">No Orders Yet</h3>
+                        <p class="text-gray-600">You haven't booked any services yet. Schedule a service above to get started.</p>
+                    </div>
+                @endif
+            @endif
+        </div>
+    </section>
+    @endauth
+
+    <!-- Booking Modal Component -->
+    @livewire('customer.garage-service-booking')
+
 </div>
 

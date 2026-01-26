@@ -754,6 +754,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
     
     // Spare Part Orders
     Route::get('/spare-part-orders', \App\Livewire\Admin\SparePartOrders::class)->name('spare-part-orders');
+    Route::get('/garage-orders', \App\Livewire\Admin\GarageOrders::class)->name('garage-orders');
 
     // Reports
     Route::prefix('reports')->name('reports.')->group(function () {
