@@ -108,7 +108,7 @@
                                     style="background-color: #009866;"
                                     onmouseover="this.style.backgroundColor='#007a52'"
                                     onmouseout="this.style.backgroundColor='#009866'"
-                                    wire:click="$dispatch('openBookingModal', { services: ['{{ $service }}'], serviceType: '{{ $service }}', agentId: {{ $primaryGarage['id'] ?? 'null' }}, agentName: '{{ $primaryGarage['name'] ?? 'Garage' }}' })"
+                                    wire:click="openBookingModalForGarage({{ $primaryGarage['id'] }}, '{{ addslashes($primaryGarage['name'] ?? 'Garage') }}', @js($primaryGarage['services'] ?? []), '{{ $service }}')"
                                 >
                                     Schedule Service
                                 </button>
@@ -161,7 +161,7 @@
                                         style="background-color: #009866;"
                                         onmouseover="this.style.backgroundColor='#007a52'"
                                         onmouseout="this.style.backgroundColor='#009866'"
-                                        wire:click="$dispatch('openBookingModal', { services: ['{{ $modalServiceKey }}'], serviceType: '{{ $modalServiceKey }}', agentId: {{ $garage['id'] ?? 'null' }}, agentName: '{{ $garage['name'] ?? 'Garage' }}' })"
+                                        wire:click="openBookingModalForGarage({{ $garage['id'] }}, '{{ addslashes($garage['name'] ?? 'Garage') }}', @js($garage['services'] ?? []), '{{ $modalServiceKey }}')"
                                     >
                                         Schedule Service
                                     </button>

@@ -754,6 +754,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
     
     // Spare Part Orders
     Route::get('/spare-part-orders', \App\Livewire\Admin\SparePartOrders::class)->name('spare-part-orders');
+    Route::get('/spare-part-orders/{order}', \App\Livewire\Admin\SparePartOrderView::class)->name('spare-part-orders.show');
     Route::get('/garage-orders', \App\Livewire\Admin\GarageOrders::class)->name('garage-orders');
 
     // Reports
@@ -1091,6 +1092,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
             return view('admin.settings.billing');
         })->name('billing');
     });
+    
+    // Garage Orders
+    Route::get('/garage-orders/{order}', \App\Livewire\Admin\GarageOrderView::class)->name('garage-orders.show');
     
     // Pricing Management
     Route::get('/pricing', function () {

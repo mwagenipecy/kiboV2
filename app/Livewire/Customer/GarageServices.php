@@ -79,6 +79,7 @@ class GarageServices extends Component
                         'phone' => $garage->phone_number ?? null,
                         'email' => $garage->email ?? null,
                         'address' => $garage->address ?? null,
+                        'services' => $garage->services ?? [],
                     ];
                 })->values()->toArray();
 
@@ -115,6 +116,29 @@ class GarageServices extends Component
         if ($this->showTracking) {
             $this->loadUserOrders();
         }
+    }
+
+    public function openBookingModalForGarage($garageId, $garageName, $services = [], $serviceType = null)
+    {
+        $garage = Agent::find($garageId);
+        $availableServices = [];
+        
+        if ($garage && !empty($garage->services)) {
+            $availableServices = is_array($garage->services) ? array_values($garage->services) : [];
+        }
+        
+        if (!empty($services) && is_array($services)) {
+            $availableServices = array_merge($availableServices, $services);
+            $availableServices = array_unique($availableServices);
+        }
+        
+        $this->dispatch('openBookingModal', [
+            'agentId' => $garageId,
+            'agentName' => $garageName,
+            'availableServices' => array_values($availableServices),
+            'services' => $services,
+            'serviceType' => $serviceType,
+        ]);
     }
 }
 

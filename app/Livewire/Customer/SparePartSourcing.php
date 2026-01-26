@@ -20,6 +20,13 @@ class SparePartSourcing extends Component
 
     // Order items array (now includes make/model per item for bulk orders)
     public $orderItems = [];
+    
+    // Modal states
+    public $showSuccessModal = false;
+    public $showErrorModal = false;
+    public $successMessage = '';
+    public $errorMessage = '';
+    public $createdOrderNumbers = [];
 
     // Customer information
     public $customerName = '';
@@ -173,7 +180,8 @@ class SparePartSourcing extends Component
     {
         // Check if user is logged in
         if (!Auth::check()) {
-            session()->flash('error', 'Please login to submit your spare part order.');
+            $this->errorMessage = 'Please login to submit your spare part order.';
+            $this->showErrorModal = true;
             return;
         }
 
@@ -244,10 +252,25 @@ class SparePartSourcing extends Component
         }
 
         $this->submitted = true;
-        session()->flash('success', 'Your spare part order(s) have been submitted successfully! Order numbers: ' . implode(', ', array_column($createdOrders, 'order_number')));
+        $this->createdOrderNumbers = array_column($createdOrders, 'order_number');
+        $this->successMessage = 'Your spare part order(s) have been submitted successfully!';
+        $this->showSuccessModal = true;
         
         // Reset form after showing success
         $this->resetForm();
+    }
+    
+    public function closeSuccessModal()
+    {
+        $this->showSuccessModal = false;
+        $this->successMessage = '';
+        $this->createdOrderNumbers = [];
+    }
+    
+    public function closeErrorModal()
+    {
+        $this->showErrorModal = false;
+        $this->errorMessage = '';
     }
 
     public function resetForm()

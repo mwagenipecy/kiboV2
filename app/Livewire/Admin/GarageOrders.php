@@ -25,6 +25,48 @@ class GarageOrders extends Component
 
     protected $queryString = ['filter', 'search'];
 
+    private function scopedOrdersQuery(int $orderId = null)
+    {
+        $user = Auth::user();
+        $userRole = $user->role ?? null;
+
+        $query = GarageServiceOrder::query()
+            ->with(['agent', 'user', 'processedBy']);
+
+        if ($orderId !== null) {
+            $query->where('id', $orderId);
+        }
+
+        // Admin can see all.
+        if ($userRole === 'admin') {
+            return $query;
+        }
+
+        $hasScope = false;
+
+        // If user is an agent, scope by agent_id.
+        $agent = \App\Models\Agent::where('user_id', $user->id)->first();
+        if ($agent) {
+            $query->where('agent_id', $agent->id);
+            $hasScope = true;
+        }
+
+        // If user has an entity_id, additionally scope to orders created by users in same entity.
+        if (!empty($user->entity_id)) {
+            $query->whereHas('user', function ($q) use ($user) {
+                $q->where('entity_id', $user->entity_id);
+            });
+            $hasScope = true;
+        }
+
+        // If no scope could be applied, show nothing.
+        if (!$hasScope) {
+            $query->whereRaw('1 = 0');
+        }
+
+        return $query;
+    }
+
     public function updatingSearch()
     {
         $this->resetPage();
@@ -38,22 +80,7 @@ class GarageOrders extends Component
 
     public function viewOrder($orderId)
     {
-        $user = Auth::user();
-        $userRole = $user->role ?? null;
-        
-        $query = GarageServiceOrder::with(['agent', 'user', 'processedBy'])->where('id', $orderId);
-        
-        // For non-admin users, ensure they can only view their garage's orders
-        if ($userRole !== 'admin') {
-            $agent = \App\Models\Agent::where('user_id', $user->id)->first();
-            if ($agent) {
-                $query->where('agent_id', $agent->id);
-            } else {
-                abort(403, 'You do not have permission to view this order.');
-            }
-        }
-        
-        $this->selectedOrder = $query->firstOrFail();
+        $this->selectedOrder = $this->scopedOrdersQuery((int) $orderId)->firstOrFail();
         $this->showDetailModal = true;
     }
 
@@ -68,22 +95,7 @@ class GarageOrders extends Component
 
     public function openQuoteModal($orderId)
     {
-        $user = Auth::user();
-        $userRole = $user->role ?? null;
-        
-        $query = GarageServiceOrder::where('id', $orderId);
-        
-        // For non-admin users, ensure they can only quote their garage's orders
-        if ($userRole !== 'admin') {
-            $agent = \App\Models\Agent::where('user_id', $user->id)->first();
-            if ($agent) {
-                $query->where('agent_id', $agent->id);
-            } else {
-                abort(403, 'You do not have permission to quote this order.');
-            }
-        }
-        
-        $this->selectedOrder = $query->firstOrFail();
+        $this->selectedOrder = $this->scopedOrdersQuery((int) $orderId)->firstOrFail();
         $this->quotedPrice = $this->selectedOrder->quoted_price ?? '';
         $this->quotationNotes = $this->selectedOrder->quotation_notes ?? '';
         $this->showQuoteModal = true;
@@ -98,22 +110,7 @@ class GarageOrders extends Component
 
     public function confirmOrder($orderId)
     {
-        $user = Auth::user();
-        $userRole = $user->role ?? null;
-        
-        $query = GarageServiceOrder::where('id', $orderId);
-        
-        // For non-admin users, ensure they can only confirm their garage's orders
-        if ($userRole !== 'admin') {
-            $agent = \App\Models\Agent::where('user_id', $user->id)->first();
-            if ($agent) {
-                $query->where('agent_id', $agent->id);
-            } else {
-                abort(403, 'You do not have permission to confirm this order.');
-            }
-        }
-        
-        $order = $query->firstOrFail();
+        $order = $this->scopedOrdersQuery((int) $orderId)->firstOrFail();
         $order->update([
             'status' => 'confirmed',
             'processed_by' => Auth::id(),
@@ -130,22 +127,7 @@ class GarageOrders extends Component
             'rejectionReason' => 'required|string|max:1000',
         ]);
 
-        $user = Auth::user();
-        $userRole = $user->role ?? null;
-        
-        $query = GarageServiceOrder::where('id', $orderId);
-        
-        // For non-admin users, ensure they can only reject their garage's orders
-        if ($userRole !== 'admin') {
-            $agent = \App\Models\Agent::where('user_id', $user->id)->first();
-            if ($agent) {
-                $query->where('agent_id', $agent->id);
-            } else {
-                abort(403, 'You do not have permission to reject this order.');
-            }
-        }
-
-        $order = $query->firstOrFail();
+        $order = $this->scopedOrdersQuery((int) $orderId)->firstOrFail();
         $order->update([
             'status' => 'rejected',
             'processed_by' => Auth::id(),
@@ -171,15 +153,8 @@ class GarageOrders extends Component
             return;
         }
 
-        $user = Auth::user();
-        $userRole = $user->role ?? null;
-        
-        if ($userRole !== 'admin') {
-            $agent = \App\Models\Agent::where('user_id', $user->id)->first();
-            if (!$agent || $this->selectedOrder->agent_id !== $agent->id) {
-                abort(403, 'You do not have permission to quote this order.');
-            }
-        }
+        // Re-load under scope to ensure authorization (agent_id and/or entity_id)
+        $this->selectedOrder = $this->scopedOrdersQuery((int) $this->selectedOrder->id)->firstOrFail();
 
         $this->selectedOrder->update([
             'quoted_price' => $this->quotedPrice,
@@ -194,20 +169,8 @@ class GarageOrders extends Component
 
     public function render()
     {
-        $user = Auth::user();
-        $userRole = $user->role ?? null;
-
-        $query = GarageServiceOrder::with(['agent', 'user'])
-            ->when($userRole !== 'admin', function ($q) use ($user) {
-                // For non-admin users (agents), show only orders for their garage
-                $agent = \App\Models\Agent::where('user_id', $user->id)->first();
-                if ($agent) {
-                    $q->where('agent_id', $agent->id);
-                } else {
-                    // If no agent found, show no orders
-                    $q->whereRaw('1 = 0');
-                }
-            })
+        $query = $this->scopedOrdersQuery()
+            ->with(['agent', 'user'])
             ->latest();
 
         // Apply filters
@@ -243,15 +206,7 @@ class GarageOrders extends Component
         $orders = $query->paginate(15);
 
         // Get counts for filters (filtered by agent for non-admin)
-        $countsQuery = GarageServiceOrder::query()
-            ->when($userRole !== 'admin', function ($q) use ($user) {
-                $agent = \App\Models\Agent::where('user_id', $user->id)->first();
-                if ($agent) {
-                    $q->where('agent_id', $agent->id);
-                } else {
-                    $q->whereRaw('1 = 0');
-                }
-            });
+        $countsQuery = $this->scopedOrdersQuery();
 
         $counts = [
             'all' => (clone $countsQuery)->count(),

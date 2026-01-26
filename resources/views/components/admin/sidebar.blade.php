@@ -313,6 +313,46 @@
                 </div>
                 @endif
 
+                <!-- Spare Part Orders - Expandable (Admin and Agent) -->
+                @if($userRole === 'admin' || $userRole === 'agent')
+                <div x-data="{ open: {{ request()->is('admin/spare-part-orders*') ? 'true' : 'false' }} }">
+                    <button @click="open = !open" class="w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium text-gray-700 rounded-lg kibo-sidebar-hover transition-colors group">
+                        <div class="flex items-center min-w-0">
+                            <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            <span class="menu-text">Spare Part Orders</span>
+                            @php
+                                // For agents, show only their pending orders
+                                if ($userRole === 'agent') {
+                                    $agent = \App\Models\Agent::where('user_id', auth()->id())->first();
+                                    $sparePartsPendingCount = $agent 
+                                        ? \App\Models\SparePartOrder::where('agent_id', $agent->id)->where('status', 'pending')->count()
+                                        : \App\Models\SparePartOrder::where('status', 'pending')->count();
+                                } else {
+                                    $sparePartsPendingCount = \App\Models\SparePartOrder::where('status', 'pending')->count();
+                                }
+                            @endphp
+                            @if($sparePartsPendingCount > 0)
+                            <span class="ml-auto mr-2 px-2 py-0.5 text-xs font-semibold text-yellow-700 bg-yellow-100 rounded-full menu-text">{{ $sparePartsPendingCount }}</span>
+                            @endif
+                        </div>
+                        <svg class="w-4 h-4 transition-transform menu-text flex-shrink-0" :class="open ? 'rotate-90' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </button>
+                    <div x-show="open" x-collapse class="ml-8 mt-1 space-y-1 submenu">
+                        <a href="{{ route('admin.spare-part-orders') }}" class="block px-3 py-2 text-sm text-gray-600 rounded-lg kibo-sidebar-hover transition-colors">All Orders</a>
+                        <a href="{{ route('admin.spare-part-orders') }}?status=pending" class="block px-3 py-2 text-sm text-gray-600 rounded-lg kibo-sidebar-hover transition-colors">Pending</a>
+                        <a href="{{ route('admin.spare-part-orders') }}?status=quoted" class="block px-3 py-2 text-sm text-gray-600 rounded-lg kibo-sidebar-hover transition-colors">Quoted</a>
+                        <a href="{{ route('admin.spare-part-orders') }}?status=accepted" class="block px-3 py-2 text-sm text-gray-600 rounded-lg kibo-sidebar-hover transition-colors">Accepted</a>
+                        <a href="{{ route('admin.spare-part-orders') }}?status=awaiting_payment" class="block px-3 py-2 text-sm text-gray-600 rounded-lg kibo-sidebar-hover transition-colors">Awaiting Payment</a>
+                        <a href="{{ route('admin.spare-part-orders') }}?status=completed" class="block px-3 py-2 text-sm text-gray-600 rounded-lg kibo-sidebar-hover transition-colors">Completed</a>
+                    </div>
+                </div>
+                @endif
+
                 <!-- Auctions (Admin and Dealer) -->
                 @if($userRole === 'admin' || $userRole === 'dealer')
                 <a href="{{ route('admin.auctions') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('admin.auctions*') ? 'text-white kibo-sidebar-active shadow-sm' : 'text-gray-700 kibo-sidebar-hover' }} transition-colors group">

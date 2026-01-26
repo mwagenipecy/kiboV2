@@ -277,5 +277,28 @@ class GarageSearch extends Component
             'garages' => $paginatedGarages,
         ]);
     }
+
+    public function openBookingModalForGarage($garageId, $garageName, $services = [])
+    {
+        $garage = Agent::find($garageId);
+        $availableServices = [];
+        
+        if ($garage && !empty($garage->services)) {
+            $availableServices = is_array($garage->services) ? array_values($garage->services) : [];
+        }
+        
+        if (!empty($services) && is_array($services)) {
+            $availableServices = array_merge($availableServices, $services);
+            $availableServices = array_unique($availableServices);
+        }
+        
+        $this->dispatch('openBookingModal', [
+            'agentId' => $garageId,
+            'agentName' => $garageName,
+            'availableServices' => array_values($availableServices),
+            'services' => [],
+            'serviceType' => null,
+        ]);
+    }
 }
 

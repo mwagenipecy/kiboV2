@@ -4,6 +4,8 @@ namespace App\Livewire\Customer;
 
 use App\Models\Agent;
 use App\Models\GarageServiceOrder;
+use App\Models\VehicleMake;
+use App\Models\VehicleModel;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
@@ -24,6 +26,10 @@ class GarageServiceBooking extends Component
     public $customer_phone = '';
     public $vehicle_make = '';
     public $vehicle_model = '';
+    public $vehicle_make_id = '';
+    public $vehicle_model_id = '';
+    public array $availableMakes = [];
+    public array $availableModels = [];
     public $vehicle_year = '';
     public $vehicle_registration = '';
     public $booking_type = 'scheduled';
@@ -65,10 +71,41 @@ class GarageServiceBooking extends Component
         $data = $params[0] ?? null;
         
         if ($data && is_array($data)) {
-            // Available services for the selected garage
-            $this->availableServices = (!empty($data['availableServices']) && is_array($data['availableServices']))
-                ? array_values($data['availableServices'])
-                : [];
+            $this->agentId = $data['agentId'] ?? null;
+            $this->agent_id = $data['agentId'] ?? null;
+            $this->agentName = $data['agentName'] ?? '';
+
+            // Fetch available services from database if agentId is provided
+            if ($this->agentId) {
+                $garage = Agent::find($this->agentId);
+                if ($garage && !empty($garage->services)) {
+                    $this->availableServices = is_array($garage->services) 
+                        ? array_values($garage->services) 
+                        : [];
+                }
+
+                // Fetch available vehicle makes for this garage (based on agent.vehicle_makes)
+                $this->availableMakes = [];
+                $this->availableModels = [];
+                $this->vehicle_make_id = '';
+                $this->vehicle_model_id = '';
+
+                $makeIds = is_array($garage?->vehicle_makes) ? array_filter($garage->vehicle_makes) : [];
+                if (!empty($makeIds)) {
+                    $this->availableMakes = VehicleMake::query()
+                        ->whereIn('id', $makeIds)
+                        ->where('status', 'active')
+                        ->orderBy('name')
+                        ->get(['id', 'name'])
+                        ->map(fn($m) => ['id' => $m->id, 'name' => $m->name])
+                        ->all();
+                }
+            }
+
+            // Override with provided availableServices if they exist
+            if (!empty($data['availableServices']) && is_array($data['availableServices'])) {
+                $this->availableServices = array_values($data['availableServices']);
+            }
 
             // Multiple services
             if (!empty($data['services']) && is_array($data['services'])) {
@@ -80,16 +117,12 @@ class GarageServiceBooking extends Component
                 $this->service_type = $this->serviceType;
                 $this->services = $this->serviceType ? [$this->serviceType] : [];
             }
-            $this->agentId = $data['agentId'] ?? null;
-            $this->agent_id = $data['agentId'] ?? null;
-            $this->agentName = $data['agentName'] ?? '';
 
-            // If we have available services, default the selection to the first available service
-            // when nothing is preselected.
+            // If we have available services but no preselected services, don't auto-select
+            // Let user choose from the list
             if (empty($this->services) && !empty($this->availableServices)) {
-                $this->services = [$this->availableServices[0]];
-                $this->serviceType = $this->availableServices[0];
-                $this->service_type = $this->availableServices[0];
+                // Don't auto-select - let user choose
+                $this->services = [];
             }
         } elseif ($data) {
             $this->serviceType = $data;
@@ -111,6 +144,24 @@ class GarageServiceBooking extends Component
         $this->showModal = true;
     }
 
+    public function updatedVehicleMakeId(): void
+    {
+        $this->vehicle_model_id = '';
+        $this->availableModels = [];
+
+        if (!$this->vehicle_make_id) {
+            return;
+        }
+
+        $this->availableModels = VehicleModel::query()
+            ->where('vehicle_make_id', $this->vehicle_make_id)
+            ->where('status', 'active')
+            ->orderBy('name')
+            ->get(['id', 'name'])
+            ->map(fn($m) => ['id' => $m->id, 'name' => $m->name])
+            ->all();
+    }
+
     public function closeModal()
     {
         $this->showModal = false;
@@ -124,8 +175,11 @@ class GarageServiceBooking extends Component
         $this->customer_phone = '';
         $this->vehicle_make = '';
         $this->vehicle_model = '';
+        $this->vehicle_make_id = '';
+        $this->vehicle_model_id = '';
+        $this->availableMakes = [];
+        $this->availableModels = [];
         $this->vehicle_year = '';
-        $this->vehicle_registration = '';
         $this->booking_type = 'scheduled';
         $this->scheduled_date = '';
         $this->scheduled_time = '';
@@ -147,6 +201,8 @@ class GarageServiceBooking extends Component
             'booking_type' => 'required|in:immediate,scheduled',
             'scheduled_date' => 'required_if:booking_type,scheduled|nullable|date|after_or_equal:today',
             'scheduled_time' => 'required_if:booking_type,scheduled|nullable',
+            'vehicle_make_id' => 'nullable|integer|exists:vehicle_makes,id',
+            'vehicle_model_id' => 'nullable|integer|exists:vehicle_models,id',
         ], [], [
             'services' => 'services',
             'agent_id' => 'garage',
@@ -165,6 +221,18 @@ class GarageServiceBooking extends Component
                 ->implode(', ');
         }
 
+        // Fill labels for storage (existing schema stores strings)
+        $this->vehicle_make = '';
+        $this->vehicle_model = '';
+        if ($this->vehicle_make_id) {
+            $make = VehicleMake::find($this->vehicle_make_id);
+            $this->vehicle_make = $make?->name ?? '';
+        }
+        if ($this->vehicle_model_id) {
+            $model = VehicleModel::find($this->vehicle_model_id);
+            $this->vehicle_model = $model?->name ?? '';
+        }
+
         $data = [
             'user_id' => Auth::id(),
             'customer_name' => $this->customer_name,
@@ -175,7 +243,6 @@ class GarageServiceBooking extends Component
             'vehicle_make' => $this->vehicle_make ?: null,
             'vehicle_model' => $this->vehicle_model ?: null,
             'vehicle_year' => $this->vehicle_year ?: null,
-            'vehicle_registration' => $this->vehicle_registration ?: null,
             'booking_type' => $this->booking_type,
             'scheduled_date' => $this->booking_type === 'scheduled' ? $this->scheduled_date : null,
             'scheduled_time' => $this->booking_type === 'scheduled' ? $this->scheduled_time : null,

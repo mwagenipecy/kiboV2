@@ -120,7 +120,7 @@
                                 style="background-color: #009866;"
                                 onmouseover="this.style.backgroundColor='#007a52'"
                                 onmouseout="this.style.backgroundColor='#009866'"
-                                @click="$dispatch('openBookingModal', { agentId: {{ $garage->id }}, agentName: '{{ $garage->company_name ?? $garage->name }}', availableServices: {{ json_encode($garage->services ?? []) }} })"
+                                wire:click="openBookingModalForGarage({{ $garage->id }}, '{{ addslashes($garage->company_name ?? $garage->name) }}', @js($garage->services ?? []))"
                             >
                                 Schedule Service
                             </button>

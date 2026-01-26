@@ -3,16 +3,75 @@
         <h1 class="text-3xl font-bold text-gray-900 mb-2">Order Spare Parts</h1>
         <p class="text-gray-600">Submit your order and we'll match you with the best suppliers</p>
     </div>
-    @if (session()->has('success'))
-        <div class="mb-6 rounded-xl bg-green-50 px-4 py-3 text-green-800 text-center">
-            {{ session('success') }}
+    
+    {{-- Success Modal --}}
+    @if($showSuccessModal)
+    <div class="fixed inset-0 z-[9999] overflow-y-auto" style="display: block !important;">
+        <div class="fixed inset-0 bg-black/50 z-[9998]" wire:click="closeSuccessModal"></div>
+        <div class="flex min-h-full items-center justify-center p-4">
+            <div class="relative bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 z-[9999]" wire:click.stop>
+                <div class="text-center">
+                    <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full mb-4" style="background-color: rgba(0, 152, 102, 0.1);">
+                        <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: #009866;">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Order Submitted Successfully!</h3>
+                    <p class="text-gray-600 mb-4">{{ $successMessage }}</p>
+                    
+                    @if(count($createdOrderNumbers) > 0)
+                    <div class="bg-gray-50 rounded-lg p-4 mb-4">
+                        <p class="text-sm font-medium text-gray-700 mb-2">Your Order Number(s):</p>
+                        @foreach($createdOrderNumbers as $orderNumber)
+                        <p class="text-lg font-bold" style="color: #009866;">{{ $orderNumber }}</p>
+                        @endforeach
+                    </div>
+                    <p class="text-sm text-gray-500 mb-4">You can track your order status in the "My Orders" section.</p>
+                    @endif
+                    
+                    <div class="flex gap-3 justify-center">
+                        <a href="{{ route('spare-parts.orders') }}" class="px-4 py-2 text-white rounded-lg font-medium transition-colors" style="background-color: #009866;" onmouseover="this.style.backgroundColor='#007a52'" onmouseout="this.style.backgroundColor='#009866'">
+                            View My Orders
+                        </a>
+                        <button wire:click="closeSuccessModal" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
+    </div>
     @endif
     
-    @if (session()->has('error'))
-        <div class="mb-6 rounded-xl bg-red-50 px-4 py-3 text-red-800 text-center">
-            {{ session('error') }}
+    {{-- Error Modal --}}
+    @if($showErrorModal)
+    <div class="fixed inset-0 z-[9999] overflow-y-auto" style="display: block !important;">
+        <div class="fixed inset-0 bg-black/50 z-[9998]" wire:click="closeErrorModal"></div>
+        <div class="flex min-h-full items-center justify-center p-4">
+            <div class="relative bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 z-[9999]" wire:click.stop>
+                <div class="text-center">
+                    <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4">
+                        <svg class="h-8 w-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Error</h3>
+                    <p class="text-gray-600 mb-6">{{ $errorMessage }}</p>
+                    
+                    <div class="flex gap-3 justify-center">
+                        @guest
+                        <a href="{{ route('login') }}" class="px-4 py-2 text-white rounded-lg font-medium transition-colors" style="background-color: #009866;" onmouseover="this.style.backgroundColor='#007a52'" onmouseout="this.style.backgroundColor='#009866'">
+                            Sign In
+                        </a>
+                        @endguest
+                        <button wire:click="closeErrorModal" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
+    </div>
     @endif
     
     <!-- Login Notice -->
