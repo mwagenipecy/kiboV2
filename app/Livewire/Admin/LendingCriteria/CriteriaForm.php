@@ -4,6 +4,7 @@ namespace App\Livewire\Admin\LendingCriteria;
 
 use App\Models\Entity;
 use App\Models\LendingCriteria;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
 class CriteriaForm extends Component
@@ -12,6 +13,8 @@ class CriteriaForm extends Component
     public $entity_id = '';
     public $name = '';
     public $description = '';
+    public $userIsAdmin = false;
+    public $userEntityName = '';
     
     // Vehicle Requirements
     public $min_vehicle_year = '';
@@ -48,8 +51,13 @@ class CriteriaForm extends Component
     public $is_active = true;
     public $priority = 0;
 
-    protected $rules = [
-        'entity_id' => 'required|exists:entities,id',
+    protected function rules()
+    {
+        $user = Auth::user();
+        $userRole = $user->role ?? null;
+        
+        return [
+            'entity_id' => $userRole === 'admin' ? 'required|exists:entities,id' : 'required|exists:entities,id',
         'name' => 'required|string|max:255',
         'description' => 'nullable|string',
         'min_vehicle_year' => 'nullable|integer|min:1900',
@@ -69,11 +77,20 @@ class CriteriaForm extends Component
         'min_employment_months' => 'nullable|integer|min:0',
         'processing_time_days' => 'nullable|integer|min:0',
         'processing_fee' => 'nullable|numeric|min:0',
-        'priority' => 'nullable|integer',
-    ];
+            'priority' => 'nullable|integer',
+        ];
+    }
 
     public function mount($id = null)
     {
+        $user = Auth::user();
+        $this->userIsAdmin = $user->isAdmin();
+        
+        if (!$this->userIsAdmin && $user->entity) {
+            $this->entity_id = $user->entity_id;
+            $this->userEntityName = $user->entity->name;
+        }
+        
         if ($id) {
             $this->criteriaId = $id;
             $this->loadCriteria();
@@ -84,7 +101,21 @@ class CriteriaForm extends Component
     {
         $criteria = LendingCriteria::findOrFail($this->criteriaId);
         
-        $this->entity_id = $criteria->entity_id;
+        // For non-admin users, ensure they can only edit their own entity's criteria
+        if (!$this->userIsAdmin) {
+            $user = Auth::user();
+            if ($criteria->entity_id !== $user->entity_id) {
+                session()->flash('error', 'You do not have permission to edit this lending criteria.');
+                return redirect()->route('admin.lending-criteria.index');
+            }
+            // Ensure entity_id and entity name are set for non-admin users
+            if ($user->entity) {
+                $this->entity_id = $user->entity_id;
+                $this->userEntityName = $user->entity->name;
+            }
+        } else {
+            $this->entity_id = $criteria->entity_id;
+        }
         $this->name = $criteria->name;
         $this->description = $criteria->description;
         $this->min_vehicle_year = $criteria->min_vehicle_year;
@@ -118,6 +149,18 @@ class CriteriaForm extends Component
 
     public function save()
     {
+        $user = Auth::user();
+        $userRole = $user->role ?? null;
+        
+        // Ensure entity_id is set for non-admin users
+        if ($userRole !== 'admin') {
+            if (!$user->entity_id) {
+                session()->flash('error', 'You cannot create lending criteria without an associated entity. Please contact an administrator.');
+                return;
+            }
+            $this->entity_id = $user->entity_id;
+        }
+        
         $this->validate();
 
         $data = [
@@ -170,6 +213,8 @@ class CriteriaForm extends Component
         
         return view('livewire.admin.lending-criteria.criteria-form', [
             'entities' => $entities,
+            'userIsAdmin' => $this->userIsAdmin,
+            'userEntityName' => $this->userEntityName,
         ]);
     }
 }

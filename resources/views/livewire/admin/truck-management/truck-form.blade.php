@@ -406,8 +406,8 @@
             <h3 class="text-lg font-semibold text-gray-900 mb-4">Ownership & Status</h3>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Dealer/Entity (Only for Admin) -->
-                @if(Auth::user()->isAdmin())
+                <!-- Dealer/Entity -->
+                @if($userIsAdmin)
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Dealer (Optional)</label>
                     <select wire:model="entity_id" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
@@ -418,6 +418,22 @@
                     </select>
                     @error('entity_id') <span class="text-red-500 text-sm mt-1">{{ $message }}</span> @enderror
                     <p class="text-xs text-gray-500 mt-1">Leave empty if not associated with any dealer</p>
+                </div>
+                @else
+                <!-- Non-admin users: Show entity info (read-only) -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Dealer/Entity</label>
+                    @if($userEntityName)
+                        <input type="text" value="{{ $userEntityName }}" disabled class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-600 cursor-not-allowed">
+                        <input type="hidden" wire:model="entity_id" value="{{ auth()->user()->entity_id }}">
+                        <p class="text-xs text-gray-500 mt-1">Truck will be registered under your entity.</p>
+                    @else
+                        <div class="w-full px-4 py-2 border border-red-300 rounded-lg bg-red-50 text-red-600">
+                            <p class="text-sm font-medium">No Entity Assigned</p>
+                            <p class="text-xs mt-1">You cannot register a truck without an associated entity. Please contact an administrator.</p>
+                        </div>
+                    @endif
+                    @error('entity_id') <span class="text-red-500 text-sm mt-1">{{ $message }}</span> @enderror
                 </div>
                 @endif
 
@@ -446,12 +462,119 @@
 
         <!-- Form Actions -->
         <div class="flex items-center justify-end space-x-4">
-            <a href="{{ route('admin.trucks.index') }}" class="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+            <a href="{{ route('admin.trucks.index') }}" 
+               wire:loading.attr="disabled"
+               class="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                 Cancel
             </a>
-            <button type="submit" class="px-6 py-2.5 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition-all shadow-sm">
-                {{ $editMode ? 'Update Truck' : 'Register Truck' }}
+            <button type="submit" 
+                    wire:loading.attr="disabled"
+                    wire:target="save"
+                    class="px-6 py-2.5 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center min-w-[140px]">
+                <span wire:loading.remove wire:target="save">
+                    {{ $editMode ? 'Update Truck' : 'Register Truck' }}
+                </span>
+                <span wire:loading wire:target="save" class="flex items-center">
+                    <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Saving...
+                </span>
             </button>
         </div>
     </form>
+
+    <!-- Error Modal -->
+    @if($showErrorModal)
+    <div wire:key="error-modal-wrapper" 
+         class="fixed inset-0 z-[9999] overflow-y-auto" 
+         aria-labelledby="modal-title" 
+         role="dialog" 
+         aria-modal="true"
+         style="display: block !important;">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <!-- Background overlay -->
+            <div class="fixed inset-0 bg-black/50 transition-opacity" 
+                 wire:click="closeErrorModal"
+                 style="cursor: pointer; z-index: 9998;"></div>
+
+            <!-- Center modal -->
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+            <!-- Modal panel -->
+            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full relative z-[10000]">
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="sm:flex sm:items-start">
+                        <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                            <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                        </div>
+                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left flex-1">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                                {{ $errorTitle }}
+                            </h3>
+                            <div class="mt-2">
+                                <p class="text-sm text-gray-500 whitespace-pre-line">
+                                    {{ $errorMessage }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button type="button" 
+                            wire:click="closeErrorModal" 
+                            class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    @script
+    <script>
+        // Auto-scroll to top when modal shows
+        document.addEventListener('livewire:init', () => {
+            Livewire.on('error-modal-shown', () => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        });
+    </script>
+    @endscript
+
+    <!-- Validation Errors Summary (if any) -->
+    @if($errors->any())
+    <div class="fixed bottom-4 right-4 z-40 max-w-md">
+        <div class="bg-black/50 border-l-4 border-red-400 p-4 rounded-lg shadow-lg">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                    </svg>
+                </div>
+                <div class="ml-3 flex-1">
+                    <h3 class="text-sm font-medium text-white">Please fix the following errors:</h3>
+                    <div class="mt-2 text-sm text-gray-200">
+                        <ul class="list-disc list-inside space-y-1">
+                            @foreach($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+                <div class="ml-auto pl-3">
+                    <button type="button" onclick="this.parentElement.parentElement.parentElement.remove()" class="inline-flex text-red-400 hover:text-red-300">
+                        <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
 </div>

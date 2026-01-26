@@ -24,6 +24,15 @@
     </div>
     @endif
 
+    @if(session()->has('error'))
+    <div class="mb-6 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg flex items-center gap-3">
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+        </svg>
+        {{ session('error') }}
+    </div>
+    @endif
+
     <form wire:submit="save">
         <div class="space-y-6">
             <!-- Basic Information -->
@@ -36,6 +45,7 @@
                         <label class="block text-sm font-medium text-gray-700 mb-2">
                             Lender <span class="text-red-500">*</span>
                         </label>
+                        @if($userIsAdmin)
                         <select wire:model="entity_id" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
                             <option value="">Select Lender...</option>
                             @foreach($entities as $entity)
@@ -43,6 +53,16 @@
                             @endforeach
                         </select>
                         @error('entity_id') <span class="text-sm text-red-600 mt-1 block">{{ $message }}</span> @enderror
+                        @else
+                        @if($userEntityName)
+                        <input type="text" value="{{ $userEntityName }}" class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed" readonly>
+                        <input type="hidden" wire:model="entity_id">
+                        <p class="text-xs text-gray-500 mt-1">Lending criteria will be created for your lender entity.</p>
+                        @else
+                        <p class="text-red-500 text-sm mt-1">You are not associated with any lender entity. Cannot create lending criteria.</p>
+                        @endif
+                        @error('entity_id') <span class="text-sm text-red-600 mt-1 block">{{ $message }}</span> @enderror
+                        @endif
                     </div>
 
                     <!-- Name -->

@@ -1,3 +1,7 @@
+@php
+    $currency = $lease->currency ?? 'TZS';
+@endphp
+
 <div>
     <!-- Page Header -->
     <div class="mb-6">
@@ -64,7 +68,7 @@
                 <div class="grid grid-cols-2 md:grid-cols-3 gap-6">
                     <div>
                         <p class="text-sm text-gray-600">Monthly Payment</p>
-                        <p class="text-2xl font-bold text-green-600">${{ number_format($lease->monthly_payment, 2) }}</p>
+                        <p class="text-2xl font-bold text-green-600">{{ $currency }} {{ number_format($lease->monthly_payment, 2) }}</p>
                     </div>
                     <div>
                         <p class="text-sm text-gray-600">Lease Term</p>
@@ -72,11 +76,11 @@
                     </div>
                     <div>
                         <p class="text-sm text-gray-600">Down Payment</p>
-                        <p class="text-lg font-semibold text-gray-900">${{ number_format($lease->down_payment, 2) }}</p>
+                        <p class="text-lg font-semibold text-gray-900">{{ $currency }} {{ number_format($lease->down_payment, 2) }}</p>
                     </div>
                     <div>
                         <p class="text-sm text-gray-600">Security Deposit</p>
-                        <p class="text-lg font-semibold text-gray-900">${{ number_format($lease->security_deposit, 2) }}</p>
+                        <p class="text-lg font-semibold text-gray-900">{{ $currency }} {{ number_format($lease->security_deposit, 2) }}</p>
                     </div>
                     <div>
                         <p class="text-sm text-gray-600">Mileage Limit/Year</p>
@@ -84,7 +88,7 @@
                     </div>
                     <div>
                         <p class="text-sm text-gray-600">Excess Mileage</p>
-                        <p class="text-lg font-semibold text-gray-900">${{ number_format($lease->excess_mileage_charge, 2) }}/km</p>
+                        <p class="text-lg font-semibold text-gray-900">{{ $currency }} {{ number_format($lease->excess_mileage_charge, 2) }}/km</p>
                     </div>
                 </div>
 
@@ -119,18 +123,18 @@
                 <div class="grid grid-cols-2 gap-4">
                     <div class="flex justify-between items-center py-2">
                         <span class="text-gray-600">Acquisition Fee</span>
-                        <span class="font-semibold text-gray-900">${{ number_format($lease->acquisition_fee, 2) }}</span>
+                        <span class="font-semibold text-gray-900">{{ $currency }} {{ number_format($lease->acquisition_fee, 2) }}</span>
                     </div>
                     <div class="flex justify-between items-center py-2">
                         <span class="text-gray-600">Disposition Fee</span>
-                        <span class="font-semibold text-gray-900">${{ number_format($lease->disposition_fee, 2) }}</span>
+                        <span class="font-semibold text-gray-900">{{ $currency }} {{ number_format($lease->disposition_fee, 2) }}</span>
                     </div>
                 </div>
 
                 <div class="mt-4 pt-4 border-t border-gray-200">
                     <div class="flex justify-between items-center">
                         <span class="text-gray-900 font-medium">Total Upfront Cost</span>
-                        <span class="text-xl font-bold text-green-600">${{ number_format($lease->total_upfront_cost, 2) }}</span>
+                        <span class="text-xl font-bold text-green-600">{{ $currency }} {{ number_format($lease->total_upfront_cost, 2) }}</span>
                     </div>
                     <p class="text-xs text-gray-500 mt-1">Down payment + Security deposit + Acquisition fee</p>
                 </div>
@@ -138,7 +142,7 @@
                 <div class="mt-4 pt-4 border-t border-gray-200">
                     <div class="flex justify-between items-center">
                         <span class="text-gray-900 font-medium">Total Lease Cost</span>
-                        <span class="text-xl font-bold text-gray-900">${{ number_format($lease->total_lease_cost, 2) }}</span>
+                        <span class="text-xl font-bold text-gray-900">{{ $currency }} {{ number_format($lease->total_lease_cost, 2) }}</span>
                     </div>
                     <p class="text-xs text-gray-500 mt-1">Total payments over {{ $lease->lease_term_months }} months + upfront costs</p>
                 </div>
@@ -176,7 +180,7 @@
                     @if($lease->min_monthly_income)
                     <div>
                         <p class="text-gray-600">Min. Monthly Income</p>
-                        <p class="font-semibold text-gray-900">${{ number_format($lease->min_monthly_income, 2) }}</p>
+                        <p class="font-semibold text-gray-900">{{ $currency }} {{ number_format($lease->min_monthly_income, 2) }}</p>
                     </div>
                     @endif
                     
@@ -208,14 +212,14 @@
                     @if($lease->residual_value)
                     <div class="flex justify-between items-center">
                         <span class="text-gray-600">Residual Value (Buy-out Price)</span>
-                        <span class="font-semibold text-gray-900">${{ number_format($lease->residual_value, 2) }}</span>
+                        <span class="font-semibold text-gray-900">{{ $currency }} {{ number_format($lease->residual_value, 2) }}</span>
                     </div>
                     @endif
 
                     @if($lease->early_termination_fee)
                     <div class="flex justify-between items-center">
                         <span class="text-gray-600">Early Termination Fee</span>
-                        <span class="font-semibold text-gray-900">${{ number_format($lease->early_termination_fee, 2) }}</span>
+                        <span class="font-semibold text-gray-900">{{ $currency }} {{ number_format($lease->early_termination_fee, 2) }}</span>
                     </div>
                     @endif
                 </div>

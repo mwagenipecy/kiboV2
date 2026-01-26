@@ -18,8 +18,8 @@
     
     // Common data for all roles
     $totalVehicles = Vehicle::count();
-    $activeVehicles = Vehicle::where('status', 'available')->count();
-    $pendingVehicles = Vehicle::where('status', 'pending')->count();
+    $activeVehicles = Vehicle::where('status', VehicleStatus::APPROVED->value)->count();
+    $pendingVehicles = Vehicle::where('status', VehicleStatus::PENDING->value)->count();
     $totalOrders = Order::count();
     $pendingOrders = Order::where('status', OrderStatus::PENDING->value)->count();
     $completedOrders = Order::where('status', OrderStatus::COMPLETED->value)->count();
@@ -48,9 +48,9 @@
             
             if ($entityId) {
                 $totalVehicles = Vehicle::where('entity_id', $entityId)->count();
-                $activeVehicles = Vehicle::where('entity_id', $entityId)->where('status', VehicleStatus::AVAILABLE)->count();
-                $pendingVehicles = Vehicle::where('entity_id', $entityId)->where('status', VehicleStatus::PENDING)->count();
-                $soldVehicles = Vehicle::where('entity_id', $entityId)->where('status', VehicleStatus::SOLD)->count();
+                $activeVehicles = Vehicle::where('entity_id', $entityId)->where('status', VehicleStatus::APPROVED->value)->count();
+                $pendingVehicles = Vehicle::where('entity_id', $entityId)->where('status', VehicleStatus::PENDING->value)->count();
+                $soldVehicles = Vehicle::where('entity_id', $entityId)->where('status', VehicleStatus::SOLD->value)->count();
                 
                 $openCarRequests = CarRequest::where('status', 'open')->count();
                 $myOffers = DealerCarOffer::where('entity_id', $entityId)->count();

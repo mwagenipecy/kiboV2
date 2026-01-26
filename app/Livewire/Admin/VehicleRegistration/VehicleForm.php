@@ -86,7 +86,10 @@ class VehicleForm extends Component
      */
     protected function rules()
     {
-        return [
+        $user = Auth::user();
+        $userRole = $user->role ?? null;
+        
+        $rules = [
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'origin' => 'required|in:local,international',
@@ -112,7 +115,6 @@ class VehicleForm extends Component
             'currency' => 'required|string|max:3',
             'original_price' => 'nullable|numeric|min:0',
             'negotiable' => 'boolean',
-            'entity_id' => 'nullable|exists:entities,id',
             'status' => 'required|string',
             'notes' => 'nullable|string',
             'image_front' => 'nullable|image|max:5120',
@@ -120,6 +122,15 @@ class VehicleForm extends Component
             'image_back' => 'nullable|image|max:5120',
             'other_images.*' => 'nullable|image|max:5120',
         ];
+        
+        // Entity validation: required for non-admin users, optional for admin
+        if ($userRole === 'admin') {
+            $rules['entity_id'] = 'nullable|exists:entities,id';
+        } else {
+            $rules['entity_id'] = 'required|exists:entities,id';
+        }
+        
+        return $rules;
     }
 
     public function mount($vehicleId = null)
@@ -134,8 +145,14 @@ class VehicleForm extends Component
         } else {
             // Set default entity for non-admin users
             $user = Auth::user();
-            if (!$user->isAdmin() && $user->entity_id) {
-                $this->entity_id = $user->entity_id;
+            if ($user->role !== 'admin') {
+                // For non-admin users, always set entity_id from user
+                if ($user->entity_id) {
+                    $this->entity_id = $user->entity_id;
+                } else {
+                    // If no entity_id, set to null (validation will prevent saving)
+                    $this->entity_id = null;
+                }
             }
         }
         
@@ -215,6 +232,19 @@ class VehicleForm extends Component
 
     public function save()
     {
+        $user = Auth::user();
+        $userRole = $user->role ?? null;
+        
+        // For non-admin users, ensure entity_id is set from user
+        if ($userRole !== 'admin') {
+            if (!$user->entity_id) {
+                session()->flash('error', 'You cannot register a vehicle without an associated entity. Please contact an administrator.');
+                return;
+            }
+            // Force entity_id to user's entity_id (prevent tampering)
+            $this->entity_id = $user->entity_id;
+        }
+        
         $this->validate();
 
         $data = [

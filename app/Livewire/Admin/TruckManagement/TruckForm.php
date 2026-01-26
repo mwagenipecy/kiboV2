@@ -72,10 +72,17 @@ class TruckForm extends Component
     
     // Ownership
     public $entity_id;
+    public $userIsAdmin;
+    public $userEntityName;
     
     // Status
     public $status = 'pending';
     public $notes;
+    
+    // Error handling
+    public $showErrorModal = false;
+    public $errorMessage = '';
+    public $errorTitle = 'Error';
     
     // Edit mode
     public $truckId;
@@ -127,7 +134,7 @@ class TruckForm extends Component
             'currency' => 'required|string|max:3',
             'original_price' => 'nullable|numeric|min:0',
             'negotiable' => 'boolean',
-            'entity_id' => 'nullable|exists:entities,id',
+            'entity_id' => $this->userIsAdmin ? 'nullable|exists:entities,id' : 'required|exists:entities,id',
             'status' => 'required|string',
             'notes' => 'nullable|string',
             'image_front' => 'nullable|image|max:5120',
@@ -142,16 +149,18 @@ class TruckForm extends Component
         $this->loadMakes();
         $this->loadDealers();
         
+        $user = Auth::user();
+        $this->userIsAdmin = $user->isAdmin();
+        
+        if (!$this->userIsAdmin && $user->entity) {
+            $this->entity_id = $user->entity_id;
+            $this->userEntityName = $user->entity->name;
+        }
+        
         if ($truckId) {
             $this->editMode = true;
             $this->truckId = $truckId;
             $this->loadTruck();
-        } else {
-            // Set default entity for non-admin users
-            $user = Auth::user();
-            if (!$user->isAdmin() && $user->entity_id) {
-                $this->entity_id = $user->entity_id;
-            }
         }
         
         $this->year = date('Y');
@@ -280,6 +289,21 @@ class TruckForm extends Component
         $this->safety_features = array_values($this->safety_features);
     }
 
+    public function closeErrorModal()
+    {
+        $this->showErrorModal = false;
+        $this->errorMessage = '';
+        $this->errorTitle = 'Error';
+    }
+
+    public function showError($title, $message)
+    {
+        $this->errorTitle = $title;
+        $this->errorMessage = $message;
+        $this->showErrorModal = true;
+        $this->dispatch('error-modal-shown');
+    }
+
     public function updatedImageFront()
     {
         if ($this->image_front) {
@@ -309,7 +333,38 @@ class TruckForm extends Component
 
     public function save()
     {
-        $this->validate();
+        $user = Auth::user();
+        
+        // For non-admin users, ensure entity_id is set from user
+        if (!$user->isAdmin()) {
+            if (!$user->entity_id) {
+                $this->showError('Entity Required', 'You cannot register a truck without an associated entity. Please contact an administrator.');
+                return;
+            }
+            // Force entity_id to user's entity_id (prevent tampering)
+            $this->entity_id = $user->entity_id;
+        }
+        
+        try {
+            $this->validate();
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Show modal with validation errors for better visibility
+            $errors = $e->validator->errors()->all();
+            $errorCount = count($errors);
+            if ($errorCount > 5) {
+                $errorSummary = implode("\n• ", array_slice($errors, 0, 5)) . "\n• and " . ($errorCount - 5) . " more error(s)";
+            } else {
+                $errorSummary = implode("\n• ", $errors);
+            }
+            $this->showError('Validation Error', "Please fix the following errors:\n\n• " . $errorSummary);
+            // Manually add errors to Livewire's error bag so they show inline too
+            foreach ($e->validator->errors()->messages() as $key => $messages) {
+                foreach ($messages as $message) {
+                    $this->addError($key, $message);
+                }
+            }
+            return;
+        }
 
         try {
             $data = [
@@ -347,7 +402,7 @@ class TruckForm extends Component
                 'negotiable' => $this->negotiable ?? true,
                 'features' => $this->features,
                 'safety_features' => $this->safety_features,
-                'entity_id' => $this->entity_id ?: null,
+                'entity_id' => $this->userIsAdmin ? ($this->entity_id ?: null) : $user->entity_id,
                 'status' => $this->status,
                 'notes' => $this->notes ?: null,
             ];
@@ -407,8 +462,8 @@ class TruckForm extends Component
             return redirect()->route('admin.trucks.index');
             
         } catch (\Exception $e) {
-            session()->flash('error', 'Error saving truck: ' . $e->getMessage());
-            \Log::error('Truck save error: ' . $e->getMessage());
+            \Log::error('Truck save error: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            $this->showError('Save Error', 'An error occurred while saving the truck: ' . $e->getMessage() . '. Please check all fields and try again.');
         }
     }
 

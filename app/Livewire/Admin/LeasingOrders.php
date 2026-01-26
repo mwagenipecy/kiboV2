@@ -5,6 +5,8 @@ namespace App\Livewire\Admin;
 use App\Enums\OrderStatus;
 use App\Enums\OrderType;
 use App\Models\Order;
+use App\Models\VehicleLease;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -35,8 +37,32 @@ class LeasingOrders extends Component
 
     public function render()
     {
+        $user = Auth::user();
+        $userRole = $user->role ?? null;
+        
         $query = Order::with(['user.customer'])
             ->where('order_type', OrderType::LEASING_APPLICATION->value)
+            // Filter by lease's entity_id if user is not admin
+            ->when($userRole !== 'admin', function ($q) use ($user) {
+                if ($user->entity_id) {
+                    // Get lease IDs that belong to user's entity
+                    $leaseIds = VehicleLease::where('entity_id', $user->entity_id)->pluck('id')->toArray();
+                    if (empty($leaseIds)) {
+                        // If no leases found, show no orders
+                        $q->whereRaw('1 = 0');
+                    } else {
+                        // Filter orders where lease_id in order_data matches user's entity leases
+                        $q->where(function ($orderQuery) use ($leaseIds) {
+                            foreach ($leaseIds as $leaseId) {
+                                $orderQuery->orWhere('order_data->lease_id', $leaseId);
+                            }
+                        });
+                    }
+                } else {
+                    // If no entity_id, show no orders (impossible condition)
+                    $q->whereRaw('1 = 0');
+                }
+            })
             ->latest();
 
         // Apply filters
@@ -82,31 +108,47 @@ class LeasingOrders extends Component
 
         $orders = $query->paginate(15);
 
-        // Get counts for filters
-        $baseQuery = Order::where('order_type', OrderType::LEASING_APPLICATION->value);
+        // Get counts for filters (filtered by entity for non-admin)
+        $countsQuery = Order::where('order_type', OrderType::LEASING_APPLICATION->value)
+            ->when($userRole !== 'admin', function ($q) use ($user) {
+                if ($user->entity_id) {
+                    $leaseIds = VehicleLease::where('entity_id', $user->entity_id)->pluck('id')->toArray();
+                    if (empty($leaseIds)) {
+                        $q->whereRaw('1 = 0');
+                    } else {
+                        $q->where(function ($orderQuery) use ($leaseIds) {
+                            foreach ($leaseIds as $leaseId) {
+                                $orderQuery->orWhere('order_data->lease_id', $leaseId);
+                            }
+                        });
+                    }
+                } else {
+                    $q->whereRaw('1 = 0');
+                }
+            });
         
         $counts = [
-            'all' => $baseQuery->count(),
-            'pending' => (clone $baseQuery)->where('status', OrderStatus::PENDING->value)->count(),
-            'approved' => (clone $baseQuery)->where('status', OrderStatus::APPROVED->value)
+            'all' => (clone $countsQuery)->count(),
+            'pending' => (clone $countsQuery)->where('status', OrderStatus::PENDING->value)->count(),
+            'approved' => (clone $countsQuery)->where('status', OrderStatus::APPROVED->value)
                 ->where('order_data->approval_status', 'approved')
                 ->where(function($q) {
                     $q->where('order_data->lease_started', false)
                       ->orWhereNull('order_data->lease_started');
                 })
                 ->count(),
-            'active' => (clone $baseQuery)->where('status', OrderStatus::APPROVED->value)
+            'active' => (clone $countsQuery)->where('status', OrderStatus::APPROVED->value)
                 ->where('order_data->lease_started', true)
                 ->where(function($q) {
                     $q->where('order_data->lease_terminated', false)
                       ->orWhereNull('order_data->lease_terminated');
                 })
                 ->count(),
-            'completed' => (clone $baseQuery)->where(function ($q) {
+            'completed' => (clone $countsQuery)->where(function ($q) {
                 $q->where('status', OrderStatus::COMPLETED->value)
                   ->orWhere('order_data->lease_terminated', true);
             })->count(),
-            'rejected' => (clone $baseQuery)->where('status', OrderStatus::REJECTED->value)->count(),
+            'rejected' => (clone $countsQuery)->where('status', OrderStatus::REJECTED->value)->count(),
         ];
 
         return view('livewire.admin.leasing-orders', [

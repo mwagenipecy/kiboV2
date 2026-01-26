@@ -7,6 +7,13 @@
             </div>
         @endif
 
+        <!-- Error Message -->
+        @if (session()->has('error'))
+            <div class="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg">
+                {{ session('error') }}
+            </div>
+        @endif
+
         <!-- Basic Information -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <h3 class="text-lg font-semibold text-gray-900 mb-4">Basic Information</h3>
@@ -39,7 +46,7 @@
                 <!-- Condition -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Condition <span class="text-red-500">*</span></label>
-                    <select wire:model="condition" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                    <select wire:model.live="condition" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
                         <option value="new">New</option>
                         <option value="used">Used</option>
                         <option value="certified_pre_owned">Certified Pre-Owned</option>
@@ -49,7 +56,7 @@
 
                 <!-- Registration Number -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Registration Number</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Registration Number <span>(Optional)</span> </label>
                     <input type="text" wire:model="registration_number" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="e.g., T123ABC">
                     @error('registration_number') <span class="text-red-500 text-sm mt-1">{{ $message }}</span> @enderror
                 </div>
@@ -317,7 +324,11 @@
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Dealer/Entity (Only for Admin) -->
-                @if(Auth::user()->isAdmin())
+                @php
+                    $user = Auth::user();
+                    $userRole = $user->role ?? null;
+                @endphp
+                @if($userRole === 'admin')
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Dealer (Optional)</label>
                     <select wire:model="entity_id" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
@@ -328,6 +339,22 @@
                     </select>
                     @error('entity_id') <span class="text-red-500 text-sm mt-1">{{ $message }}</span> @enderror
                     <p class="text-xs text-gray-500 mt-1">Leave empty if not associated with any dealer</p>
+                </div>
+                @else
+                <!-- Non-admin users: Show entity info (read-only) -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Dealer/Entity</label>
+                    @if($user->entity_id && $user->entity)
+                        <input type="text" value="{{ $user->entity->name }}" disabled class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-600 cursor-not-allowed">
+                        <input type="hidden" wire:model="entity_id" value="{{ $user->entity_id }}">
+                        <p class="text-xs text-gray-500 mt-1">Your associated entity (automatically assigned)</p>
+                    @else
+                        <div class="w-full px-4 py-2 border border-red-300 rounded-lg bg-red-50 text-red-600">
+                            <p class="text-sm font-medium">No Entity Assigned</p>
+                            <p class="text-xs mt-1">You cannot register a vehicle without an associated entity. Please contact an administrator.</p>
+                        </div>
+                    @endif
+                    @error('entity_id') <span class="text-red-500 text-sm mt-1">{{ $message }}</span> @enderror
                 </div>
                 @endif
 

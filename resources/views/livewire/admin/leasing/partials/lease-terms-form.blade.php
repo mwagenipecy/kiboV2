@@ -3,8 +3,21 @@
     <h2 class="text-lg font-semibold text-gray-900 mb-4">Lease Terms</h2>
     
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Currency -->
         <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Monthly Payment * ($)</label>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Currency *</label>
+            <select wire:model="currency" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                <option value="TZS">TZS - Tanzanian Shilling</option>
+                <option value="USD">USD - US Dollar</option>
+                <option value="EUR">EUR - Euro</option>
+                <option value="GBP">GBP - British Pound</option>
+                <option value="KES">KES - Kenyan Shilling</option>
+            </select>
+            @error('currency') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+        </div>
+        
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Monthly Payment *</label>
             <input type="number" step="0.01" wire:model="monthly_payment" placeholder="0.00" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
             @error('monthly_payment') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
         </div>
@@ -22,13 +35,13 @@
         </div>
 
         <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Down Payment ($)</label>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Down Payment</label>
             <input type="number" step="0.01" wire:model="down_payment" placeholder="0.00" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
             @error('down_payment') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
         </div>
 
         <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Security Deposit ($)</label>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Security Deposit</label>
             <input type="number" step="0.01" wire:model="security_deposit" placeholder="0.00" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
             @error('security_deposit') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
         </div>
@@ -40,7 +53,7 @@
         </div>
 
         <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Excess Mileage Charge ($ per km)</label>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Excess Mileage Charge (per km)</label>
             <input type="number" step="0.01" wire:model="excess_mileage_charge" placeholder="0.25" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
             @error('excess_mileage_charge') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
         </div>
@@ -53,12 +66,12 @@
     
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Acquisition Fee ($)</label>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Acquisition Fee</label>
             <input type="number" step="0.01" wire:model="acquisition_fee" placeholder="0.00" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
         </div>
 
         <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Disposition Fee ($)</label>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Disposition Fee</label>
             <input type="number" step="0.01" wire:model="disposition_fee" placeholder="0.00" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
         </div>
 
@@ -103,7 +116,7 @@
         </div>
 
         <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Min. Monthly Income ($)</label>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Min. Monthly Income</label>
             <input type="number" step="0.01" wire:model="min_monthly_income" placeholder="e.g., 3000" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
         </div>
 
@@ -130,12 +143,12 @@
         </div>
 
         <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Residual Value (Buy-out Price) ($)</label>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Residual Value (Buy-out Price)</label>
             <input type="number" step="0.01" wire:model="residual_value" placeholder="0.00" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
         </div>
 
         <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Early Termination Fee ($)</label>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Early Termination Fee</label>
             <input type="number" step="0.01" wire:model="early_termination_fee" placeholder="0.00" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
         </div>
     </div>

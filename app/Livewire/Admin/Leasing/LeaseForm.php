@@ -59,6 +59,7 @@ class LeaseForm extends Component
     
     // Lease Terms
     public $monthly_payment = '';
+    public $currency = 'TZS';
     public $lease_term_months = 36;
     public $down_payment = 0;
     public $security_deposit = 0;
@@ -95,13 +96,30 @@ class LeaseForm extends Component
     // Services (array)
     public $included_services = [];
     public $new_service = '';
+    
+    // Error handling
+    public $showErrorModal = false;
+    public $errorMessage = '';
+    public $errorTitle = 'Error';
 
     public function mount($id = null)
     {
+        $user = auth()->user();
+        $userRole = $user->role ?? null;
+        
         if ($id) {
             $this->leaseId = $id;
             $this->lease = VehicleLease::findOrFail($id);
             $this->loadLeaseData();
+        } else {
+            // Set default entity for non-admin users
+            if ($userRole !== 'admin') {
+                if ($user->entity_id) {
+                    $this->entity_id = $user->entity_id;
+                } else {
+                    $this->entity_id = null;
+                }
+            }
         }
     }
 
@@ -157,6 +175,7 @@ class LeaseForm extends Component
         $this->lease_title = $this->lease->lease_title;
         $this->lease_description = $this->lease->lease_description;
         $this->monthly_payment = $this->lease->monthly_payment;
+        $this->currency = $this->lease->currency ?? 'TZS';
         $this->lease_term_months = $this->lease->lease_term_months;
         $this->down_payment = $this->lease->down_payment;
         $this->security_deposit = $this->lease->security_deposit;
@@ -217,9 +236,38 @@ class LeaseForm extends Component
     }
 
 
+    public function closeErrorModal()
+    {
+        $this->showErrorModal = false;
+        $this->errorMessage = '';
+        $this->errorTitle = 'Error';
+    }
+
+    public function showError($title, $message)
+    {
+        $this->errorTitle = $title;
+        $this->errorMessage = $message;
+        $this->showErrorModal = true;
+        $this->dispatch('error-modal-shown');
+    }
+
     public function save()
     {
-        $this->validate([
+        $user = auth()->user();
+        $userRole = $user->role ?? null;
+        
+        // For non-admin users, ensure entity_id is set from user
+        if ($userRole !== 'admin') {
+            if (!$user->entity_id) {
+                $this->showError('Entity Required', 'You cannot create a lease without an associated entity. Please contact an administrator.');
+                return;
+            }
+            // Force entity_id to user's entity_id (prevent tampering)
+            $this->entity_id = $user->entity_id;
+        }
+        
+        try {
+            $this->validate([
             // Vehicle validation
             'vehicle_title' => 'required|string|max:255',
             'vehicle_year' => 'required|integer|min:1900|max:' . (date('Y') + 2),
@@ -234,7 +282,8 @@ class LeaseForm extends Component
             'image_back' => 'nullable|image|max:5120',
             'other_images.*' => 'nullable|image|max:5120',
             // Lease validation
-            'entity_id' => 'nullable|exists:entities,id',
+            'entity_id' => $userRole === 'admin' ? 'nullable|exists:entities,id' : 'required|exists:entities,id',
+            'currency' => 'required|string|max:3',
             'lease_title' => 'required|string|max:255',
             'lease_description' => 'nullable|string',
             'monthly_payment' => 'required|numeric|min:0',
@@ -256,10 +305,29 @@ class LeaseForm extends Component
             'available_until' => 'nullable|date',
         ]);
         
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Show modal with validation errors for better visibility
+            $errors = $e->validator->errors()->all();
+            $errorCount = count($errors);
+            if ($errorCount > 5) {
+                $errorSummary = implode("\n• ", array_slice($errors, 0, 5)) . "\n• and " . ($errorCount - 5) . " more error(s)";
+            } else {
+                $errorSummary = implode("\n• ", $errors);
+            }
+            $this->showError('Validation Error', "Please fix the following errors:\n\n• " . $errorSummary);
+            // Manually add errors to Livewire's error bag so they show inline too
+            foreach ($e->validator->errors()->messages() as $key => $messages) {
+                foreach ($messages as $message) {
+                    $this->addError($key, $message);
+                }
+            }
+            return;
+        }
+        
         // Custom validation for date range
         if ($this->available_from && $this->available_until) {
             if (strtotime($this->available_until) <= strtotime($this->available_from)) {
-                session()->flash('error', 'The available until date must be after the available from date.');
+                $this->showError('Invalid Date Range', 'The available until date must be after the available from date.');
                 return;
             }
         }
@@ -269,13 +337,13 @@ class LeaseForm extends Component
         $model = VehicleModel::find($this->vehicle_model_id);
         
         if (!$make || !$model) {
-            session()->flash('error', 'Invalid make or model selected.');
+            $this->showError('Invalid Selection', 'Invalid make or model selected. Please select a valid make and model.');
             return;
         }
         
         // Verify model belongs to make
         if ($model->vehicle_make_id != $make->id) {
-            session()->flash('error', 'Selected model does not belong to the selected make.');
+            $this->showError('Invalid Selection', 'Selected model does not belong to the selected make. Please select a matching make and model.');
             return;
         }
 
@@ -301,6 +369,7 @@ class LeaseForm extends Component
             'lease_title' => $this->lease_title,
             'lease_description' => $this->lease_description,
             'monthly_payment' => $this->monthly_payment,
+            'currency' => $this->currency,
             'lease_term_months' => $this->lease_term_months,
             'down_payment' => $this->down_payment ?: 0,
             'security_deposit' => $this->security_deposit ?: 0,
@@ -391,8 +460,8 @@ class LeaseForm extends Component
 
             return redirect()->route('admin.leasing.index');
         } catch (\Exception $e) {
-            session()->flash('error', 'Error saving lease: ' . $e->getMessage());
-            \Log::error('Lease save error: ' . $e->getMessage(), ['data' => $data]);
+            \Log::error('Lease save error: ' . $e->getMessage(), ['data' => $data, 'trace' => $e->getTraceAsString()]);
+            $this->showError('Save Error', 'An error occurred while saving the lease: ' . $e->getMessage() . '. Please check all fields and try again.');
         }
     }
 

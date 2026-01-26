@@ -60,7 +60,20 @@ class TruckList extends Component
 
     public function render()
     {
-        $query = Truck::with(['make', 'model', 'entity', 'registeredBy']);
+        $user = Auth::user();
+        $userRole = $user->role ?? null;
+        
+        $query = Truck::with(['make', 'model', 'entity', 'registeredBy'])
+            // Filter by entity_id if user is not admin
+            ->when($userRole !== 'admin', function ($q) use ($user) {
+                if ($user->entity_id) {
+                    // Show only trucks with matching entity_id
+                    $q->where('entity_id', $user->entity_id);
+                } else {
+                    // If no entity_id, show no trucks (impossible condition)
+                    $q->whereRaw('1 = 0');
+                }
+            });
 
         // Search
         if ($this->search) {
@@ -87,7 +100,7 @@ class TruckList extends Component
         }
 
         // Apply sorting
-                $query->orderBy($this->sortBy, $this->sortDirection);
+        $query->orderBy($this->sortBy, $this->sortDirection);
 
         $trucks = $query->paginate(15);
 

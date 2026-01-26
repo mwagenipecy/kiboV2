@@ -5,6 +5,7 @@ namespace App\Livewire\Admin;
 use App\Enums\OrderStatus;
 use App\Enums\OrderType;
 use App\Models\Order;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -35,8 +36,23 @@ class FinancingOrders extends Component
 
     public function render()
     {
+        $user = Auth::user();
+        $userRole = $user->role ?? null;
+        
         $query = Order::with(['vehicle.make', 'vehicle.model', 'user'])
             ->where('order_type', OrderType::FINANCING_APPLICATION->value)
+            // Filter by vehicle's entity_id if user is not admin
+            ->when($userRole !== 'admin', function ($q) use ($user) {
+                if ($user->entity_id) {
+                    // Show only orders where vehicle's entity_id matches user's entity_id
+                    $q->whereHas('vehicle', function ($vehicleQuery) use ($user) {
+                        $vehicleQuery->where('entity_id', $user->entity_id);
+                    });
+                } else {
+                    // If no entity_id, show no orders (impossible condition)
+                    $q->whereRaw('1 = 0');
+                }
+            })
             ->latest();
 
         // Apply filters
@@ -70,21 +86,24 @@ class FinancingOrders extends Component
 
         $orders = $query->paginate(15);
 
-        // Get counts for filters
+        // Get counts for filters (filtered by entity for non-admin)
+        $countsQuery = Order::where('order_type', OrderType::FINANCING_APPLICATION->value)
+            ->when($userRole !== 'admin', function ($q) use ($user) {
+                if ($user->entity_id) {
+                    $q->whereHas('vehicle', function ($vehicleQuery) use ($user) {
+                        $vehicleQuery->where('entity_id', $user->entity_id);
+                    });
+                } else {
+                    $q->whereRaw('1 = 0');
+                }
+            });
+        
         $counts = [
-            'all' => Order::where('order_type', OrderType::FINANCING_APPLICATION->value)->count(),
-            'pending' => Order::where('order_type', OrderType::FINANCING_APPLICATION->value)
-                ->where('status', OrderStatus::PENDING->value)
-                ->count(),
-            'approved' => Order::where('order_type', OrderType::FINANCING_APPLICATION->value)
-                ->where('status', OrderStatus::APPROVED->value)
-                ->count(),
-            'completed' => Order::where('order_type', OrderType::FINANCING_APPLICATION->value)
-                ->where('status', OrderStatus::COMPLETED->value)
-                ->count(),
-            'rejected' => Order::where('order_type', OrderType::FINANCING_APPLICATION->value)
-                ->where('status', OrderStatus::REJECTED->value)
-                ->count(),
+            'all' => (clone $countsQuery)->count(),
+            'pending' => (clone $countsQuery)->where('status', OrderStatus::PENDING->value)->count(),
+            'approved' => (clone $countsQuery)->where('status', OrderStatus::APPROVED->value)->count(),
+            'completed' => (clone $countsQuery)->where('status', OrderStatus::COMPLETED->value)->count(),
+            'rejected' => (clone $countsQuery)->where('status', OrderStatus::REJECTED->value)->count(),
         ];
 
         return view('livewire.admin.financing-orders', [

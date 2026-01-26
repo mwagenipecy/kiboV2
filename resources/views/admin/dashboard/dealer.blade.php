@@ -45,7 +45,7 @@
                 <p class="text-sm font-medium text-gray-600">Total Vehicles</p>
                 <p class="text-2xl font-bold text-gray-900 mt-2">{{ number_format($totalVehicles) }}</p>
                 <p class="text-sm text-gray-500 mt-1">{{ number_format($activeVehicles) }} active · {{ number_format($pendingVehicles) }} pending</p>
-                <a href="{{ route('dealer.vehicles.index') }}" class="text-xs text-green-700 hover:text-green-800 mt-1 inline-block">Manage vehicles →</a>
+                <a href="{{ url('/admin/vehicles/registration') }}" class="text-xs text-green-700 hover:text-green-800 mt-1 inline-block">Manage vehicles →</a>
             </div>
             <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
                 <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -62,7 +62,7 @@
                 <p class="text-sm font-medium text-gray-600">Active Listings</p>
                 <p class="text-2xl font-bold text-gray-900 mt-2">{{ number_format($activeVehicles) }}</p>
                 <p class="text-sm text-blue-600 mt-1">{{ $totalVehicles > 0 ? round(($activeVehicles / $totalVehicles) * 100) : 0 }}% of total</p>
-                <a href="{{ route('dealer.vehicles.active') }}" class="text-xs text-green-700 hover:text-green-800 mt-1 inline-block">View active →</a>
+                <a href="{{ url('/admin/vehicles/registration?filterStatus=approved') }}" class="text-xs text-green-700 hover:text-green-800 mt-1 inline-block">View active →</a>
             </div>
             <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
                 <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -79,7 +79,7 @@
                 <p class="text-sm font-medium text-gray-600">Vehicles Sold</p>
                 <p class="text-2xl font-bold text-gray-900 mt-2">{{ number_format($soldVehicles) }}</p>
                 <p class="text-sm text-green-600 mt-1">Total sold</p>
-                <a href="{{ route('dealer.vehicles.sold') }}" class="text-xs text-green-700 hover:text-green-800 mt-1 inline-block">View sold →</a>
+                <a href="{{ url('/admin/vehicles/registration?filterStatus=sold') }}" class="text-xs text-green-700 hover:text-green-800 mt-1 inline-block">View sold →</a>
             </div>
             <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
                 <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -121,7 +121,7 @@
                 </svg>
             </div>
         </div>
-        <a href="{{ route('dealer.car-requests') }}" class="text-sm text-green-600 hover:text-green-700 mt-3 inline-block">View requests →</a>
+        <a href="{{ url('/admin/car-requests') }}" class="text-sm text-green-600 hover:text-green-700 mt-3 inline-block">View requests →</a>
     </div>
 
     <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
@@ -137,7 +137,7 @@
                 </svg>
             </div>
         </div>
-        <a href="{{ route('dealer.car-requests') }}" class="text-xs text-green-700 hover:text-green-800 mt-1 inline-block">Manage offers →</a>
+        <a href="{{ url('/admin/car-requests') }}" class="text-xs text-green-700 hover:text-green-800 mt-1 inline-block">Manage offers →</a>
     </div>
 
     <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
@@ -168,7 +168,6 @@
                 </svg>
             </div>
         </div>
-        <a href="{{ route('dealer.orders') }}" class="text-sm text-green-600 hover:text-green-700 mt-3 inline-block">View orders →</a>
     </div>
 </div>
 
@@ -197,11 +196,11 @@
                             <p class="text-sm text-gray-500">Added {{ $vehicle->created_at?->diffForHumans() }}</p>
                         </div>
                         <span class="px-3 py-1 text-xs font-semibold rounded-full 
-                            @if($vehicle->status === VehicleStatus::AVAILABLE) bg-green-100 text-green-700
+                            @if($vehicle->status === VehicleStatus::APPROVED) bg-green-100 text-green-700
                             @elseif($vehicle->status === VehicleStatus::PENDING) bg-yellow-100 text-yellow-700
                             @elseif($vehicle->status === VehicleStatus::SOLD) bg-gray-100 text-gray-700
                             @else bg-gray-100 text-gray-700 @endif">
-                            {{ $vehicle->status?->value ?? '—' }}
+                            {{ $vehicle->status?->label() ?? '—' }}
                         </span>
                     </div>
                 @empty
@@ -222,24 +221,19 @@
                     </svg>
                     Register New Vehicle
                 </a>
-                <a href="{{ route('dealer.vehicles.index') }}" class="w-full flex items-center px-4 py-3 border-2 border-green-500 text-green-600 rounded-lg hover:bg-green-50 transition-colors">
+                <a href="{{ url('admin/vehicles/registration') }}" class="w-full flex items-center px-4 py-3 border-2 border-green-500 text-green-600 rounded-lg hover:bg-green-50 transition-colors">
                     <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                     </svg>
                     Manage Vehicles
                 </a>
-                <a href="{{ route('dealer.car-requests') }}" class="w-full flex items-center px-4 py-3 border-2 border-green-500 text-green-600 rounded-lg hover:bg-green-50 transition-colors">
+                <a href="{{ route('admin.car-requests') }}" class="w-full flex items-center px-4 py-3 border-2 border-green-500 text-green-600 rounded-lg hover:bg-green-50 transition-colors">
                     <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c1.657 0 3 .895 3 2s-1.343 2-3 2-3 .895-3 2 1.343 2 3 2m0-8a4 4 0 00-4 4c0 1.657 1.343 3 3 3h2c1.657 0 3 1.343 3 3a4 4 0 01-4 4m0-16v1m0 15v1m8-8h1M3 12h1m12.364 5.364l.707.707M5.636 6.636l.707.707m12.021 0l-.707.707M5.636 17.364l-.707.707"/>
                     </svg>
                     View Car Requests
                 </a>
-                <a href="{{ route('dealer.analytics') }}" class="w-full flex items-center px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-                    </svg>
-                    View Analytics
-                </a>
+               
             </div>
         </div>
     </div>

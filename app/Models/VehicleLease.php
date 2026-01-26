@@ -38,6 +38,7 @@ class VehicleLease extends Model
         'lease_title',
         'lease_description',
         'monthly_payment',
+        'currency',
         'lease_term_months',
         'down_payment',
         'security_deposit',

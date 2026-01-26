@@ -4,6 +4,7 @@ namespace App\Livewire\Admin\Leasing;
 
 use App\Models\Entity;
 use App\Models\VehicleLease;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -72,7 +73,20 @@ class LeaseList extends Component
 
     public function render()
     {
+        $user = Auth::user();
+        $userRole = $user->role ?? null;
+        
         $query = VehicleLease::with(['entity'])
+            // Filter by entity_id if user is not admin
+            ->when($userRole !== 'admin', function ($q) use ($user) {
+                if ($user->entity_id) {
+                    // Show only leases with matching entity_id
+                    $q->where('entity_id', $user->entity_id);
+                } else {
+                    // If no entity_id, show no leases (impossible condition)
+                    $q->whereRaw('1 = 0');
+                }
+            })
             ->orderBy($this->sortBy, $this->sortDirection);
 
         // Apply search
@@ -90,20 +104,27 @@ class LeaseList extends Component
             $query->where('status', $this->filterStatus);
         }
 
-        // Apply entity filter
-        if ($this->filterEntity) {
+        // Apply entity filter (only for admin)
+        if ($userRole === 'admin' && $this->filterEntity) {
             $query->where('entity_id', $this->filterEntity);
         }
 
         $leases = $query->paginate(15);
         $entities = Entity::where('type', 'dealer')->get();
 
-        // Get counts for status tabs
+        // Get counts for status tabs (filtered by entity for non-admin)
+        $countsQuery = VehicleLease::query();
+        if ($userRole !== 'admin' && $user->entity_id) {
+            $countsQuery->where('entity_id', $user->entity_id);
+        } elseif ($userRole !== 'admin') {
+            $countsQuery->whereRaw('1 = 0');
+        }
+        
         $counts = [
-            'all' => VehicleLease::count(),
-            'active' => VehicleLease::where('status', 'active')->count(),
-            'inactive' => VehicleLease::where('status', 'inactive')->count(),
-            'reserved' => VehicleLease::where('status', 'reserved')->count(),
+            'all' => (clone $countsQuery)->count(),
+            'active' => (clone $countsQuery)->where('status', 'active')->count(),
+            'inactive' => (clone $countsQuery)->where('status', 'inactive')->count(),
+            'reserved' => (clone $countsQuery)->where('status', 'reserved')->count(),
         ];
 
         return view('livewire.admin.leasing.lease-list', [

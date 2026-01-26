@@ -96,8 +96,21 @@ class PendingVehicles extends Component
 
     public function render()
     {
+        $user = Auth::user();
+        $userRole = $user->role ?? null;
+        
         $query = Vehicle::with(['make', 'model', 'entity', 'registeredBy'])
             ->whereIn('status', [VehicleStatus::PENDING, VehicleStatus::AWAITING_APPROVAL])
+            // Filter by entity_id if user is not admin
+            ->when($userRole !== 'admin', function ($q) use ($user) {
+                if ($user->entity_id) {
+                    // Show only vehicles with matching entity_id
+                    $q->where('entity_id', $user->entity_id);
+                } else {
+                    // If no entity_id, show no vehicles (impossible condition)
+                    $q->whereRaw('1 = 0');
+                }
+            })
             ->when($this->search, function ($q) {
                 $q->where(function ($query) {
                     $query->where('title', 'like', '%' . $this->search . '%')

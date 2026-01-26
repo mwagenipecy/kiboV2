@@ -4,6 +4,7 @@ namespace App\Livewire\Admin\LendingCriteria;
 
 use App\Models\Entity;
 use App\Models\LendingCriteria;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -40,7 +41,20 @@ class CriteriaList extends Component
 
     public function render()
     {
+        $user = Auth::user();
+        $userRole = $user->role ?? null;
+        
         $query = LendingCriteria::with('entity')->latest();
+
+        // Apply entity filter for non-admin users
+        if ($userRole !== 'admin') {
+            if ($user->entity_id) {
+                $query->where('entity_id', $user->entity_id);
+            } else {
+                // If no entity_id, show no criteria
+                $query->whereRaw('1 = 0');
+            }
+        }
 
         // Apply search
         if ($this->search) {
@@ -53,8 +67,8 @@ class CriteriaList extends Component
             });
         }
 
-        // Filter by entity
-        if ($this->filterEntity) {
+        // Filter by entity (only for admin users)
+        if ($userRole === 'admin' && $this->filterEntity) {
             $query->where('entity_id', $this->filterEntity);
         }
 
@@ -71,6 +85,7 @@ class CriteriaList extends Component
         return view('livewire.admin.lending-criteria.criteria-list', [
             'criteria' => $criteria,
             'entities' => $entities,
+            'userIsAdmin' => $userRole === 'admin',
         ]);
     }
 }

@@ -20,12 +20,28 @@
     </div>
 
     <!-- Stats Cards -->
+    @php
+        use App\Models\Truck;
+        use App\Enums\VehicleStatus;
+        
+        $user = auth()->user();
+        $userRole = $user->role ?? null;
+        $baseQuery = Truck::query();
+
+        if ($userRole !== 'admin') {
+            if ($user->entity_id) {
+                $baseQuery->where('entity_id', $user->entity_id);
+            } else {
+                $baseQuery->whereRaw('1 = 0'); // Show no trucks
+            }
+        }
+    @endphp
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-600">Total Trucks</p>
-                    <p class="text-2xl font-bold text-gray-900 mt-2">{{ \App\Models\Truck::count() }}</p>
+                    <p class="text-2xl font-bold text-gray-900 mt-2">{{ (clone $baseQuery)->count() }}</p>
                 </div>
                 <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
                     <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -39,7 +55,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-600">Pending Approval</p>
-                    <p class="text-2xl font-bold text-gray-900 mt-2">{{ \App\Models\Truck::pending()->count() }}</p>
+                    <p class="text-2xl font-bold text-gray-900 mt-2">{{ (clone $baseQuery)->pending()->count() }}</p>
                 </div>
                 <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
                     <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -53,7 +69,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-600">Approved</p>
-                    <p class="text-2xl font-bold text-gray-900 mt-2">{{ \App\Models\Truck::approved()->count() }}</p>
+                    <p class="text-2xl font-bold text-gray-900 mt-2">{{ (clone $baseQuery)->approved()->count() }}</p>
                 </div>
                 <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
                     <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -67,7 +83,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-600">Sold</p>
-                    <p class="text-2xl font-bold text-gray-900 mt-2">{{ \App\Models\Truck::where('status', 'sold')->count() }}</p>
+                    <p class="text-2xl font-bold text-gray-900 mt-2">{{ (clone $baseQuery)->where('status', VehicleStatus::SOLD->value)->count() }}</p>
                 </div>
                 <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
                     <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

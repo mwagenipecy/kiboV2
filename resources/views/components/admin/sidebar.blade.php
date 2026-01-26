@@ -27,8 +27,11 @@
 
         <!-- Navigation -->
         <nav class="flex-1 overflow-y-auto py-4 px-3">
+            @php
+                $userRole = auth()->user()->role ?? null;
+            @endphp
             <div class="space-y-1">
-                <!-- Dashboard -->
+                <!-- Dashboard (All roles) -->
                 <a href="{{ route('admin.dashboard') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('admin.dashboard') ? 'text-white kibo-sidebar-active shadow-sm' : 'text-gray-700 kibo-sidebar-hover' }} transition-colors group">
                     <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
@@ -36,7 +39,8 @@
                     <span class="menu-text">Dashboard</span>
                 </a>
 
-                <!-- Analytics - Expandable -->
+                <!-- Analytics - Expandable (Admin only) -->
+                @if($userRole === 'admin')
                 <div x-data="{ open: {{ request()->is('admin/analytics*') ? 'true' : 'false' }} }">
                     <button @click="open = !open" class="w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-lg {{ request()->is('admin/analytics*') ? 'text-white kibo-sidebar-active shadow-sm' : 'text-gray-700 kibo-sidebar-hover' }} transition-colors group">
                         <div class="flex items-center min-w-0">
@@ -55,13 +59,16 @@
                         <a href="{{ route('admin.analytics') }}#insights" class="block px-3 py-2 text-sm text-gray-600 rounded-lg kibo-sidebar-hover transition-colors">Insights</a>
                     </div>
                 </div>
+                @endif
 
-                <!-- Inventory Section -->
+                <!-- Inventory Section (Admin and Dealer) -->
+                @if($userRole === 'admin' || $userRole === 'dealer')
                 <div class="pt-4 pb-2 section-title">
                     <p class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Inventory</p>
                 </div>
 
-                <!-- Vehicles - Expandable -->
+                <!-- Vehicles - Expandable (Admin and Dealer) -->
+                @if($userRole === 'admin' || $userRole === 'dealer')
                 <div x-data="{ open: {{ request()->is('admin/vehicles*') ? 'true' : 'false' }} }">
                     <button @click="open = !open" class="w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium text-gray-700 rounded-lg kibo-sidebar-hover transition-colors group">
                         <div class="flex items-center min-w-0">
@@ -88,8 +95,10 @@
                         <a href="{{ route('admin.vehicles.registration.sold') }}" class="block px-3 py-2 text-sm text-gray-600 rounded-lg kibo-sidebar-hover transition-colors">Sold Vehicles</a>
                     </div>
                 </div>
+                @endif
 
-                <!-- Vehicle Leasing - Expandable -->
+                <!-- Vehicle Leasing - Expandable (Admin and Dealer) -->
+                @if($userRole === 'admin' || $userRole === 'dealer')
                 <div x-data="{ open: {{ request()->is('admin/leasing*') ? 'true' : 'false' }} }">
                     <button @click="open = !open" class="w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium text-gray-700 rounded-lg kibo-sidebar-hover transition-colors group">
                         <div class="flex items-center min-w-0">
@@ -107,8 +116,10 @@
                         <a href="{{ route('admin.leasing.create') }}" class="block px-3 py-2 text-sm text-gray-600 rounded-lg kibo-sidebar-hover transition-colors">Register Lease Vehicle</a>
                     </div>
                 </div>
+                @endif
 
-                <!-- Trucks - Expandable -->
+                <!-- Trucks - Expandable (Admin and Dealer) -->
+                @if($userRole === 'admin' || $userRole === 'dealer')
                 <div x-data="{ open: {{ request()->is('admin/trucks*') ? 'true' : 'false' }} }">
                     <button @click="open = !open" class="w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium text-gray-700 rounded-lg kibo-sidebar-hover transition-colors group">
                         <div class="flex items-center min-w-0">
@@ -135,13 +146,16 @@
                         <a href="{{ route('admin.trucks.sold') }}" class="block px-3 py-2 text-sm text-gray-600 rounded-lg kibo-sidebar-hover transition-colors">Sold Trucks</a>
                     </div>
                 </div>
+                @endif
+                @endif
 
                 <!-- Orders Section -->
                 <div class="pt-4 pb-2 section-title">
                     <p class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Orders</p>
                 </div>
 
-                <!-- Evaluation Orders - Expandable -->
+                <!-- Evaluation Orders - Expandable (Admin and Agent) -->
+                @if($userRole === 'admin' || $userRole === 'agent')
                 <div x-data="{ open: {{ request()->is('admin/orders/evaluations*') ? 'true' : 'false' }} }">
                     <button @click="open = !open" class="w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium text-gray-700 rounded-lg kibo-sidebar-hover transition-colors group">
                         <div class="flex items-center min-w-0">
@@ -167,8 +181,10 @@
                         <a href="{{ route('admin.orders.evaluations.completed') }}" class="block px-3 py-2 text-sm text-gray-600 rounded-lg kibo-sidebar-hover transition-colors">Completed</a>
                     </div>
                 </div>
+                @endif
 
-                <!-- Cash Purchase Orders - Expandable -->
+                <!-- Cash Purchase Orders - Expandable (Admin and Dealer) -->
+                @if($userRole === 'admin' || $userRole === 'dealer')
                 <div x-data="{ open: {{ request()->is('admin/orders/cash*') ? 'true' : 'false' }} }">
                     <button @click="open = !open" class="w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium text-gray-700 rounded-lg kibo-sidebar-hover transition-colors group">
                         <div class="flex items-center min-w-0">
@@ -195,8 +211,10 @@
                         <a href="{{ route('admin.orders.cash.rejected') }}" class="block px-3 py-2 text-sm text-gray-600 rounded-lg kibo-sidebar-hover transition-colors">Rejected</a>
                     </div>
                 </div>
+                @endif
 
-                <!-- Financing Applications - Expandable -->
+                <!-- Financing Applications - Expandable (Admin, Dealer, and Lender) -->
+                @if($userRole === 'admin' || $userRole === 'dealer' || $userRole === 'lender')
                 <div x-data="{ open: {{ request()->is('admin/orders/financing*') ? 'true' : 'false' }} }">
                     <button @click="open = !open" class="w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium text-gray-700 rounded-lg kibo-sidebar-hover transition-colors group">
                         <div class="flex items-center min-w-0">
@@ -223,8 +241,10 @@
                         <a href="{{ route('admin.orders.financing.rejected') }}" class="block px-3 py-2 text-sm text-gray-600 rounded-lg kibo-sidebar-hover transition-colors">Rejected</a>
                     </div>
                 </div>
+                @endif
 
-                <!-- Leasing Orders - Expandable -->
+                <!-- Leasing Orders - Expandable (Admin and Dealer) -->
+                @if($userRole === 'admin' || $userRole === 'dealer')
                 <div x-data="{ open: {{ request()->is('admin/orders/leasing*') ? 'true' : 'false' }} }">
                     <button @click="open = !open" class="w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium text-gray-700 rounded-lg kibo-sidebar-hover transition-colors group">
                         <div class="flex items-center min-w-0">
@@ -252,8 +272,10 @@
                         <a href="{{ route('admin.orders.leasing.rejected') }}" class="block px-3 py-2 text-sm text-gray-600 rounded-lg kibo-sidebar-hover transition-colors">Rejected</a>
                     </div>
                 </div>
+                @endif
 
-                <!-- Auctions -->
+                <!-- Auctions (Admin and Dealer) -->
+                @if($userRole === 'admin' || $userRole === 'dealer')
                 <a href="{{ route('admin.auctions') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('admin.auctions*') ? 'text-white kibo-sidebar-active shadow-sm' : 'text-gray-700 kibo-sidebar-hover' }} transition-colors group">
                     <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -266,16 +288,20 @@
                     <span class="ml-auto px-2 py-0.5 text-xs font-semibold text-yellow-700 bg-yellow-100 rounded-full menu-text">{{ $pendingAuctions }}</span>
                     @endif
                 </a>
+                @endif
 
-                <!-- Car Requests -->
+                <!-- Car Requests (Admin and Dealer) -->
+                @if($userRole === 'admin' || $userRole === 'dealer')
                 <a href="{{ route('admin.car-requests') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('admin.car-requests') ? 'text-white kibo-sidebar-active shadow-sm' : 'text-gray-700 kibo-sidebar-hover' }} transition-colors group">
                     <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h8M8 11h8M8 15h5M5 4h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z"/>
                     </svg>
                     <span class="menu-text">Car Requests</span>
                 </a>
+                @endif
 
-                <!-- Customers - Expandable -->
+                <!-- Customers - Expandable (Admin only) -->
+                @if($userRole === 'admin')
                 <div x-data="{ open: {{ request()->is('admin/customers*') ? 'true' : 'false' }} }">
                     <button @click="open = !open" class="w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-lg {{ request()->is('admin/customers*') ? 'text-white kibo-sidebar-active shadow-sm' : 'text-gray-700 kibo-sidebar-hover' }} transition-colors group">
                         <div class="flex items-center min-w-0">
@@ -294,8 +320,10 @@
                         <a href="{{ route('admin.customers.index') }}#inactive" class="block px-3 py-2 text-sm text-gray-600 rounded-lg kibo-sidebar-hover transition-colors">Inactive</a>
                     </div>
                 </div>
+                @endif
 
-                <!-- Reviews - Expandable -->
+                <!-- Reviews - Expandable (Admin only) -->
+                @if($userRole === 'admin')
                 <div x-data="{ open: {{ request()->is('admin/reviews*') ? 'true' : 'false' }} }">
                     <button @click="open = !open" class="w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-lg {{ request()->is('admin/reviews*') ? 'text-white kibo-sidebar-active shadow-sm' : 'text-gray-700 kibo-sidebar-hover' }} transition-colors group">
                         <div class="flex items-center min-w-0">
@@ -314,13 +342,15 @@
                         <a href="{{ route('admin.reviews.index') }}#approved" class="block px-3 py-2 text-sm text-gray-600 rounded-lg kibo-sidebar-hover transition-colors">Approved</a>
                     </div>
                 </div>
+                @endif
 
-                <!-- Management Section -->
+                <!-- Management Section (Admin only) -->
+                @if($userRole === 'admin')
                 <div class="pt-4 pb-2 section-title">
                     <p class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Management</p>
                 </div>
 
-                <!-- Registration - Expandable -->
+                <!-- Registration - Expandable (Admin only) -->
                 <div x-data="{ open: {{ request()->is('admin/registration*') ? 'true' : 'false' }} }">
                     <button @click="open = !open" class="w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium text-gray-700 rounded-lg kibo-sidebar-hover transition-colors group">
                         <div class="flex items-center min-w-0">
@@ -342,7 +372,7 @@
                     </div>
                 </div>
 
-                <!-- Users - Expandable -->
+                <!-- Users - Expandable (Admin only) -->
                 <div x-data="{ open: {{ request()->is('admin/users*') ? 'true' : 'false' }} }">
                     <button @click="open = !open" class="w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium text-gray-700 rounded-lg kibo-sidebar-hover transition-colors group">
                         <div class="flex items-center min-w-0">
@@ -365,24 +395,30 @@
                         <a href="{{ route('admin.users.permissions') }}" class="block px-3 py-2 text-sm text-gray-600 rounded-lg kibo-sidebar-hover transition-colors">Permissions</a>
                     </div>
                 </div>
+                @endif
 
-                <!-- Lending Criteria -->
+                <!-- Lending Criteria (Admin and Lender) -->
+                @if($userRole === 'admin' || $userRole === 'lender')
                 <a href="{{ route('admin.lending-criteria.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('admin.lending-criteria.*') ? 'text-white kibo-sidebar-active shadow-sm' : 'text-gray-700 kibo-sidebar-hover' }} transition-colors group">
                     <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
                     </svg>
                     <span class="menu-text">Lending Criteria</span>
                 </a>
+                @endif
 
-                <!-- Valuation Pricing -->
+                <!-- Valuation Pricing (Admin only) -->
+                @if($userRole === 'admin')
                 <a href="{{ route('admin.valuation-pricing.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('admin.valuation-pricing.*') ? 'text-white kibo-sidebar-active shadow-sm' : 'text-gray-700 kibo-sidebar-hover' }} transition-colors group">
                     <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
                     <span class="menu-text">Valuation Pricing</span>
                 </a>
+                @endif
 
-                <!-- Settings - Expandable -->
+                <!-- Settings - Expandable (Admin only) -->
+                @if($userRole === 'admin')
                 <div x-data="{ open: {{ request()->is('admin/settings*') ? 'true' : 'false' }} }">
                     <button @click="open = !open" class="w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium text-gray-700 rounded-lg kibo-sidebar-hover transition-colors group">
                         <div class="flex items-center min-w-0">
@@ -405,6 +441,7 @@
                         <a href="{{ route('admin.settings.billing') }}" class="block px-3 py-2 text-sm text-gray-600 rounded-lg kibo-sidebar-hover transition-colors">Billing</a>
                     </div>
                 </div>
+                @endif
             </div>
         </nav>
 

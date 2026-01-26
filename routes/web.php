@@ -648,6 +648,15 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
         return view('admin.dashboard', ['userRole' => $role]);
     })->name('dashboard');
     
+    // Profile & Settings (Common to all roles)
+    Route::get('/profile', function () {
+        return view('admin.profile');
+    })->name('profile');
+    
+    Route::get('/settings', function () {
+        return view('admin.settings');
+    })->name('settings');
+    
     // Analytics
     Route::get('/analytics', function () {
         return view('admin.analytics');
