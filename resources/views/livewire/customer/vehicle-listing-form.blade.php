@@ -43,12 +43,6 @@
             <h3 class="text-xl font-semibold text-gray-900 mb-4">Basic Information</h3>
             
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Vehicle Title <span class="text-red-500">*</span></label>
-                <input type="text" wire:model="title" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="e.g., 2024 Toyota Land Cruiser V8">
-                @error('title') <span class="text-red-500 text-sm mt-1">{{ $message }}</span> @enderror
-            </div>
-
-            <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
                 <textarea wire:model="description" rows="4" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="Tell potential buyers about your vehicle..."></textarea>
             </div>
@@ -65,7 +59,12 @@
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Year <span class="text-red-500">*</span></label>
-                    <input type="number" wire:model="year" min="1900" max="{{ date('Y') + 1 }}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                    <select wire:model="year" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                        <option value="">Select Year</option>
+                        @for($y = date('Y') + 1; $y >= 1900; $y--)
+                            <option value="{{ $y }}">{{ $y }}</option>
+                        @endfor
+                    </select>
                     @error('year') <span class="text-red-500 text-sm mt-1">{{ $message }}</span> @enderror
                 </div>
 
@@ -95,9 +94,11 @@
                     <label class="block text-sm font-medium text-gray-700 mb-2">Price <span class="text-red-500">*</span></label>
                     <div class="flex">
                         <select wire:model="currency" class="px-4 py-2 border border-gray-300 rounded-l-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
-                            <option value="GBP">GBP</option>
+                            <option value="TZS">TZS</option>
                             <option value="USD">USD</option>
                             <option value="EUR">EUR</option>
+                            <option value="GBP">GBP</option>
+                            <option value="KES">KES</option>
                         </select>
                         <input type="number" wire:model="price" step="0.01" min="0" class="flex-1 px-4 py-2 border border-gray-300 border-l-0 rounded-r-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="0.00">
                     </div>
@@ -111,8 +112,15 @@
             </div>
 
             <div class="flex justify-end">
-                <button type="button" wire:click="nextStep" class="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2 rounded-lg transition-colors">
-                    Next: Add Details
+                <button type="button" wire:click="nextStep" wire:loading.attr="disabled" wire:target="nextStep" class="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2">
+                    <span wire:loading.remove wire:target="nextStep">Next: Add Details</span>
+                    <span wire:loading wire:target="nextStep" class="flex items-center gap-2">
+                        <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Loading...
+                    </span>
                 </button>
             </div>
         </div>
@@ -184,11 +192,25 @@
             </div>
 
             <div class="flex justify-between">
-                <button type="button" wire:click="previousStep" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold px-6 py-2 rounded-lg transition-colors">
-                    Previous
+                <button type="button" wire:click="previousStep" wire:loading.attr="disabled" wire:target="previousStep" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold px-6 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2">
+                    <span wire:loading.remove wire:target="previousStep">Previous</span>
+                    <span wire:loading wire:target="previousStep" class="flex items-center gap-2">
+                        <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Loading...
+                    </span>
                 </button>
-                <button type="button" wire:click="nextStep" class="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2 rounded-lg transition-colors">
-                    Next: Add Photos
+                <button type="button" wire:click="nextStep" wire:loading.attr="disabled" wire:target="nextStep" class="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2">
+                    <span wire:loading.remove wire:target="nextStep">Next: Add Photos</span>
+                    <span wire:loading wire:target="nextStep" class="flex items-center gap-2">
+                        <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Loading...
+                    </span>
                 </button>
             </div>
         </div>
@@ -212,23 +234,91 @@
 
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Additional Photos (Optional)</label>
-                <input type="file" wire:model="other_images" multiple accept="image/*" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
-                <p class="text-xs text-gray-500 mt-1">You can upload multiple photos</p>
-                @if($other_images)
-                    <div class="mt-2 grid grid-cols-4 gap-2">
+                
+                {{-- File Input Container --}}
+                <div class="space-y-3">
+                    @if(count($other_images) > 0)
                         @foreach($other_images as $index => $image)
-                            <img src="{{ $image->temporaryUrl() }}" alt="Preview {{ $index + 1 }}" class="h-24 w-full object-cover rounded-lg">
+                        <div class="flex items-center gap-3 p-3 border border-gray-300 rounded-lg bg-gray-50">
+                            <div class="flex-1 flex items-center gap-3">
+                                @if(is_object($image) && method_exists($image, 'temporaryUrl'))
+                                <img src="{{ $image->temporaryUrl() }}" alt="Preview {{ $index + 1 }}" class="h-16 w-16 object-cover rounded-lg border border-gray-200">
+                                @elseif(is_string($image))
+                                <img src="{{ asset('storage/' . $image) }}" alt="Preview {{ $index + 1 }}" class="h-16 w-16 object-cover rounded-lg border border-gray-200">
+                                @endif
+                                <div class="flex-1">
+                                    <p class="text-sm font-medium text-gray-900">Photo {{ $index + 1 }}</p>
+                                    <p class="text-xs text-gray-500">Uploaded</p>
+                                </div>
+                            </div>
+                            <button type="button" wire:click="removePhoto({{ $index }})" wire:loading.attr="disabled" class="px-3 py-1.5 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                </svg>
+                            </button>
+                        </div>
                         @endforeach
+                    @endif
+                    
+                    {{-- Add More Button --}}
+                    <div>
+                        <input 
+                            type="file" 
+                            wire:model="newPhotos" 
+                            multiple
+                            accept="image/*" 
+                            id="other_images_input_{{ $currentStep }}"
+                            class="hidden"
+                        >
+                        <button 
+                            type="button" 
+                            onclick="document.getElementById('other_images_input_{{ $currentStep }}').click()"
+                            wire:loading.attr="disabled"
+                            class="w-full px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg hover:border-green-500 hover:bg-green-50 transition-colors flex items-center justify-center gap-2 text-gray-600 hover:text-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                            </svg>
+                            <span class="font-medium">
+                                <span wire:loading.remove wire:target="newPhotos">Add More Photos</span>
+                                <span wire:loading wire:target="newPhotos" class="flex items-center gap-2">
+                                    <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    Uploading...
+                                </span>
+                            </span>
+                        </button>
+                        <p class="text-xs text-gray-500 mt-1 text-center">You can select multiple photos at once</p>
                     </div>
-                @endif
+                </div>
+                
+                @error('other_images.*') 
+                    <span class="text-red-500 text-sm mt-1">{{ $message }}</span> 
+                @enderror
             </div>
 
             <div class="flex justify-between">
-                <button type="button" wire:click="previousStep" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold px-6 py-2 rounded-lg transition-colors">
-                    Previous
+                <button type="button" wire:click="previousStep" wire:loading.attr="disabled" wire:target="previousStep" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold px-6 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2">
+                    <span wire:loading.remove wire:target="previousStep">Previous</span>
+                    <span wire:loading wire:target="previousStep" class="flex items-center gap-2">
+                        <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Loading...
+                    </span>
                 </button>
-                <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2 rounded-lg transition-colors">
-                    Submit Listing
+                <button type="submit" wire:loading.attr="disabled" wire:target="save" class="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2">
+                    <span wire:loading.remove wire:target="save">Submit Listing</span>
+                    <span wire:loading wire:target="save" class="flex items-center gap-2">
+                        <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Submitting...
+                    </span>
                 </button>
             </div>
         </div>

@@ -15,7 +15,6 @@ class VehicleListingForm extends Component
     use WithFileUploads;
 
     // Basic Information
-    public $title;
     public $description;
     public $condition = 'used';
     public $registration_number;
@@ -38,12 +37,13 @@ class VehicleListingForm extends Component
     
     // Pricing
     public $price;
-    public $currency = 'GBP';
+    public $currency = 'TZS';
     public $negotiable = true;
     
     // Images
     public $image_front;
     public $other_images = [];
+    public $newPhotos = [];
     
     // Data for dropdowns
     public $makes = [];
@@ -56,7 +56,6 @@ class VehicleListingForm extends Component
     protected function rules()
     {
         $rules = [
-            'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'condition' => 'required|in:new,used',
             'vehicle_make_id' => 'required|exists:vehicle_makes,id',
@@ -83,6 +82,26 @@ class VehicleListingForm extends Component
         }
 
         return $rules;
+    }
+
+    public function updatedNewPhotos()
+    {
+        if (!empty($this->newPhotos)) {
+            foreach ($this->newPhotos as $photo) {
+                if ($photo) {
+                    $this->other_images[] = $photo;
+                }
+            }
+            $this->newPhotos = [];
+        }
+    }
+
+    public function removePhoto($index)
+    {
+        if (isset($this->other_images[$index])) {
+            unset($this->other_images[$index]);
+            $this->other_images = array_values($this->other_images); // Re-index array
+        }
     }
 
     public function mount()
@@ -123,7 +142,6 @@ class VehicleListingForm extends Component
     {
         if ($this->currentStep === 1) {
             $this->validate([
-                'title' => 'required|string|max:255',
                 'condition' => 'required|in:new,used',
                 'vehicle_make_id' => 'required|exists:vehicle_makes,id',
                 'vehicle_model_id' => 'required|exists:vehicle_models,id',
@@ -149,8 +167,15 @@ class VehicleListingForm extends Component
     {
         $this->validate();
 
+        // Generate title from make, model, and year
+        $make = VehicleMake::find($this->vehicle_make_id);
+        $model = VehicleModel::find($this->vehicle_model_id);
+        $makeName = $make?->name ?? '';
+        $modelName = $model?->name ?? '';
+        $title = trim("{$this->year} {$makeName} {$modelName} {$this->variant}");
+
         $data = [
-            'title' => $this->title,
+            'title' => $title,
             'description' => $this->description,
             'origin' => 'local',
             'condition' => $this->condition,

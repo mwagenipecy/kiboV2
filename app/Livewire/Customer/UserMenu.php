@@ -24,11 +24,12 @@ class UserMenu extends Component
 
     public function logout()
     {
-        Auth::guard('web')->logout();
-        Session::invalidate();
-        Session::regenerateToken();
+        Auth::logout();
         
-        return $this->redirect(route('cars.index'), navigate: true);
+        request()->session()->invalidate();
+        request()->session()->regenerateToken();
+        
+        return redirect()->route('cars.index');
     }
 
     public function getUserProperty()

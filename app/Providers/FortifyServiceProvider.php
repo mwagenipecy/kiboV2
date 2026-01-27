@@ -56,11 +56,42 @@ class FortifyServiceProvider extends ServiceProvider
             }
         });
 
-        // Register custom registration response - redirect to home page
+        // Register custom registration response - redirect to home page with OTP verification
         $this->app->instance(RegisterResponse::class, new class implements RegisterResponse {
             public function toResponse($request)
             {
-                // Redirect to home page after successful registration
+                $user = auth()->user();
+                
+                if ($user) {
+                    // Generate 4-digit OTP code
+                    $otpCode = str_pad((string) random_int(0, 9999), 4, '0', STR_PAD_LEFT);
+                    
+                    // Store OTP in database
+                    $user->update([
+                        'otp_code' => $otpCode,
+                        'otp_expires_at' => now()->addMinutes(5),
+                    ]);
+                    
+                    // Send OTP email asynchronously via queue
+                    SendLoginOtp::dispatch($user->email, $user->name, $otpCode);
+                    
+                    // Store intended URL in session for after OTP verification
+                    // If user is not a customer and has a role, redirect to admin dashboard
+                    if ($user->role && $user->role !== 'customer') {
+                        $intendedUrl = route('admin.dashboard');
+                    } else {
+                        $intendedUrl = route('cars.index');
+                    }
+                    session()->put('otp_intended_url', $intendedUrl);
+                    
+                    // Redirect to home page with flag to show OTP verification modal
+                    return redirect()->route('cars.index')
+                        ->with('showOtpVerification', true)
+                        ->with('registrationSuccess', true)
+                        ->with('status', 'Account created successfully! Please verify your email with the OTP code sent to ' . $user->email);
+                }
+                
+                // Fallback if user is not authenticated (shouldn't happen)
                 return redirect()->route('cars.index')->with('registrationSuccess', true);
             }
         });

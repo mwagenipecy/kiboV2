@@ -476,8 +476,18 @@
 
                     <div class="text-center mb-6">
                         <h3 class="text-lg font-bold text-gray-900 mb-2">Verify Your Email</h3>
+                        @if(session('registrationSuccess'))
+                        <div class="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                            <p class="text-sm text-green-700 font-medium">Account created successfully!</p>
+                        </div>
+                        @endif
                         <p class="text-sm text-gray-600">
-                            We've sent a 4-digit verification code to<br>
+                            @if(session('registrationSuccess'))
+                            Welcome to Kibo Auto! We've sent a 4-digit verification code to your email address.
+                            @else
+                            We've sent a 4-digit verification code to your email address.
+                            @endif
+                            <br>
                             <span class="font-medium text-gray-900">{{ auth()->user()->email }}</span>
                         </p>
                     </div>
@@ -578,7 +588,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const authTitle = document.getElementById('authTitle');
     const authSubtitle = document.getElementById('authSubtitle');
 
-    // Check for OTP verification first (highest priority after login)
+    // Check for OTP verification first (highest priority after login/registration)
     // Check if user is logged in and either has showOtpVerification flag OR has an unverified OTP
     // But NOT if OTP is already verified
     @php
@@ -608,7 +618,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 100);
     // Auto-open modal if there are validation errors, status messages, showForgotPassword flag, or registration success
     // But NOT if OTP was just verified (to prevent showing modal after successful OTP verification)
-    @elseif (($errors->any() || session('status') || session('showForgotPassword') || session('registrationSuccess')) && !session('otp_verified') && !session('otpVerified'))
+    // Also NOT if we should show OTP (handled above)
+    @elseif (($errors->any() || session('status') || session('showForgotPassword') || session('registrationSuccess')) && !session('otp_verified') && !session('otpVerified') && !$shouldShowOtp)
         authModal.classList.remove('hidden');
         setTimeout(() => {
             authPanel.classList.remove('translate-x-full');

@@ -6,6 +6,7 @@
         .kibo-border { border-color: #009866 !important; }
         input[type="radio"]:checked, input[type="checkbox"]:checked { accent-color: #009866; }
         input:focus, select:focus { --tw-ring-color: #009866 !important; }
+        [x-cloak] { display: none !important; }
     </style>
     {{-- Filter Bar --}}
     <div class="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
@@ -456,9 +457,9 @@
                 }
                 $imageCount = count($allImages);
             @endphp
-            <div class="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-300 flex flex-col">
+            <div class="bg-white border border-gray-200 rounded-lg hover:shadow-lg transition-shadow duration-300 flex flex-col relative" style="overflow: visible;">
                 {{-- Image Carousel --}}
-                <div class="relative aspect-[4/3] bg-gray-100 group" data-carousel="vehicle-{{ $vehicle->id }}">
+                <div class="relative aspect-[4/3] bg-gray-100 group overflow-hidden rounded-t-lg" data-carousel="vehicle-{{ $vehicle->id }}">
                     @if($imageCount > 0)
                         @foreach($allImages as $index => $image)
                         <a href="{{ route('cars.detail', $vehicle->id) }}" class="carousel-image absolute inset-0 {{ $index === 0 ? '' : 'hidden' }}" data-index="{{ $index }}">
@@ -579,21 +580,33 @@
                 </a>
 
                 {{-- Action Buttons --}}
-                <div class="px-4 pb-4 space-y-2" x-data="{ showMenu: false }">
+                <div class="px-4 pb-4 space-y-2 relative" x-data="{ showMenu: false }" style="z-index: 50; overflow: visible;">
                     {{-- Main action button dropdown --}}
-                    <div class="relative">
+                    <div class="relative" style="z-index: 50;">
                         <button @click.stop="showMenu = !showMenu" class="w-full px-4 py-2 kibo-bg text-white text-sm font-medium rounded-lg hover:opacity-90 transition-colors flex items-center justify-center gap-2">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                             </svg>
                             Quick Actions
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-4 h-4 transition-transform duration-200" :class="showMenu ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                             </svg>
                         </button>
 
                         {{-- Dropdown Menu --}}
-                        <div x-show="showMenu" @click.away="showMenu = false" x-transition class="absolute bottom-full mb-2 left-0 right-0 bg-white rounded-lg shadow-xl border border-gray-200 z-20 overflow-hidden">
+                        <div 
+                            x-show="showMenu" 
+                            x-cloak
+                            @click.away="showMenu = false" 
+                            x-transition:enter="transition ease-out duration-200"
+                            x-transition:enter-start="opacity-0 transform scale-95 translate-y-2"
+                            x-transition:enter-end="opacity-100 transform scale-100 translate-y-0"
+                            x-transition:leave="transition ease-in duration-150"
+                            x-transition:leave-start="opacity-100 transform scale-100 translate-y-0"
+                            x-transition:leave-end="opacity-0 transform scale-95 translate-y-2"
+                            class="absolute bottom-full mb-2 left-0 right-0 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden"
+                            style="z-index: 9999; min-width: 100%;"
+                        >
                             {{-- Valuation Report --}}
                             @auth
                             <button wire:click="openValuationModal({{ $vehicle->id }})" @click="showMenu = false" class="w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors flex items-start gap-3 border-b border-gray-100">
