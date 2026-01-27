@@ -57,7 +57,7 @@ class SparePartOrders extends Component
         if ($user->role === 'admin') {
             return null; // Admin can see all
         }
-        return Agent::where('user_id', $user->id)->first();
+        return Agent::where('id', $user->entity_id)->first();
     }
 
     public function openQuoteModal($orderId)

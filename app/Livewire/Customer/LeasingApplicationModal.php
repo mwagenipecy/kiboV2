@@ -56,44 +56,49 @@ class LeasingApplicationModal extends Component
     public $agreeToCreditCheck = false;
 
     #[On('open-leasing-modal')]
-    public function open($leaseId)
+    public function open(...$params)
     {
+        // Extract leaseId from event parameters
+        // Livewire 3 passes event data as parameters
+        $leaseId = null;
+        
+        if (!empty($params)) {
+            $firstParam = $params[0];
+            if (is_numeric($firstParam)) {
+                $leaseId = (int) $firstParam;
+            } elseif (is_array($firstParam)) {
+                $leaseId = $firstParam['leaseId'] ?? $firstParam[0] ?? null;
+                if ($leaseId) {
+                    $leaseId = (int) $leaseId;
+                }
+            } elseif (is_object($firstParam)) {
+                $leaseId = $firstParam->leaseId ?? null;
+                if ($leaseId) {
+                    $leaseId = (int) $leaseId;
+                }
+            }
+        }
+        
+        if (!$leaseId || $leaseId <= 0) {
+            \Log::error('Leasing modal: No leaseId provided', ['params' => $params, 'first_param' => $params[0] ?? null]);
+            session()->flash('error', 'Invalid lease ID.');
+            return;
+        }
+        
+        \Log::info('Leasing modal opening', ['leaseId' => $leaseId, 'params' => $params]);
+
         if (!Auth::check()) {
             session()->flash('error', 'Please login to apply for leasing.');
             return redirect()->route('login');
         }
 
-        $this->leaseId = $leaseId;
-        $this->lease = VehicleLease::with('entity')->findOrFail($leaseId);
-        
-        // Check for existing applications
-        $existingOrders = Order::where('user_id', Auth::id())
-            ->where('order_type', OrderType::LEASING_APPLICATION->value)
-            ->where('order_data->lease_id', $leaseId)
-            ->orderBy('created_at', 'desc')
-            ->get();
-
-        if ($existingOrders->isNotEmpty()) {
-            $existingOrder = $existingOrders->first();
-            $status = $existingOrder->status;
-            $orderData = $existingOrder->order_data ?? [];
-            $approvalStatus = $orderData['approval_status'] ?? 'pending';
-            $leaseStarted = $orderData['lease_started'] ?? false;
-            $leaseTerminated = $orderData['lease_terminated'] ?? false;
-
-            // Only allow if rejected or completed and terminated
-            $canApply = false;
-            if ($status === OrderStatus::REJECTED) {
-                $canApply = true;
-            } elseif ($status === OrderStatus::COMPLETED && $leaseTerminated) {
-                $canApply = true;
-            }
-
-            if (!$canApply) {
-                session()->flash('error', 'You already have an active application or lease for this vehicle. Please wait for the current process to complete.');
-                $this->dispatch('order-exists');
-                return; // Don't open modal
-            }
+        try {
+            $this->leaseId = $leaseId;
+            $this->lease = VehicleLease::with('entity')->findOrFail($this->leaseId);
+        } catch (\Exception $e) {
+            session()->flash('error', 'Lease not found.');
+            \Log::error('Leasing modal error: ' . $e->getMessage());
+            return;
         }
         
         // Pre-fill user information if available
@@ -108,9 +113,15 @@ class LeasingApplicationModal extends Component
             $this->email = $user->email;
         }
         
-        // Only show modal if we passed all checks
+        // Always show modal - validation will happen on submit
         $this->show = true;
         $this->resetDocuments();
+        
+        // Debug: Log that we're setting show to true
+        \Log::info('Modal show set to true', ['show' => $this->show, 'leaseId' => $this->leaseId, 'lease' => $this->lease ? $this->lease->id : null]);
+        
+        // Force a re-render
+        $this->js('window.dispatchEvent(new CustomEvent("leasing-modal-opened"))');
     }
     
     public function close()
@@ -304,6 +315,10 @@ class LeasingApplicationModal extends Component
 
     public function render()
     {
+        if ($this->show && $this->leaseId && !$this->lease) {
+            $this->lease = VehicleLease::with('entity')->find($this->leaseId);
+        }
+
         return view('livewire.customer.leasing-application-modal');
     }
 }

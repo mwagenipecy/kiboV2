@@ -346,7 +346,7 @@ class TruckForm extends Component
         }
         
         try {
-            $this->validate();
+        $this->validate();
         } catch (\Illuminate\Validation\ValidationException $e) {
             // Show modal with validation errors for better visibility
             $errors = $e->validator->errors()->all();

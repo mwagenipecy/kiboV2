@@ -24,12 +24,14 @@ class UserMenu extends Component
 
     public function logout()
     {
-        Auth::logout();
-        
-        request()->session()->invalidate();
-        request()->session()->regenerateToken();
-        
-        return redirect()->route('cars.index');
+        Auth::guard('web')->logout();
+
+        // Ensure session is fully cleared
+        Session::invalidate();
+        Session::regenerateToken();
+
+        // Livewire-friendly redirect
+        return $this->redirect(route('cars.index'), navigate: true);
     }
 
     public function getUserProperty()

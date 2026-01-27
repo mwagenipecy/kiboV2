@@ -580,36 +580,27 @@
                 </a>
 
                 {{-- Action Buttons --}}
-                <div class="px-4 pb-4 space-y-2 relative" x-data="{ showMenu: false }" style="z-index: 50; overflow: visible;">
-                    {{-- Main action button dropdown --}}
-                    <div class="relative" style="z-index: 50;">
-                        <button @click.stop="showMenu = !showMenu" class="w-full px-4 py-2 kibo-bg text-white text-sm font-medium rounded-lg hover:opacity-90 transition-colors flex items-center justify-center gap-2">
+                <div class="px-4 pb-4 space-y-2 relative" style="z-index: 50; overflow: visible;">
+                    {{-- Main action button dropdown (no Alpine; uses native <details>) --}}
+                    <details class="relative kibo-details" style="z-index: 50;">
+                        <summary class="w-full px-4 py-2 kibo-bg text-white text-sm font-medium rounded-lg hover:opacity-90 transition-colors flex items-center justify-center gap-2 cursor-pointer select-none">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                             </svg>
                             Quick Actions
-                            <svg class="w-4 h-4 transition-transform duration-200" :class="showMenu ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-4 h-4 transition-transform duration-200 kibo-details-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                             </svg>
-                        </button>
+                        </summary>
 
                         {{-- Dropdown Menu --}}
-                        <div 
-                            x-show="showMenu" 
-                            x-cloak
-                            @click.away="showMenu = false" 
-                            x-transition:enter="transition ease-out duration-200"
-                            x-transition:enter-start="opacity-0 transform scale-95 translate-y-2"
-                            x-transition:enter-end="opacity-100 transform scale-100 translate-y-0"
-                            x-transition:leave="transition ease-in duration-150"
-                            x-transition:leave-start="opacity-100 transform scale-100 translate-y-0"
-                            x-transition:leave-end="opacity-0 transform scale-95 translate-y-2"
+                        <div
                             class="absolute bottom-full mb-2 left-0 right-0 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden"
                             style="z-index: 9999; min-width: 100%;"
                         >
                             {{-- Valuation Report --}}
                             @auth
-                            <button wire:click="openValuationModal({{ $vehicle->id }})" @click="showMenu = false" class="w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors flex items-start gap-3 border-b border-gray-100">
+                            <button wire:click="openValuationModal({{ $vehicle->id }})" class="w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors flex items-start gap-3 border-b border-gray-100">
                                 <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                                 </svg>
@@ -620,7 +611,7 @@
                             </button>
 
                             {{-- Financing --}}
-                            <button wire:click="openFinancingModal({{ $vehicle->id }})" @click="showMenu = false" class="w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors flex items-start gap-3 border-b border-gray-100">
+                            <button wire:click="openFinancingModal({{ $vehicle->id }})" class="w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors flex items-start gap-3 border-b border-gray-100">
                                 <svg class="w-5 h-5 kibo-text flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                 </svg>
@@ -631,7 +622,7 @@
                             </button>
 
                             {{-- Cash Purchase --}}
-                            <button wire:click="openCashPurchaseModal({{ $vehicle->id }})" @click="showMenu = false" class="w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors flex items-start gap-3">
+                            <button wire:click="openCashPurchaseModal({{ $vehicle->id }})" class="w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors flex items-start gap-3">
                                 <svg class="w-5 h-5 text-purple-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
                                 </svg>
@@ -646,7 +637,7 @@
                             </a>
                             @endauth
                         </div>
-                    </div>
+                    </details>
                 </div>
             </div>
             @empty
@@ -718,6 +709,12 @@
             }
         }
     </script>
+
+    <style>
+        /* Quick Actions dropdown (no Alpine) */
+        .kibo-details > summary::-webkit-details-marker { display: none; }
+        .kibo-details[open] .kibo-details-chevron { transform: rotate(180deg); }
+    </style>
 
     {{-- Order Modals --}}
     @livewire('customer.valuation-request-modal')

@@ -1,5 +1,14 @@
 <!-- Reserve Online Section -->
 <section class="bg-white py-16 px-4 sm:px-6 lg:px-8">
+    @php
+        $approvedCarsCount = cache()->remember(
+            'kibo.approved_cars_count',
+            now()->addMinutes(10),
+            fn () => \App\Models\Vehicle::query()
+                ->where('status', \App\Enums\VehicleStatus::APPROVED->value)
+                ->count()
+        );
+    @endphp
     <div class="max-w-7xl mx-auto">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
             <!-- Left Section - Info & Search -->
@@ -16,11 +25,11 @@
                     </p>
                     
                     <!-- Search Button -->
-                    <a href="{{ route('cars.search') }}" class="w-full max-w-md flex items-center justify-center gap-2 px-6 py-4 border-2 border-blue-600 text-blue-600 rounded-full font-medium hover:bg-blue-50 transition-colors">
+                    <a href="{{ route('cars.search') }}" class="w-full max-w-md flex items-center justify-center gap-2 px-6 py-4 border-2 border-green-600 text-green-600 rounded-full font-medium hover:bg-green-50 transition-colors">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                         </svg>
-                        <span>Search 148,584 cars</span>
+                        <span>Search {{ number_format((int) $approvedCarsCount) }} cars</span>
                     </a>
                 </div>
             </div>

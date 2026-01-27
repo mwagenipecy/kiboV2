@@ -101,6 +101,10 @@ class ImportFinancing extends Component
     public bool $showLoginModal = false;
     public bool $showSideModal = false;
     public string $sideModalType = 'login'; // 'login' or 'register'
+    
+    // Error modal
+    public bool $showErrorModal = false;
+    public array $errorMessages = [];
 
     // Login/Register form fields
     public string $loginEmail = '';
@@ -132,7 +136,8 @@ class ImportFinancing extends Component
             ->get()
             ->mapWithKeys(function ($make) {
                 return [$make->id => $make->name];
-            });
+            })
+            ->toArray();
 
         // Load all active vehicle models grouped by make_id
         $this->vehicleModels = VehicleModel::where('status', 'active')
@@ -141,7 +146,8 @@ class ImportFinancing extends Component
             ->groupBy('vehicle_make_id')
             ->map(function ($models) {
                 return $models->pluck('name')->toArray();
-            });
+            })
+            ->toArray();
     }
 
     public function openSideModal($type)
@@ -271,6 +277,15 @@ class ImportFinancing extends Component
         return [];
     }
 
+    public function getVehicleMakeNameProperty(): string
+    {
+        if (!empty($this->vehicleMake) && isset($this->vehicleMakes[$this->vehicleMake])) {
+            return $this->vehicleMakes[$this->vehicleMake];
+        }
+
+        return '';
+    }
+
     public function extractCarInfo()
     {
         if (empty($this->carLink)) {
@@ -330,11 +345,22 @@ class ImportFinancing extends Component
 
     public function nextStep()
     {
-        $this->validateCurrentStep();
-        
-        if ($this->currentStep < 4) {
-            $this->currentStep++;
+        try {
+            $this->validateCurrentStep();
+            
+            if ($this->currentStep < 4) {
+                $this->currentStep++;
+            }
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            $this->errorMessages = collect($e->errors())->flatten()->toArray();
+            $this->showErrorModal = true;
         }
+    }
+    
+    public function closeErrorModal()
+    {
+        $this->showErrorModal = false;
+        $this->errorMessages = [];
     }
 
     public function previousStep()
@@ -374,18 +400,23 @@ class ImportFinancing extends Component
             case 3:
                 if ($this->requestType === 'buy_car') {
                     $this->validate([
-                        'vehicleMake' => 'required|string|max:100',
+                        'vehicleMake' => 'required',
                         'vehicleModel' => 'required|string|max:100',
                         'vehicleYear' => 'nullable|integer|min:1900|max:2030',
                         'vehiclePrice' => 'required|numeric|min:0',
                         'vehicleCurrency' => 'required|in:USD,EUR,GBP,JPY,TZS',
+                    ], [
+                        'vehicleMake.required' => 'Please select a vehicle make.',
+                        'vehicleModel.required' => 'Please select a vehicle model.',
+                        'vehiclePrice.required' => 'Please enter the vehicle price.',
                     ]);
                 } else {
                     $this->validate([
-                        'vehicleMake' => 'nullable|string|max:100',
-                        'vehicleModel' => 'nullable|string|max:100',
                         'taxAmount' => 'required|numeric|min:0',
                         'transportCost' => 'required|numeric|min:0',
+                    ], [
+                        'taxAmount.required' => 'Please enter the tax amount.',
+                        'transportCost.required' => 'Please enter the transport cost.',
                     ]);
                 }
                 break;
@@ -393,6 +424,10 @@ class ImportFinancing extends Component
                 $this->validate([
                     'financingAmountRequested' => 'required|numeric|min:1000',
                     'loanTermMonths' => 'required|integer|min:6|max:84',
+                ], [
+                    'financingAmountRequested.required' => 'Please enter the financing amount you need.',
+                    'financingAmountRequested.min' => 'The minimum financing amount is 1,000.',
+                    'loanTermMonths.required' => 'Please select a loan term.',
                 ]);
                 break;
         }
@@ -400,48 +435,77 @@ class ImportFinancing extends Component
 
     public function submit()
     {
-        $this->validateCurrentStep();
+        try {
+            $this->validateCurrentStep();
 
-        // Store documents if uploaded
-        $documentPaths = [];
-        if (!empty($this->documents)) {
-            foreach ($this->documents as $document) {
-                $path = $document->store('import-financing-documents', 'public');
-                $documentPaths[] = $path;
+            // Check if user is authenticated
+            if (!auth()->check()) {
+                $this->errorMessages = ['You must be logged in to submit an application.'];
+                $this->showErrorModal = true;
+                return;
             }
+
+            // Store documents if uploaded
+            $documentPaths = [];
+            if (!empty($this->documents)) {
+                foreach ($this->documents as $document) {
+                    $path = $document->store('import-financing-documents', 'public');
+                    $documentPaths[] = $path;
+                }
+            }
+
+            // Prepare data for both request types
+            $data = [
+                'user_id' => auth()->id(),
+                'customer_name' => $this->customerName,
+                'customer_email' => $this->customerEmail,
+                'customer_phone' => $this->customerPhone,
+                'request_type' => $this->requestType,
+                'financing_amount_requested' => $this->financingAmountRequested,
+                'loan_term_months' => $this->loanTermMonths,
+                'down_payment' => $this->downPayment,
+                'documents' => $documentPaths,
+                'customer_notes' => $this->customerNotes,
+                'status' => 'pending',
+            ];
+
+            // Add request-type specific fields
+            if ($this->requestType === 'buy_car') {
+                $data['car_link'] = $this->carLink;
+                $data['extracted_car_info'] = $this->extractedCarInfo;
+                $data['vehicle_make'] = $this->vehicleMakeName;
+                $data['vehicle_model'] = $this->vehicleModel;
+                $data['vehicle_year'] = $this->vehicleYear;
+                $data['vehicle_price'] = $this->vehiclePrice;
+                $data['vehicle_currency'] = $this->vehicleCurrency;
+                $data['vehicle_condition'] = $this->vehicleCondition;
+                $data['vehicle_location'] = $this->vehicleLocation;
+            } else {
+                // tax_transport
+                $data['vehicle_make'] = $this->vehicleMakeName ?: null;
+                $data['vehicle_model'] = $this->vehicleModel ?: null;
+                $data['vehicle_year'] = $this->vehicleYear;
+                $data['vehicle_condition'] = $this->vehicleCondition;
+                $data['tax_amount'] = $this->taxAmount;
+                $data['transport_cost'] = $this->transportCost;
+                $data['total_clearing_cost'] = $this->totalClearingCost;
+                $data['vehicle_currency'] = 'TZS';
+            }
+
+            // Create the request
+            $request = ImportFinancingRequest::create($data);
+
+            $this->referenceNumber = $request->reference_number;
+            $this->showSuccess = true;
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            $this->errorMessages = collect($e->errors())->flatten()->toArray();
+            $this->showErrorModal = true;
+        } catch (\Exception $e) {
+            $this->errorMessages = ['An error occurred while submitting your application. Please try again.'];
+            $this->showErrorModal = true;
+            \Log::error('Import financing submission error: ' . $e->getMessage());
         }
-
-        // Create the request
-        $request = ImportFinancingRequest::create([
-            'user_id' => auth()->id(),
-            'customer_name' => $this->customerName,
-            'customer_email' => $this->customerEmail,
-            'customer_phone' => $this->customerPhone,
-            'request_type' => $this->requestType,
-            'car_link' => $this->carLink,
-            'extracted_car_info' => $this->extractedCarInfo,
-            'vehicle_make' => $this->vehicleMake,
-            'vehicle_model' => $this->vehicleModel,
-            'vehicle_year' => $this->vehicleYear,
-            'vehicle_price' => $this->vehiclePrice,
-            'vehicle_currency' => $this->vehicleCurrency,
-            'vehicle_condition' => $this->vehicleCondition,
-            'vehicle_location' => $this->vehicleLocation,
-            'tax_amount' => $this->taxAmount,
-            'transport_cost' => $this->transportCost,
-            'total_clearing_cost' => $this->totalClearingCost,
-            'financing_amount_requested' => $this->financingAmountRequested,
-            'loan_term_months' => $this->loanTermMonths,
-            'down_payment' => $this->downPayment,
-            'documents' => $documentPaths,
-            'customer_notes' => $this->customerNotes,
-            'status' => 'pending',
-        ]);
-
-        $this->referenceNumber = $request->reference_number;
-        $this->showSuccess = true;
-
-        // TODO: Send notification to admin
     }
 
     public function resetForm()
