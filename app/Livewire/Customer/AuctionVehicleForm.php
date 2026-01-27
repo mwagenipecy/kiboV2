@@ -16,7 +16,6 @@ class AuctionVehicleForm extends Component
     use WithFileUploads;
 
     // Basic Information
-    public $title;
     public $description;
     public $condition = 'used';
     public $registration_number;
@@ -46,6 +45,7 @@ class AuctionVehicleForm extends Component
     // Images
     public $image_front;
     public $other_images = [];
+    public $newImages = []; // Temporary property for new uploads
     
     // Location
     public $location;
@@ -68,7 +68,6 @@ class AuctionVehicleForm extends Component
     protected function rules()
     {
         return [
-            'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'condition' => 'required|in:new,used',
             'vehicle_make_id' => 'required|exists:vehicle_makes,id',
@@ -82,6 +81,71 @@ class AuctionVehicleForm extends Component
             'contact_phone' => 'required|string|max:20',
             'contact_email' => 'required|email',
         ];
+    }
+
+    /**
+     * Generate auto title from year, make, model, variant
+     */
+    public function getGeneratedTitleProperty()
+    {
+        $parts = [];
+        
+        if ($this->year) {
+            $parts[] = $this->year;
+        }
+        
+        if ($this->vehicle_make_id) {
+            $make = $this->makes->firstWhere('id', $this->vehicle_make_id);
+            if ($make) {
+                $parts[] = $make->name;
+            }
+        }
+        
+        if ($this->vehicle_model_id) {
+            $model = $this->models->firstWhere('id', $this->vehicle_model_id);
+            if ($model) {
+                $parts[] = $model->name;
+            }
+        }
+        
+        if ($this->variant) {
+            $parts[] = $this->variant;
+        }
+        
+        return implode(' ', $parts) ?: 'Vehicle Listing';
+    }
+
+    /**
+     * Remove a specific image from other_images array
+     */
+    public function removeOtherImage($index)
+    {
+        if (isset($this->other_images[$index])) {
+            $images = $this->other_images;
+            unset($images[$index]);
+            $this->other_images = array_values($images);
+        }
+    }
+
+    /**
+     * Handle when new images are uploaded - append them to existing images
+     */
+    public function updatedNewImages()
+    {
+        // Validate each new image
+        $this->validate([
+            'newImages.*' => 'image|max:5120',
+        ]);
+
+        // Append new images to existing other_images (max 10 total)
+        foreach ($this->newImages as $image) {
+            if (count($this->other_images) < 10) {
+                $this->other_images[] = $image;
+            }
+        }
+
+        // Clear the temporary upload field
+        $this->newImages = [];
     }
 
     public function mount()
@@ -103,6 +167,18 @@ class AuctionVehicleForm extends Component
         $this->makes = VehicleMake::where('status', 'active')
             ->orderBy('name')
             ->get(['id', 'name']);
+    }
+
+    /**
+     * Get available years for dropdown
+     */
+    public function getYearsProperty()
+    {
+        $years = [];
+        for ($y = date('Y') + 1; $y >= 1900; $y--) {
+            $years[] = $y;
+        }
+        return $years;
     }
 
     public function updatedVehicleMakeId()
@@ -127,7 +203,6 @@ class AuctionVehicleForm extends Component
     {
         if ($this->currentStep === 1) {
             $this->validate([
-                'title' => 'required|string|max:255',
                 'condition' => 'required|in:new,used',
                 'vehicle_make_id' => 'required|exists:vehicle_makes,id',
                 'vehicle_model_id' => 'required|exists:vehicle_models,id',
@@ -159,7 +234,7 @@ class AuctionVehicleForm extends Component
 
         $data = [
             'user_id' => Auth::id(),
-            'title' => $this->title,
+            'title' => $this->generatedTitle,
             'description' => $this->description,
             'condition' => $this->condition,
             'registration_number' => $this->registration_number,

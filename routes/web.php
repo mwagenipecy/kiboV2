@@ -1,8 +1,25 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 use Laravel\Fortify\Features;
 use Livewire\Volt\Volt;
+
+// Storage file serving route (fallback if symlink doesn't work on server)
+Route::get('/storage/{path}', function ($path) {
+    $fullPath = storage_path('app/public/' . $path);
+    
+    if (!file_exists($fullPath)) {
+        abort(404);
+    }
+    
+    $mimeType = mime_content_type($fullPath);
+    
+    return response()->file($fullPath, [
+        'Content-Type' => $mimeType,
+        'Cache-Control' => 'public, max-age=31536000',
+    ]);
+})->where('path', '.*')->name('storage.serve');
 
 // Language switching route
 Route::get('/lang/{locale}', function ($locale) {
@@ -1176,7 +1193,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('my-adverts', \App\Livewire\Customer\MyAdverts::class)->name('my-adverts');
     Route::get('my-auctions', \App\Livewire\Customer\MyAuctions::class)->name('my-auctions');
 
-    // My car requests (Find-me-a-car)
+    // ms (Find-me-a-car)
     Route::get('my-car-requests', \App\Livewire\Customer\MyCarRequests::class)->name('my-car-requests');
 
     Route::get('settings/two-factor', function () {

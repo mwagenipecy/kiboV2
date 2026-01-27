@@ -38,12 +38,6 @@
         @if($currentStep === 1)
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-6">
             <h3 class="text-xl font-semibold text-gray-900 mb-4">Vehicle Information</h3>
-            
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Title <span class="text-red-500">*</span></label>
-                <input type="text" wire:model="title" placeholder="e.g., 2020 Toyota Land Cruiser V8" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
-                @error('title') <span class="text-red-500 text-sm mt-1">{{ $message }}</span> @enderror
-            </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -113,8 +107,15 @@
 
             <!-- Navigation -->
             <div class="flex justify-end pt-4">
-                <button type="button" wire:click="nextStep" class="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2 rounded-lg transition-colors">
-                    Next Step
+                <button type="button" wire:click="nextStep" class="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2 rounded-lg transition-colors flex items-center">
+                    <span wire:loading.remove wire:target="nextStep">Next Step</span>
+                    <span wire:loading wire:target="nextStep" class="flex items-center">
+                        <svg class="animate-spin h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Loading...
+                    </span>
                 </button>
             </div>
         </div>
@@ -228,11 +229,25 @@
 
             <!-- Navigation -->
             <div class="flex justify-between pt-4">
-                <button type="button" wire:click="previousStep" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold px-6 py-2 rounded-lg transition-colors">
-                    Previous
+                <button type="button" wire:click="previousStep" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold px-6 py-2 rounded-lg transition-colors flex items-center">
+                    <span wire:loading.remove wire:target="previousStep">Previous</span>
+                    <span wire:loading wire:target="previousStep" class="flex items-center">
+                        <svg class="animate-spin h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Loading...
+                    </span>
                 </button>
-                <button type="button" wire:click="nextStep" class="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2 rounded-lg transition-colors">
-                    Next Step
+                <button type="button" wire:click="nextStep" class="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2 rounded-lg transition-colors flex items-center">
+                    <span wire:loading.remove wire:target="nextStep">Next Step</span>
+                    <span wire:loading wire:target="nextStep" class="flex items-center">
+                        <svg class="animate-spin h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Loading...
+                    </span>
                 </button>
             </div>
         </div>
@@ -257,24 +272,86 @@
 
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Additional Photos</label>
-                <input type="file" wire:model="other_images" accept="image/*" multiple class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
-                <p class="text-xs text-gray-500 mt-1">You can upload up to 10 additional photos</p>
+                <p class="text-xs text-gray-500 mb-3">You can upload up to 10 additional photos. Click "Add Photos" to select one or multiple images at once.</p>
+                
+                <!-- Image Previews (show first if there are images) -->
                 @if(count($other_images) > 0)
-                    <div class="mt-2 flex flex-wrap gap-2">
-                        @foreach($other_images as $image)
-                            <img src="{{ $image->temporaryUrl() }}" alt="Preview" class="h-24 w-24 rounded-lg object-cover">
+                    <div class="mb-4 grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+                        @foreach($other_images as $index => $image)
+                            <div class="relative group">
+                                <img src="{{ $image->temporaryUrl() }}" alt="Photo {{ $index + 1 }}" class="h-24 w-24 rounded-lg object-cover border border-gray-200">
+                                <!-- Remove Button -->
+                                <button 
+                                    type="button" 
+                                    wire:click="removeOtherImage({{ $index }})"
+                                    class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
+                                    title="Remove image"
+                                >
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                    </svg>
+                                </button>
+                            </div>
                         @endforeach
                     </div>
+                    <p class="text-xs text-gray-500 mb-3">{{ count($other_images) }} of 10 photo(s) added. Hover over an image to remove it.</p>
+                @endif
+                
+                <!-- Hidden file input - uses newImages to append -->
+                <input 
+                    type="file" 
+                    wire:model="newImages" 
+                    accept="image/*" 
+                    multiple 
+                    class="hidden"
+                    id="other-images-input"
+                >
+                
+                <!-- Add Photos Button -->
+                @if(count($other_images) < 10)
+                    <button 
+                        type="button" 
+                        onclick="document.getElementById('other-images-input').click()"
+                        class="inline-flex items-center px-4 py-2 bg-green-50 hover:bg-green-100 text-green-700 font-medium rounded-lg border border-green-300 transition-colors"
+                    >
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                        </svg>
+                        {{ count($other_images) > 0 ? 'Add More Photos' : 'Add Photos' }}
+                        <span wire:loading wire:target="newImages" class="ml-2">
+                            <svg class="animate-spin h-4 w-4 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                        </span>
+                    </button>
+                    <span class="text-xs text-gray-500 ml-2">Select one or multiple photos</span>
+                @else
+                    <p class="text-sm text-amber-600">Maximum 10 photos reached. Remove some to add more.</p>
                 @endif
             </div>
 
             <!-- Navigation -->
             <div class="flex justify-between pt-4">
-                <button type="button" wire:click="previousStep" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold px-6 py-2 rounded-lg transition-colors">
-                    Previous
+                <button type="button" wire:click="previousStep" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold px-6 py-2 rounded-lg transition-colors flex items-center">
+                    <span wire:loading.remove wire:target="previousStep">Previous</span>
+                    <span wire:loading wire:target="previousStep" class="flex items-center">
+                        <svg class="animate-spin h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Loading...
+                    </span>
                 </button>
-                <button type="button" wire:click="nextStep" class="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2 rounded-lg transition-colors">
-                    Next Step
+                <button type="button" wire:click="nextStep" class="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2 rounded-lg transition-colors flex items-center">
+                    <span wire:loading.remove wire:target="nextStep">Next Step</span>
+                    <span wire:loading wire:target="nextStep" class="flex items-center">
+                        <svg class="animate-spin h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Loading...
+                    </span>
                 </button>
             </div>
         </div>
@@ -337,11 +414,25 @@
 
             <!-- Navigation -->
             <div class="flex justify-between pt-4">
-                <button type="button" wire:click="previousStep" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold px-6 py-2 rounded-lg transition-colors">
-                    Previous
+                <button type="button" wire:click="previousStep" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold px-6 py-2 rounded-lg transition-colors flex items-center">
+                    <span wire:loading.remove wire:target="previousStep">Previous</span>
+                    <span wire:loading wire:target="previousStep" class="flex items-center">
+                        <svg class="animate-spin h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Loading...
+                    </span>
                 </button>
-                <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-semibold px-8 py-2 rounded-lg transition-colors">
-                    Submit for Auction
+                <button type="submit" wire:loading.attr="disabled" class="bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white font-semibold px-8 py-2 rounded-lg transition-colors flex items-center">
+                    <span wire:loading.remove wire:target="save">Submit for Auction</span>
+                    <span wire:loading wire:target="save" class="flex items-center">
+                        <svg class="animate-spin h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Submitting...
+                    </span>
                 </button>
             </div>
         </div>
