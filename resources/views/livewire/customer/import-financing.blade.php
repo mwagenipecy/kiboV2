@@ -54,19 +54,11 @@
                 <p class="text-gray-600 mb-4 sm:mb-6 text-sm sm:text-base">
                     You need to be logged in to submit an import financing request. Please sign in to continue.
                 </p>
-                <div class="flex flex-col sm:flex-row gap-3 justify-center">
-                    <button wire:click="openSideModal('login')" class="inline-flex items-center justify-center px-5 sm:px-6 py-2.5 sm:py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl transition-colors text-sm sm:text-base">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
-                        </svg>
-                        Sign In
+                <div class="flex flex-col gap-3 items-center">
+                    <button wire:click="closeLoginModal" class="inline-flex items-center justify-center px-5 sm:px-6 py-2.5 sm:py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl transition-colors text-sm sm:text-base">
+                        OK
                     </button>
-                    <button wire:click="openSideModal('register')" class="inline-flex items-center justify-center px-5 sm:px-6 py-2.5 sm:py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl transition-colors text-sm sm:text-base">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
-                        </svg>
-                        Create Account
-                    </button>
+                
                 </div>
             </div>
         </div>
@@ -304,7 +296,6 @@
         </div>
     </div>
 
-    @auth
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
         @if($showSuccess)
             <!-- Success Message -->
@@ -416,7 +407,7 @@
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                         <!-- Buy Car Option -->
-                        <button type="button" wire:click="$set('requestType', 'buy_car')" class="text-left w-full">
+                        <button type="button" wire:click="handleRequestTypeClick('buy_car')" class="text-left w-full">
                             <div class="p-4 sm:p-6 rounded-xl sm:rounded-2xl border-2 transition-all duration-300 {{ $requestType === 'buy_car' ? 'border-emerald-500 bg-emerald-50 ring-4 ring-emerald-100' : 'border-gray-200 hover:border-emerald-300 hover:bg-gray-50' }}">
                                 <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center mb-3 sm:mb-4 {{ $requestType === 'buy_car' ? 'bg-emerald-500 text-white' : 'bg-gray-100 text-gray-600' }} transition-colors">
                                     <svg class="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -435,7 +426,7 @@
                         </button>
 
                         <!-- Tax & Transport Option -->
-                        <button type="button" wire:click="$set('requestType', 'tax_transport')" class="text-left w-full">
+                        <button type="button" wire:click="handleRequestTypeClick('tax_transport')" class="text-left w-full">
                             <div class="p-4 sm:p-6 rounded-xl sm:rounded-2xl border-2 transition-all duration-300 {{ $requestType === 'tax_transport' ? 'border-emerald-500 bg-emerald-50 ring-4 ring-emerald-100' : 'border-gray-200 hover:border-emerald-300 hover:bg-gray-50' }}">
                                 <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center mb-3 sm:mb-4 {{ $requestType === 'tax_transport' ? 'bg-emerald-500 text-white' : 'bg-gray-100 text-gray-600' }} transition-colors">
                                     <svg class="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -809,5 +800,4 @@
             </div>
         @endif
     </div>
-    @endauth
 </div>

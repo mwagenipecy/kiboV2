@@ -123,9 +123,8 @@ class ImportFinancing extends Component
             $this->customerName = $user->name;
             $this->customerEmail = $user->email;
             $this->customerPhone = $user->phone ?? '';
-        } else {
-            $this->showLoginModal = true;
         }
+        // Don't show modal on mount - let user see the form first
     }
 
     protected function loadVehicleData()
@@ -154,11 +153,7 @@ class ImportFinancing extends Component
     {
         $this->sideModalType = $type;
         $this->showSideModal = true;
-
-        // Only hide the initial login modal if we're opening from there
-        if ($this->showLoginModal) {
-            $this->showLoginModal = false;
-        }
+        $this->showLoginModal = false;
 
         $this->resetFormFields();
 
@@ -169,8 +164,13 @@ class ImportFinancing extends Component
     public function closeSideModal()
     {
         $this->showSideModal = false;
-        $this->showLoginModal = true;
         $this->resetFormFields();
+        // Don't reopen login modal - let user continue with form
+    }
+
+    public function closeLoginModal()
+    {
+        $this->showLoginModal = false;
     }
 
     public function backToInitialModal()
@@ -178,6 +178,29 @@ class ImportFinancing extends Component
         $this->showSideModal = false;
         $this->showLoginModal = true;
         $this->resetFormFields();
+    }
+
+    public function checkAuthAndShowModal()
+    {
+        if (!auth()->check()) {
+            $this->showLoginModal = true;
+            return false;
+        }
+        return true;
+    }
+
+    public function updatedCustomerName()
+    {
+        if (!auth()->check()) {
+            $this->showLoginModal = true;
+        }
+    }
+
+    public function updatedCustomerEmail()
+    {
+        if (!auth()->check()) {
+            $this->showLoginModal = true;
+        }
     }
 
     protected function resetFormFields()
@@ -238,6 +261,15 @@ class ImportFinancing extends Component
         $this->customerPhone = $user->phone ?? '';
 
         session()->flash('message', 'Account created successfully!');
+    }
+
+    public function handleRequestTypeClick($type)
+    {
+        if (!$this->checkAuthAndShowModal()) {
+            return;
+        }
+        $this->requestType = $type;
+        $this->updatedRequestType();
     }
 
     public function updatedRequestType()
@@ -345,6 +377,10 @@ class ImportFinancing extends Component
 
     public function nextStep()
     {
+        if (!$this->checkAuthAndShowModal()) {
+            return;
+        }
+
         try {
             $this->validateCurrentStep();
             
@@ -435,15 +471,12 @@ class ImportFinancing extends Component
 
     public function submit()
     {
+        if (!$this->checkAuthAndShowModal()) {
+            return;
+        }
+
         try {
             $this->validateCurrentStep();
-
-            // Check if user is authenticated
-            if (!auth()->check()) {
-                $this->errorMessages = ['You must be logged in to submit an application.'];
-                $this->showErrorModal = true;
-                return;
-            }
 
             // Store documents if uploaded
             $documentPaths = [];

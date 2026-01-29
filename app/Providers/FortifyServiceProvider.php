@@ -87,8 +87,7 @@ class FortifyServiceProvider extends ServiceProvider
                     // Redirect to home page with flag to show OTP verification modal
                     return redirect()->route('cars.index')
                         ->with('showOtpVerification', true)
-                        ->with('registrationSuccess', true)
-                        ->with('status', 'Account created successfully! Please verify your email with the OTP code sent to ' . $user->email);
+                        ->with('registrationSuccess', true);
                 }
                 
                 // Fallback if user is not authenticated (shouldn't happen)

@@ -343,7 +343,11 @@
                 {{-- Report --}}
                 <div class="bg-white rounded-xl p-6 shadow-sm">
                     <h2 class="text-2xl font-bold text-gray-900 mb-4">Spotted something fishy?</h2>
-                    <button class="kibo-text hover:opacity-80 font-medium underline">
+                    <p class="text-gray-600 mb-4">If you believe this listing violates our policies or contains misleading information, please report it.</p>
+                    <button wire:click="$dispatch('openReportModal', { section: 'vehicle', reportableId: {{ $vehicle->id }}, reportableType: 'App\\Models\\Vehicle' })" class="inline-flex items-center gap-2 px-4 py-2 bg-red-50 hover:bg-red-100 text-red-700 font-medium rounded-lg transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
                         Report this advert
                     </button>
                 </div>
@@ -640,10 +644,10 @@
                     <div class="mb-6">
                         <div class="flex items-center gap-4 mb-6">
                             <div class="w-16 h-16 bg-indigo-900 rounded-full flex items-center justify-center">
-                                <span class="text-white text-sm font-bold">MSM</span>
+                                <span class="text-white text-sm font-bold">SV</span>
                             </div>
                             <div>
-                                <p class="font-bold text-gray-900">MoneySuperMarket</p>
+                                <p class="font-bold text-gray-900">Savana</p>
                                 <p class="text-sm text-gray-600">Our trusted insurance partner</p>
                             </div>
                         </div>
@@ -838,4 +842,7 @@
     @livewire('customer.valuation-request-modal')
     @livewire('customer.financing-application-modal')
     @livewire('customer.cash-purchase-modal')
+    
+    {{-- Report Modal --}}
+    @livewire('customer.report-modal', ['section' => 'vehicle', 'reportableId' => $vehicle->id, 'reportableType' => 'App\Models\Vehicle'], key('report-modal-'.$vehicle->id))
 </div>

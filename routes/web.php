@@ -665,6 +665,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
         return view('admin.dashboard', ['userRole' => $role]);
     })->name('dashboard');
     
+    // Reports (Admin only)
+    Route::get('/reports', \App\Livewire\Admin\Reports::class)->name('reports');
+    
     // Profile & Settings (Common to all roles)
     Route::get('/profile', function () {
         return view('admin.profile');
@@ -1207,6 +1210,13 @@ Route::middleware(['auth'])->group(function () {
         ),
     )->name('two-factor.show');
 });
+
+// ============================================
+// LEGAL PAGES
+// ============================================
+Route::get('/terms', function () {
+    return view('terms', ['vehicleType' => 'cars']);
+})->name('terms');
 
 // ============================================
 // CHATBOT API ROUTE

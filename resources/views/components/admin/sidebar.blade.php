@@ -496,6 +496,22 @@
                 </a>
                 @endif
 
+                <!-- Reports (Admin only) -->
+                @if($userRole === 'admin')
+                <a href="{{ route('admin.reports') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('admin.reports') ? 'text-white kibo-sidebar-active shadow-sm' : 'text-gray-700 kibo-sidebar-hover' }} transition-colors group">
+                    <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    <span class="menu-text">Reports</span>
+                    @php
+                        $pendingReportsCount = \App\Models\Report::where('status', 'pending')->count();
+                    @endphp
+                    @if($pendingReportsCount > 0)
+                        <span class="ml-auto px-2 py-0.5 text-xs font-medium bg-red-100 text-red-800 rounded-full">{{ $pendingReportsCount }}</span>
+                    @endif
+                </a>
+                @endif
+
                 <!-- Settings - Expandable (Admin only) -->
                 @if($userRole === 'admin')
                 <div x-data="{ open: {{ request()->is('admin/settings*') ? 'true' : 'false' }} }">

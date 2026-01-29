@@ -307,7 +307,7 @@
                         <label class="flex items-start">
                             <input type="checkbox" required class="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500 mt-1">
                             <span class="ml-2 text-sm text-gray-600">
-                                {!! __('auth.terms_agreement', ['terms' => '<a href="#" class="text-green-700 hover:underline">' . __('auth.terms_of_service') . '</a>', 'privacy' => '<a href="#" class="text-green-700 hover:underline">' . __('auth.privacy_policy') . '</a>']) !!}
+                                {!! __('auth.terms_agreement', ['terms' => '<a href="' . route('terms') . '" target="_blank" rel="noopener noreferrer" class="text-green-700 hover:underline font-medium">' . __('auth.terms_of_service') . '</a>', 'privacy' => '<a href="#" class="text-green-700 hover:underline font-medium">' . __('auth.privacy_policy') . '</a>']) !!}
                             </span>
                         </label>
                     </div>
@@ -488,7 +488,37 @@
                             We've sent a 4-digit verification code to your email address.
                             @endif
                             <br>
-                            <span class="font-medium text-gray-900">{{ auth()->user()->email }}</span>
+                            @php
+                                $email = auth()->user()->email;
+                                $parts = explode('@', $email);
+                                $local = $parts[0];
+                                $domain = $parts[1] ?? '';
+                                
+                                // Mask local part (keep first and last character)
+                                if (strlen($local) > 2) {
+                                    $maskedLocal = substr($local, 0, 1) . str_repeat('*', strlen($local) - 2) . substr($local, -1);
+                                } else {
+                                    $maskedLocal = str_repeat('*', strlen($local));
+                                }
+                                
+                                // Mask domain part (keep first character)
+                                if (strlen($domain) > 1) {
+                                    $domainParts = explode('.', $domain);
+                                    $domainName = $domainParts[0];
+                                    $domainExt = isset($domainParts[1]) ? '.' . $domainParts[1] : '';
+                                    
+                                    if (strlen($domainName) > 1) {
+                                        $maskedDomain = substr($domainName, 0, 1) . str_repeat('*', strlen($domainName) - 1) . $domainExt;
+                                    } else {
+                                        $maskedDomain = str_repeat('*', strlen($domainName)) . $domainExt;
+                                    }
+                                } else {
+                                    $maskedDomain = str_repeat('*', strlen($domain));
+                                }
+                                
+                                $maskedEmail = $maskedLocal . '@' . $maskedDomain;
+                            @endphp
+                            <span class="font-medium text-gray-900">{{ $maskedEmail }}</span>
                         </p>
                     </div>
 
@@ -536,20 +566,28 @@
                     </button>
                 </form>
 
-                <!-- Resend OTP -->
-                <div class="text-center">
-                    <form action="{{ route('otp.resend') }}" method="POST" class="inline" id="resendOtpForm">
+                <!-- Resend OTP and Cancel -->
+                <div class="flex flex-col gap-3 mt-4">
+                    <div class="text-center">
+                        <form action="{{ route('otp.resend') }}" method="POST" class="inline" id="resendOtpForm">
+                            @csrf
+                            <input type="hidden" name="from_modal" value="1">
+                            <button type="submit" id="resendOtpBtn" class="text-sm text-green-700 hover:text-green-800 font-medium disabled:opacity-50 disabled:cursor-not-allowed">
+                                <span id="resendOtpText">Resend Code</span>
+                                <span id="resendOtpLoading" class="hidden flex items-center gap-1">
+                                    <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    Sending...
+                                </span>
+                            </button>
+                        </form>
+                    </div>
+                    <form action="{{ route('logout') }}" method="POST" class="w-full">
                         @csrf
-                        <input type="hidden" name="from_modal" value="1">
-                        <button type="submit" id="resendOtpBtn" class="text-sm text-green-700 hover:text-green-800 font-medium disabled:opacity-50 disabled:cursor-not-allowed">
-                            <span id="resendOtpText">Resend Code</span>
-                            <span id="resendOtpLoading" class="hidden flex items-center gap-1">
-                                <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                                Sending...
-                            </span>
+                        <button type="submit" id="cancelOtpBtn" class="w-full border-2 border-gray-300 hover:border-gray-400 text-gray-700 hover:text-gray-900 py-2.5 rounded-lg font-medium transition-colors text-sm">
+                            Cancel & Login Again
                         </button>
                     </form>
                 </div>
