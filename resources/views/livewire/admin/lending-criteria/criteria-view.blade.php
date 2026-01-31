@@ -69,8 +69,8 @@
                     <div>
                         <label class="text-sm font-medium text-gray-600">Price Range</label>
                         <p class="mt-1 text-base text-gray-900">
-                            ${{ $criteria->min_vehicle_price ? number_format($criteria->min_vehicle_price) : '0' }} - 
-                            ${{ $criteria->max_vehicle_price ? number_format($criteria->max_vehicle_price) : '∞' }}
+                            TZS {{ $criteria->min_vehicle_price ? number_format($criteria->min_vehicle_price) : '0' }} - 
+                            TZS {{ $criteria->max_vehicle_price ? number_format($criteria->max_vehicle_price) : '∞' }}
                         </p>
                     </div>
                     <div>
@@ -137,8 +137,8 @@
                     <div>
                         <label class="text-sm font-medium text-gray-600">Loan Amount Range</label>
                         <p class="mt-1 text-base text-gray-900">
-                            ${{ $criteria->min_loan_amount ? number_format($criteria->min_loan_amount) : '0' }} - 
-                            ${{ $criteria->max_loan_amount ? number_format($criteria->max_loan_amount) : '∞' }}
+                            TZS {{ $criteria->min_loan_amount ? number_format($criteria->min_loan_amount) : '0' }} - 
+                            TZS {{ $criteria->max_loan_amount ? number_format($criteria->max_loan_amount) : '∞' }}
                         </p>
                     </div>
                     <div>
@@ -154,7 +154,7 @@
                     <div>
                         <label class="text-sm font-medium text-gray-600">Processing Fee</label>
                         <p class="mt-1 text-base text-gray-900">
-                            ${{ $criteria->processing_fee ? number_format($criteria->processing_fee) : '0' }}
+                            TZS {{ $criteria->processing_fee ? number_format($criteria->processing_fee) : '0' }}
                         </p>
                     </div>
                     <div>
@@ -181,7 +181,7 @@
                     <div>
                         <label class="text-sm font-medium text-gray-600">Minimum Monthly Income</label>
                         <p class="mt-1 text-base text-gray-900">
-                            ${{ $criteria->min_monthly_income ? number_format($criteria->min_monthly_income) : 'Not specified' }}
+                            TZS {{ $criteria->min_monthly_income ? number_format($criteria->min_monthly_income) : 'Not specified' }}
                         </p>
                     </div>
                     <div>

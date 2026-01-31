@@ -93,28 +93,36 @@
                     <!-- Year Range -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Minimum Vehicle Year</label>
-                        <input type="number" wire:model="min_vehicle_year" placeholder="e.g., 2015" 
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                        <select wire:model="min_vehicle_year" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                            <option value="">Select Minimum Year</option>
+                            @for($y = date('Y') + 2; $y >= 1900; $y--)
+                                <option value="{{ $y }}">{{ $y }}</option>
+                            @endfor
+                        </select>
                         @error('min_vehicle_year') <span class="text-sm text-red-600 mt-1 block">{{ $message }}</span> @enderror
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Maximum Vehicle Year</label>
-                        <input type="number" wire:model="max_vehicle_year" placeholder="e.g., 2024" 
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                        <select wire:model="max_vehicle_year" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                            <option value="">Select Maximum Year</option>
+                            @for($y = date('Y') + 2; $y >= 1900; $y--)
+                                <option value="{{ $y }}">{{ $y }}</option>
+                            @endfor
+                        </select>
                         @error('max_vehicle_year') <span class="text-sm text-red-600 mt-1 block">{{ $message }}</span> @enderror
                     </div>
 
                     <!-- Price Range -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Minimum Vehicle Price (£)</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Minimum Vehicle Price (TZS)</label>
                         <input type="number" step="0.01" wire:model="min_vehicle_price" placeholder="e.g., 5000" 
                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
                         @error('min_vehicle_price') <span class="text-sm text-red-600 mt-1 block">{{ $message }}</span> @enderror
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Maximum Vehicle Price (£)</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Maximum Vehicle Price (TZS)</label>
                         <input type="number" step="0.01" wire:model="max_vehicle_price" placeholder="e.g., 50000" 
                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
                         @error('max_vehicle_price') <span class="text-sm text-red-600 mt-1 block">{{ $message }}</span> @enderror
@@ -193,14 +201,14 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <!-- Loan Amount Range -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Minimum Loan Amount (£)</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Minimum Loan Amount (TZS)</label>
                         <input type="number" step="0.01" wire:model="min_loan_amount" placeholder="e.g., 3000" 
                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
                         @error('min_loan_amount') <span class="text-sm text-red-600 mt-1 block">{{ $message }}</span> @enderror
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Maximum Loan Amount (£)</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Maximum Loan Amount (TZS)</label>
                         <input type="number" step="0.01" wire:model="max_loan_amount" placeholder="e.g., 50000" 
                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
                         @error('max_loan_amount') <span class="text-sm text-red-600 mt-1 block">{{ $message }}</span> @enderror
@@ -247,7 +255,7 @@
 
                     <!-- Processing Fee & Time -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Processing Fee (£)</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Processing Fee (TZS)</label>
                         <input type="number" step="0.01" wire:model="processing_fee" placeholder="e.g., 250" 
                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
                         @error('processing_fee') <span class="text-sm text-red-600 mt-1 block">{{ $message }}</span> @enderror
@@ -275,7 +283,7 @@
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Minimum Monthly Income (£)</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Minimum Monthly Income (TZS)</label>
                         <input type="number" step="0.01" wire:model="min_monthly_income" placeholder="e.g., 2000" 
                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
                         @error('min_monthly_income') <span class="text-sm text-red-600 mt-1 block">{{ $message }}</span> @enderror

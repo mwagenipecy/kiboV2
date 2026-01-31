@@ -17,6 +17,7 @@ class VehicleDetail extends Component
     public $showStatusModal = false;
     public $newStatus;
     public $statusNotes = '';
+    public $selectedImage = null;
 
     public function mount($vehicleId)
     {

@@ -14,6 +14,7 @@ class TruckDetail extends Component
     public $showStatusModal = false;
     public $newStatus;
     public $statusNotes = '';
+    public $selectedImage = null;
 
     public function mount($truckId)
     {

@@ -29,17 +29,15 @@
                 <h2 class="text-lg font-semibold text-gray-900 mb-4">Vehicle Information</h2>
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Vehicle Title -->
-                    <div class="md:col-span-2">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Vehicle Title *</label>
-                        <input type="text" wire:model="vehicle_title" placeholder="e.g., 2024 Toyota Camry XLE" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
-                        @error('vehicle_title') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                    </div>
-
                     <!-- Year -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Year *</label>
-                        <input type="number" wire:model="vehicle_year" placeholder="2024" min="1900" max="{{ date('Y') + 2 }}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                        <select wire:model="vehicle_year" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                            <option value="">Select Year</option>
+                            @for($y = date('Y') + 2; $y >= 1900; $y--)
+                                <option value="{{ $y }}">{{ $y }}</option>
+                            @endfor
+                        </select>
                         @error('vehicle_year') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                     </div>
 
@@ -238,21 +236,62 @@
                 <!-- Other Images -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Additional Images</label>
-                    <input type="file" wire:model="other_images" multiple accept="image/*" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm">
-                    @error('other_images.*') <span class="text-red-500 text-sm mt-1">{{ $message }}</span> @enderror
+                    
+                    <!-- Hidden file input -->
+                    <input 
+                        type="file" 
+                        id="other_images_input_lease"
+                        wire:model.live="new_other_images" 
+                        accept="image/*" 
+                        multiple 
+                        class="hidden"
+                    >
+                    
+                    <!-- Add Images Button -->
+                    <button 
+                        type="button"
+                        onclick="document.getElementById('other_images_input_lease').click()"
+                        class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors shadow-sm"
+                    >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        Add Multiple Images
+                    </button>
+                    
+                    <p class="text-sm text-gray-500 mt-2">Click the button above to select multiple images at once</p>
+                    
+                    @error('other_images.*') <span class="text-red-500 text-sm mt-1 block">{{ $message }}</span> @enderror
                     
                     @if(count($tempOtherImages) > 0 || (is_array($other_images) && count(array_filter($other_images))))
-                        <div class="grid grid-cols-4 gap-2 mt-4">
-                            @foreach($tempOtherImages as $img)
-                                <img src="{{ asset('storage/' . $img) }}" class="w-full h-24 object-cover rounded-lg border border-gray-200">
-                            @endforeach
-                            @if(is_array($other_images))
-                                @foreach($other_images as $img)
-                                    @if(is_object($img))
-                                        <img src="{{ $img->temporaryUrl() }}" class="w-full h-24 object-cover rounded-lg border border-gray-200">
-                                    @endif
+                        <div class="mt-4">
+                            <p class="text-sm font-medium text-gray-700 mb-3">Selected Images ({{ count($tempOtherImages) + (is_array($other_images) ? count(array_filter($other_images)) : 0) }})</p>
+                            <div class="grid grid-cols-4 gap-2">
+                                @foreach($tempOtherImages as $index => $img)
+                                    <div class="relative group">
+                                        <img src="{{ asset('storage/' . $img) }}" class="w-full h-24 object-cover rounded-lg border border-gray-200">
+                                    </div>
                                 @endforeach
-                            @endif
+                                @if(is_array($other_images))
+                                    @foreach($other_images as $index => $img)
+                                        @if(is_object($img))
+                                            <div class="relative group">
+                                                <img src="{{ $img->temporaryUrl() }}" class="w-full h-24 object-cover rounded-lg border border-gray-200">
+                                                <button 
+                                                    type="button"
+                                                    wire:click="removeOtherImage({{ $index }})"
+                                                    class="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                    title="Remove image"
+                                                >
+                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        @endif
+                                    @endforeach
+                                @endif
+                            </div>
                         </div>
                     @endif
                 </div>
@@ -387,6 +426,16 @@
         document.addEventListener('livewire:init', () => {
             Livewire.on('error-modal-shown', () => {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        });
+
+        // Reset file input after images are added
+        document.addEventListener('livewire:init', () => {
+            Livewire.hook('morph.updated', ({ el, component }) => {
+                const input = document.getElementById('other_images_input_lease');
+                if (input && input.value) {
+                    input.value = '';
+                }
             });
         });
     </script>

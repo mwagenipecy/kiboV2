@@ -30,14 +30,14 @@
                     @csrf
                     
                     <!-- Display validation errors -->
-                    @if ($errors->any())
+                    @if (isset($errors) && $errors->any())
                         <div class="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
                             <div class="flex items-center">
                                 <svg class="w-5 h-5 text-red-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                 </svg>
                                 <span class="text-sm text-red-600 font-medium">
-                                    @if ($errors->has('email'))
+                                    @if (isset($errors) && $errors->has('email'))
                                         {{ $errors->first('email') }}
                                     @else
                                         {{ __('auth.credentials_not_match') }}
@@ -56,7 +56,7 @@
                             name="email" 
                             value="{{ old('email') }}"
                             required
-                            class="w-full px-4 py-3 border {{ $errors->has('email') ? 'border-red-300' : 'border-gray-300' }} rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent"
+                            class="w-full px-4 py-3 border {{ (isset($errors) && $errors->has('email')) ? 'border-red-300' : 'border-gray-300' }} rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent"
                             placeholder="{{ __('auth.enter_email') }}"
                         >
                     </div>
@@ -70,7 +70,7 @@
                                 id="password" 
                                 name="password" 
                                 required
-                                class="w-full px-4 py-3 pr-10 border {{ $errors->has('password') ? 'border-red-300' : 'border-gray-300' }} rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent"
+                                class="w-full px-4 py-3 pr-10 border {{ (isset($errors) && $errors->has('password')) ? 'border-red-300' : 'border-gray-300' }} rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent"
                                 placeholder="{{ __('auth.enter_password') }}"
                             >
                             <button 
@@ -153,7 +153,7 @@
                     @endif
 
                     <!-- Display validation errors -->
-                    @if ($errors->any() && old('name'))
+                    @if (isset($errors) && $errors->any() && old('name'))
                         <div class="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
                             <div class="flex items-start">
                                 <svg class="w-5 h-5 text-red-600 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -177,7 +177,7 @@
                             name="name" 
                             value="{{ old('name') }}"
                             required
-                            class="w-full px-4 py-3 border {{ $errors->has('name') ? 'border-red-300' : 'border-gray-300' }} rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent"
+                            class="w-full px-4 py-3 border {{ (isset($errors) && $errors->has('name')) ? 'border-red-300' : 'border-gray-300' }} rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent"
                             placeholder="{{ __('auth.enter_full_name') }}"
                         >
                     </div>
@@ -191,7 +191,7 @@
                             name="email" 
                             value="{{ old('email') }}"
                             required
-                            class="w-full px-4 py-3 border {{ $errors->has('email') ? 'border-red-300' : 'border-gray-300' }} rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent"
+                            class="w-full px-4 py-3 border {{ (isset($errors) && $errors->has('email')) ? 'border-red-300' : 'border-gray-300' }} rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent"
                             placeholder="{{ __('auth.enter_email') }}"
                         >
                     </div>
@@ -208,12 +208,12 @@
                             maxlength="20"
                             pattern="[0-9]{20}"
                             oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 20)"
-                            class="w-full px-4 py-3 border {{ $errors->has('nida_number') ? 'border-red-300' : 'border-gray-300' }} rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent"
+                            class="w-full px-4 py-3 border {{ (isset($errors) && $errors->has('nida_number')) ? 'border-red-300' : 'border-gray-300' }} rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent"
                             placeholder="Enter 20-digit NIDA number"
                         >
-                        @error('nida_number')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
+                        @if (isset($errors) && $errors->has('nida_number'))
+                            <p class="mt-1 text-sm text-red-600">{{ $errors->first('nida_number') }}</p>
+                        @endif
                         <p class="mt-1 text-xs text-gray-500">Must be exactly 20 digits (numbers only)</p>
                     </div>
 
@@ -227,12 +227,12 @@
                             value="{{ old('phone_number') }}"
                             required
                             maxlength="20"
-                            class="w-full px-4 py-3 border {{ $errors->has('phone_number') ? 'border-red-300' : 'border-gray-300' }} rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent"
+                            class="w-full px-4 py-3 border {{ (isset($errors) && $errors->has('phone_number')) ? 'border-red-300' : 'border-gray-300' }} rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent"
                             placeholder="Enter phone number"
                         >
-                        @error('phone_number')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
+                        @if (isset($errors) && $errors->has('phone_number'))
+                            <p class="mt-1 text-sm text-red-600">{{ $errors->first('phone_number') }}</p>
+                        @endif
                     </div>
 
                     <!-- Password -->
@@ -247,7 +247,7 @@
                                 id="reg_password" 
                                 name="password" 
                                 required
-                                class="w-full px-4 py-3 pr-10 border {{ $errors->has('password') ? 'border-red-300' : 'border-gray-300' }} rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent"
+                                class="w-full px-4 py-3 pr-10 border {{ (isset($errors) && $errors->has('password')) ? 'border-red-300' : 'border-gray-300' }} rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent"
                                 placeholder="{{ __('auth.create_password') }}"
                             >
                             <button 
@@ -265,9 +265,9 @@
                                 </svg>
                             </button>
                         </div>
-                        @error('password')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
+                        @if (isset($errors) && $errors->has('password'))
+                            <p class="mt-1 text-sm text-red-600">{{ $errors->first('password') }}</p>
+                        @endif
                     </div>
 
                     <!-- Confirm Password -->
@@ -279,7 +279,7 @@
                                 id="reg_password_confirmation" 
                                 name="password_confirmation" 
                                 required
-                                class="w-full px-4 py-3 pr-10 border {{ $errors->has('password_confirmation') ? 'border-red-300' : 'border-gray-300' }} rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent"
+                                class="w-full px-4 py-3 pr-10 border {{ (isset($errors) && $errors->has('password_confirmation')) ? 'border-red-300' : 'border-gray-300' }} rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent"
                                 placeholder="{{ __('auth.confirm_your_password') }}"
                             >
                             <button 
@@ -297,9 +297,9 @@
                                 </svg>
                             </button>
                         </div>
-                        @error('password_confirmation')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
+                        @if (isset($errors) && $errors->has('password_confirmation'))
+                            <p class="mt-1 text-sm text-red-600">{{ $errors->first('password_confirmation') }}</p>
+                        @endif
                     </div>
 
                     <!-- Terms Agreement -->
@@ -366,7 +366,7 @@
                     @endif
 
                     <!-- Display validation errors -->
-                    @if ($errors->any() && !old('name') && !old('email') && !session('status'))
+                    @if (isset($errors) && $errors->any() && !old('name') && !old('email') && !session('status'))
                         <div class="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
                             <div class="flex items-start">
                                 <svg class="w-5 h-5 text-red-600 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -395,12 +395,12 @@
                             value="{{ old('email') }}"
                             required
                             autofocus
-                            class="w-full px-4 py-3 border {{ $errors->has('email') ? 'border-red-300' : 'border-gray-300' }} rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent"
+                            class="w-full px-4 py-3 border {{ (isset($errors) && $errors->has('email')) ? 'border-red-300' : 'border-gray-300' }} rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent"
                             placeholder="{{ __('auth.enter_email') }}"
                         >
-                        @error('email')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
+                        @if (isset($errors) && $errors->has('email'))
+                            <p class="mt-1 text-sm text-red-600">{{ $errors->first('email') }}</p>
+                        @endif
                     </div>
 
                     <!-- Send Reset Link Button -->
@@ -459,7 +459,7 @@
                     @endif
 
                     <!-- Display validation errors -->
-                    @if ($errors->any() && !old('name') && !old('email'))
+                    @if (isset($errors) && $errors->any() && !old('name') && !old('email'))
                         <div class="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
                             <div class="flex items-start">
                                 <svg class="w-5 h-5 text-red-600 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -535,7 +535,7 @@
                                     id="otp_digit_{{$i}}"
                                     maxlength="1"
                                     pattern="[0-9]"
-                                    class="w-14 h-14 text-center text-2xl font-bold border-2 {{ $errors->has('otp_code') ? 'border-red-300' : 'border-gray-300' }} rounded-lg focus:ring-2 focus:ring-green-600 focus:border-green-600"
+                                    class="w-14 h-14 text-center text-2xl font-bold border-2 {{ (isset($errors) && $errors->has('otp_code')) ? 'border-red-300' : 'border-gray-300' }} rounded-lg focus:ring-2 focus:ring-green-600 focus:border-green-600"
                                     autocomplete="off"
                                     {{ $i === 0 ? 'autofocus' : '' }}
                                     oninput="this.value = this.value.replace(/[^0-9]/g, ''); updateOtpCode(); if(this.value.length === 1) { const next = this.nextElementSibling; if(next && next.tagName === 'INPUT') next.focus(); }"
@@ -657,7 +657,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Auto-open modal if there are validation errors, status messages, showForgotPassword flag, or registration success
     // But NOT if OTP was just verified (to prevent showing modal after successful OTP verification)
     // Also NOT if we should show OTP (handled above)
-    @elseif (($errors->any() || session('status') || session('showForgotPassword') || session('registrationSuccess')) && !session('otp_verified') && !session('otpVerified') && !$shouldShowOtp)
+    @elseif (((isset($errors) && $errors->any()) || session('status') || session('showForgotPassword') || session('registrationSuccess')) && !session('otp_verified') && !session('otpVerified') && !$shouldShowOtp)
         authModal.classList.remove('hidden');
         setTimeout(() => {
             authPanel.classList.remove('translate-x-full');

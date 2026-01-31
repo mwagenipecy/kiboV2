@@ -46,22 +46,15 @@
         }
         .otp-container {
             display: flex;
-            gap: 12px;
+            gap: 8px;
             margin: 24px 0;
             justify-content: center;
         }
         .otp-digit {
-            width: 48px;
-            height: 48px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            font-weight: 600;
-            color: #3b82f6;
-            border: 2px solid #3b82f6;
-            border-radius: 8px;
-            background-color: #ffffff;
+            font-size: 32px;
+            font-weight: 700;
+            color: #059669;
+            letter-spacing: 2px;
         }
         @media (prefers-color-scheme: dark) {
             .email-container {
@@ -74,9 +67,7 @@
                 color: #d1d5db;
             }
             .otp-digit {
-                color: #60a5fa;
-                border-color: #60a5fa;
-                background-color: #1f2937;
+                color: #10b981;
             }
         }
         .button {
@@ -125,9 +116,7 @@
                 padding: 24px 16px;
             }
             .otp-digit {
-                width: 40px;
-                height: 40px;
-                font-size: 20px;
+                font-size: 28px;
             }
         }
     </style>

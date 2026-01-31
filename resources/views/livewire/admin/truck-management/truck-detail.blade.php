@@ -109,21 +109,36 @@
                     @if($truck->image_front)
                         <div>
                             <p class="text-sm text-gray-600 mb-2">Front View</p>
-                            <img src="{{ asset('storage/' . $truck->image_front) }}" alt="Front" class="w-full h-48 object-cover rounded-lg">
+                            <img 
+                                src="{{ asset('storage/' . $truck->image_front) }}" 
+                                alt="Front" 
+                                class="w-full h-48 object-cover rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
+                                wire:click="$set('selectedImage', '{{ asset('storage/' . $truck->image_front) }}')"
+                            >
                         </div>
                     @endif
                     
                     @if($truck->image_side)
                         <div>
                             <p class="text-sm text-gray-600 mb-2">Side View</p>
-                            <img src="{{ asset('storage/' . $truck->image_side) }}" alt="Side" class="w-full h-48 object-cover rounded-lg">
+                            <img 
+                                src="{{ asset('storage/' . $truck->image_side) }}" 
+                                alt="Side" 
+                                class="w-full h-48 object-cover rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
+                                wire:click="$set('selectedImage', '{{ asset('storage/' . $truck->image_side) }}')"
+                            >
                         </div>
                     @endif
                     
                     @if($truck->image_back)
                         <div>
                             <p class="text-sm text-gray-600 mb-2">Back View</p>
-                            <img src="{{ asset('storage/' . $truck->image_back) }}" alt="Back" class="w-full h-48 object-cover rounded-lg">
+                            <img 
+                                src="{{ asset('storage/' . $truck->image_back) }}" 
+                                alt="Back" 
+                                class="w-full h-48 object-cover rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
+                                wire:click="$set('selectedImage', '{{ asset('storage/' . $truck->image_back) }}')"
+                            >
                         </div>
                     @endif
                 </div>
@@ -133,7 +148,12 @@
                         <p class="text-sm text-gray-600 mb-2">Additional Images</p>
                         <div class="grid grid-cols-4 gap-4">
                             @foreach($truck->other_images as $image)
-                                <img src="{{ asset('storage/' . $image) }}" alt="Additional" class="w-full h-32 object-cover rounded-lg">
+                                <img 
+                                    src="{{ asset('storage/' . $image) }}" 
+                                    alt="Additional" 
+                                    class="w-full h-32 object-cover rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
+                                    wire:click="$set('selectedImage', '{{ asset('storage/' . $image) }}')"
+                                >
                             @endforeach
                         </div>
                     </div>
@@ -426,6 +446,30 @@
                         Update Status
                     </button>
                 </div>
+            </div>
+        </div>
+    @endif
+
+    <!-- Image Preview Modal -->
+    @if($selectedImage)
+        <div 
+            class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80"
+            wire:click="$set('selectedImage', null)"
+        >
+            <div class="relative max-w-7xl w-full max-h-[90vh]" wire:click.stop>
+                <button 
+                    wire:click="$set('selectedImage', null)"
+                    class="absolute top-4 right-4 z-10 bg-white/90 hover:bg-white text-gray-900 rounded-full p-2 transition-colors"
+                >
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+                <img 
+                    src="{{ $selectedImage }}" 
+                    alt="Preview" 
+                    class="w-full h-full object-contain rounded-lg"
+                >
             </div>
         </div>
     @endif

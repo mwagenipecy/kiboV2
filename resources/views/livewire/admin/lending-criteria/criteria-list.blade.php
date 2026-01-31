@@ -145,8 +145,8 @@
                 <div>
                     <p class="text-gray-600">Vehicle Price Range</p>
                     <p class="font-semibold text-gray-900">
-                        £{{ $item->min_vehicle_price ? number_format($item->min_vehicle_price) : '0' }} - 
-                        £{{ $item->max_vehicle_price ? number_format($item->max_vehicle_price) : '∞' }}
+                        TZS {{ $item->min_vehicle_price ? number_format($item->min_vehicle_price) : '0' }} - 
+                        TZS {{ $item->max_vehicle_price ? number_format($item->max_vehicle_price) : '∞' }}
                     </p>
                 </div>
             </div>

@@ -10,6 +10,7 @@
     use App\Models\CarRequest;
     use App\Models\DealerCarOffer;
     use App\Models\SparePartOrder;
+    use App\Models\LendingCriteria;
     use App\Enums\OrderStatus;
     use App\Enums\OrderType;
     use App\Enums\VehicleStatus;
@@ -36,11 +37,80 @@
             $sparePartOrdersCompleted = SparePartOrder::where('status', 'completed')->count();
             break;
         case 'lender':
-            $loanRequests = Order::where('order_type', OrderType::FINANCING_APPLICATION->value)->count();
-            $loanRequestsPending = Order::where('order_type', OrderType::FINANCING_APPLICATION->value)
-                ->where('status', OrderStatus::PENDING->value)->count();
-            $loanRequestsApproved = Order::where('order_type', OrderType::FINANCING_APPLICATION->value)
-                ->where('status', OrderStatus::APPROVED->value)->count();
+            $user = auth()->user();
+            $lenderEntityId = $user->entity_id ?? null;
+            
+            if ($lenderEntityId) {
+                // Financing requests that come to this lender (where lender_entity_id matches)
+                $loanRequests = Order::where('order_type', OrderType::FINANCING_APPLICATION->value)
+                    ->whereJsonContains('order_data->lender_entity_id', $lenderEntityId)
+                    ->count();
+                
+                $loanRequestsPending = Order::where('order_type', OrderType::FINANCING_APPLICATION->value)
+                    ->whereJsonContains('order_data->lender_entity_id', $lenderEntityId)
+                    ->where(function($q) {
+                        $q->where('status', OrderStatus::PENDING->value)
+                          ->orWhere(function($q2) {
+                              $q2->where('status', OrderStatus::APPROVED->value)
+                                 ->where(function($q3) {
+                                     $q3->whereJsonContains('order_data->lender_approval', 'pending')
+                                        ->orWhereNull('order_data->lender_approval');
+                                 });
+                          });
+                    })
+                    ->count();
+                
+                $loanRequestsApproved = Order::where('order_type', OrderType::FINANCING_APPLICATION->value)
+                    ->whereJsonContains('order_data->lender_entity_id', $lenderEntityId)
+                    ->whereJsonContains('order_data->lender_approval', 'approved')
+                    ->count();
+                
+                $loanRequestsRejected = Order::where('order_type', OrderType::FINANCING_APPLICATION->value)
+                    ->whereJsonContains('order_data->lender_entity_id', $lenderEntityId)
+                    ->whereJsonContains('order_data->lender_approval', 'rejected')
+                    ->count();
+                
+                // Get lending criteria statistics
+                $totalCriteria = LendingCriteria::where('entity_id', $lenderEntityId)->count();
+                $activeCriteria = LendingCriteria::where('entity_id', $lenderEntityId)
+                    ->where('is_active', true)
+                    ->count();
+                
+                // Get criteria usage (how many times each criteria was selected)
+                $criteriaUsage = Order::where('order_type', OrderType::FINANCING_APPLICATION->value)
+                    ->whereJsonContains('order_data->lender_entity_id', $lenderEntityId)
+                    ->get()
+                    ->groupBy('order_data.lending_criteria_id')
+                    ->map(function($orders) {
+                        return $orders->count();
+                    });
+                
+                $mostUsedCriteria = null;
+                $mostUsedCriteriaCount = 0;
+                if ($criteriaUsage->isNotEmpty()) {
+                    $mostUsedCriteriaId = $criteriaUsage->keys()->first();
+                    $mostUsedCriteriaCount = $criteriaUsage->first();
+                    $mostUsedCriteria = LendingCriteria::find($mostUsedCriteriaId);
+                }
+                
+                // Recent requests
+                $recentRequests = Order::where('order_type', OrderType::FINANCING_APPLICATION->value)
+                    ->whereJsonContains('order_data->lender_entity_id', $lenderEntityId)
+                    ->with(['vehicle.make', 'vehicle.model', 'user'])
+                    ->latest()
+                    ->limit(5)
+                    ->get();
+            } else {
+                $loanRequests = 0;
+                $loanRequestsPending = 0;
+                $loanRequestsApproved = 0;
+                $loanRequestsRejected = 0;
+                $totalCriteria = 0;
+                $activeCriteria = 0;
+                $mostUsedCriteria = null;
+                $mostUsedCriteriaCount = 0;
+                $recentRequests = collect();
+            }
             break;
         case 'dealer':
             $user = auth()->user();

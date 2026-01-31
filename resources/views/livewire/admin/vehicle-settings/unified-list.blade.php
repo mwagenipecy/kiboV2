@@ -24,11 +24,13 @@
                     </button>
                 </div>
                 
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-3" wire:key="action-buttons-{{ $activeTab }}">
                     @if ($activeTab === 'makes')
                         <button 
+                            type="button"
                             wire:click="openMakeModal" 
-                            class="px-5 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition-all shadow-md hover:shadow-lg flex items-center font-semibold"
+                            wire:loading.attr="disabled"
+                            class="px-5 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition-all shadow-md hover:shadow-lg flex items-center font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
@@ -37,8 +39,10 @@
                         </button>
                     @else
                         <button 
+                            type="button"
                             wire:click="openModelModal" 
-                            class="px-5 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition-all shadow-md hover:shadow-lg flex items-center font-semibold"
+                            wire:loading.attr="disabled"
+                            class="px-5 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition-all shadow-md hover:shadow-lg flex items-center font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
@@ -296,7 +300,7 @@
 
     <!-- Make Modal -->
     @if($showMakeModal)
-    <div class="fixed inset-0 z-50 overflow-y-auto">
+    <div class="fixed inset-0 z-50 overflow-y-auto" wire:key="make-modal">
         <!-- Background overlay -->
         <div 
             wire:click="$set('showMakeModal', false)"
@@ -305,7 +309,7 @@
         
         <!-- Modal content -->
         <div class="flex items-center justify-center min-h-screen px-4 py-6">
-            <div class="relative bg-white rounded-lg shadow-xl max-w-lg w-full z-50">
+            <div class="relative bg-white rounded-lg shadow-xl max-w-lg w-full z-50" wire:click.stop>
                 <div class="px-6 py-4 bg-white border-b border-gray-200">
                     <h3 class="text-lg font-semibold text-gray-900">{{ $makeId ? 'Edit Make' : 'Create Make' }}</h3>
                 </div>
@@ -401,7 +405,7 @@
 
     <!-- Make Delete Modal -->
     @if($showMakeDeleteModal)
-    <div class="fixed inset-0 z-50 overflow-y-auto">
+    <div class="fixed inset-0 z-50 overflow-y-auto" wire:key="make-delete-modal">
         <!-- Background overlay -->
         <div 
             wire:click="$set('showMakeDeleteModal', false)"
@@ -410,7 +414,7 @@
         
         <!-- Modal content -->
         <div class="flex items-center justify-center min-h-screen px-4 py-6">
-            <div class="relative bg-white rounded-lg shadow-xl max-w-lg w-full z-50">
+            <div class="relative bg-white rounded-lg shadow-xl max-w-lg w-full z-50" wire:click.stop>
                 <div class="px-6 py-4 bg-white">
                     <div class="flex items-start">
                         <div class="flex items-center justify-center flex-shrink-0 w-12 h-12 mx-auto bg-red-100 rounded-full sm:mx-0">
@@ -459,7 +463,7 @@
 
     <!-- Model Modal -->
     @if($showModelModal)
-    <div class="fixed inset-0 z-50 overflow-y-auto">
+    <div class="fixed inset-0 z-50 overflow-y-auto" wire:key="model-modal">
         <!-- Background overlay -->
         <div 
             wire:click="$set('showModelModal', false)"
@@ -468,7 +472,7 @@
         
         <!-- Modal content -->
         <div class="flex items-center justify-center min-h-screen px-4 py-6">
-            <div class="relative bg-white rounded-lg shadow-xl max-w-lg w-full z-50">
+            <div class="relative bg-white rounded-lg shadow-xl max-w-lg w-full z-50" wire:click.stop>
                 <div class="px-6 py-4 bg-white border-b border-gray-200">
                     <h3 class="text-lg font-semibold text-gray-900">{{ $modelId ? 'Edit Model' : 'Create Model' }}</h3>
                 </div>
@@ -558,7 +562,7 @@
 
     <!-- Model Delete Modal -->
     @if($showModelDeleteModal)
-    <div class="fixed inset-0 z-50 overflow-y-auto">
+    <div class="fixed inset-0 z-50 overflow-y-auto" wire:key="model-delete-modal">
         <!-- Background overlay -->
         <div 
             wire:click="$set('showModelDeleteModal', false)"
@@ -567,7 +571,7 @@
         
         <!-- Modal content -->
         <div class="flex items-center justify-center min-h-screen px-4 py-6">
-            <div class="relative bg-white rounded-lg shadow-xl max-w-lg w-full z-50">
+            <div class="relative bg-white rounded-lg shadow-xl max-w-lg w-full z-50" wire:click.stop>
                 <div class="px-6 py-4 bg-white">
                     <div class="flex items-start">
                         <div class="flex items-center justify-center flex-shrink-0 w-12 h-12 mx-auto bg-red-100 rounded-full sm:mx-0">

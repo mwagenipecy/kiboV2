@@ -114,15 +114,15 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="text-sm text-gray-900">{{ $order->vehicle->full_name ?? 'N/A' }}</div>
-                            <div class="text-sm text-gray-500">£{{ number_format($order->vehicle->price ?? 0, 0) }}</div>
+                            <div class="text-sm text-gray-500">TZS {{ number_format($order->vehicle->price ?? 0, 0) }}</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm text-gray-900">{{ $order->order_details['lender_name'] ?? 'N/A' }}</div>
-                            <div class="text-sm text-gray-500">{{ $order->order_details['criteria_name'] ?? '' }}</div>
+                            <div class="text-sm text-gray-900">{{ $order->order_data['lender_name'] ?? 'N/A' }}</div>
+                            <div class="text-sm text-gray-500">{{ $order->order_data['criteria_name'] ?? '' }}</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm font-medium text-gray-900">${{ number_format($order->order_details['loan_amount'] ?? 0, 2) }}</div>
-                            <div class="text-sm text-gray-500">{{ $order->order_details['loan_term_months'] ?? 0 }} months</div>
+                            <div class="text-sm font-medium text-gray-900">TZS {{ number_format($order->order_data['loan_amount'] ?? 0, 2) }}</div>
+                            <div class="text-sm text-gray-500">{{ $order->order_data['loan_term_months'] ?? 0 }} months</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 

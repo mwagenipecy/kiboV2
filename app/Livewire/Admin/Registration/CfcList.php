@@ -9,6 +9,7 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Database\QueryException;
 
 class CfcList extends Component
 {
@@ -45,16 +46,38 @@ class CfcList extends Component
                 return;
             }
 
-            // Generate random password
+            // Generate random password for login credentials
             $password = Str::random(12);
 
-            // Create user account
-            $user = User::create([
-                'name' => $cfc->name,
-                'email' => $cfc->email,
-                'password' => Hash::make($password),
-                'role' => 'cfc',
-            ]);
+            // Check if user with this email already exists
+            $existingUser = User::where('email', $cfc->email)->first();
+            
+            if ($existingUser) {
+                // User already exists, link it to the CFC
+                // Check if user already has a different role
+                if ($existingUser->role !== 'cfc' && $existingUser->role !== null) {
+                    session()->flash('error', 'A user with this email already exists with a different role (' . ucfirst($existingUser->role) . '). Please use a different email address.');
+                    $this->showApproveModal = false;
+                    $this->cfcToApprove = null;
+                    return;
+                }
+                
+                // Update existing user: reset password and update role if needed
+                $existingUser->update([
+                    'role' => 'cfc',
+                    'password' => Hash::make($password),
+                ]);
+                
+                $user = $existingUser;
+            } else {
+                // Create new user account
+                $user = User::create([
+                    'name' => $cfc->name,
+                    'email' => $cfc->email,
+                    'password' => Hash::make($password),
+                    'role' => 'cfc',
+                ]);
+            }
 
             // Update CFC with approval info
             $cfc->update([
@@ -64,17 +87,28 @@ class CfcList extends Component
                 'approved_by' => auth()->id(),
             ]);
 
-            // Dispatch queued job to send credentials email
-            SendRegistrationCredentials::dispatch(
+            // Send credentials email immediately (synchronously)
+            SendRegistrationCredentials::dispatchSync(
                 $cfc->email,
                 $cfc->name,
                 $password,
                 'cfc'
             );
 
-            session()->flash('success', 'CFC approved successfully! Credentials have been sent via email.');
+            session()->flash('success', 'CFC approved successfully! Login credentials have been sent via email.');
+        } catch (QueryException $e) {
+            // Handle database integrity constraint violations
+            if ($e->getCode() === '23000') {
+                if (str_contains($e->getMessage(), 'users_email_unique')) {
+                    session()->flash('error', 'A user with this email address already exists. The CFC has been linked to the existing user account.');
+                } else {
+                    session()->flash('error', 'A database error occurred. Please try again or contact support if the problem persists.');
+                }
+            } else {
+                session()->flash('error', 'An error occurred while approving the CFC. Please try again.');
+            }
         } catch (\Exception $e) {
-            session()->flash('error', 'An error occurred: ' . $e->getMessage());
+            session()->flash('error', 'An unexpected error occurred. Please try again or contact support if the problem persists.');
         }
 
         $this->showApproveModal = false;

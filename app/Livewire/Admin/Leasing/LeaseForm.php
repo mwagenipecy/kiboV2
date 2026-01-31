@@ -21,7 +21,6 @@ class LeaseForm extends Component
     public $lease = null;
     
     // Vehicle Information
-    public $vehicle_title = '';
     public $vehicle_year = '';
     public $vehicle_make_id = '';
     public $vehicle_model_id = '';
@@ -45,6 +44,7 @@ class LeaseForm extends Component
     public $image_side;
     public $image_back;
     public $other_images = [];
+    public $new_other_images = [];
     
     // Temporary images for preview
     public $tempImageFront;
@@ -133,7 +133,6 @@ class LeaseForm extends Component
     protected function loadLeaseData()
     {
         // Vehicle Information
-        $this->vehicle_title = $this->lease->vehicle_title;
         $this->vehicle_year = $this->lease->vehicle_year;
         $this->vehicle_make = $this->lease->vehicle_make;
         $this->vehicle_model = $this->lease->vehicle_model;
@@ -235,6 +234,23 @@ class LeaseForm extends Component
         $this->features = array_values($this->features);
     }
 
+    public function updatedNewOtherImages()
+    {
+        if (!empty($this->new_other_images)) {
+            // Merge new images with existing ones
+            $this->other_images = array_merge($this->other_images, $this->new_other_images);
+            // Clear the new images input
+            $this->new_other_images = [];
+        }
+    }
+
+    public function removeOtherImage($index)
+    {
+        if (isset($this->other_images[$index])) {
+            unset($this->other_images[$index]);
+            $this->other_images = array_values($this->other_images); // Re-index array
+        }
+    }
 
     public function closeErrorModal()
     {
@@ -269,7 +285,6 @@ class LeaseForm extends Component
         try {
             $this->validate([
             // Vehicle validation
-            'vehicle_title' => 'required|string|max:255',
             'vehicle_year' => 'required|integer|min:1900|max:' . (date('Y') + 2),
             'vehicle_make_id' => 'required|exists:vehicle_makes,id',
             'vehicle_model_id' => 'required|exists:vehicle_models,id',
@@ -281,6 +296,7 @@ class LeaseForm extends Component
             'image_side' => 'nullable|image|max:5120',
             'image_back' => 'nullable|image|max:5120',
             'other_images.*' => 'nullable|image|max:5120',
+            'new_other_images.*' => 'nullable|image|max:5120',
             // Lease validation
             'entity_id' => $userRole === 'admin' ? 'nullable|exists:entities,id' : 'required|exists:entities,id',
             'currency' => 'required|string|max:3',
@@ -347,9 +363,18 @@ class LeaseForm extends Component
             return;
         }
 
+        // Auto-generate title from make, model, and year
+        $make = VehicleMake::find($this->vehicle_make_id);
+        $model = VehicleModel::find($this->vehicle_model_id);
+        $vehicle_title = ($make ? $make->name : '') . ' ' . ($model ? $model->name : '') . ' ' . $this->vehicle_year;
+        $vehicle_title = trim($vehicle_title);
+        if (empty($vehicle_title)) {
+            $vehicle_title = 'Vehicle ' . date('Y');
+        }
+
         $data = [
             // Vehicle Information
-            'vehicle_title' => $this->vehicle_title,
+            'vehicle_title' => $vehicle_title,
             'vehicle_year' => $this->vehicle_year,
             'vehicle_make' => $make->name,
             'vehicle_model' => $model->name,

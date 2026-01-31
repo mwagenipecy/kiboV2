@@ -4,9 +4,11 @@ namespace App\Livewire\Admin;
 
 use App\Models\Report;
 use Illuminate\Support\Str;
+use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithPagination;
 
+#[Layout('layouts.admin')]
 class Reports extends Component
 {
     use WithPagination;
@@ -16,6 +18,7 @@ class Reports extends Component
     public $search = '';
     public $showReportModal = false;
     public $selectedReport = null;
+    public $adminNotes = '';
 
     protected $queryString = [
         'selectedSection' => ['except' => 'all'],
@@ -41,6 +44,7 @@ class Reports extends Component
     public function viewReport($reportId)
     {
         $this->selectedReport = Report::with(['reporter', 'reviewer', 'reportable'])->findOrFail($reportId);
+        $this->adminNotes = $this->selectedReport->admin_notes ?? '';
         $this->showReportModal = true;
     }
 
@@ -48,6 +52,7 @@ class Reports extends Component
     {
         $this->showReportModal = false;
         $this->selectedReport = null;
+        $this->adminNotes = '';
     }
 
     public function updateStatus($reportId, $status)
@@ -57,10 +62,24 @@ class Reports extends Component
             'status' => $status,
             'reviewed_by' => auth()->id(),
             'reviewed_at' => now(),
+            'admin_notes' => $this->adminNotes,
         ]);
 
+        // Refresh the selected report
+        $this->selectedReport = Report::with(['reporter', 'reviewer', 'reportable'])->findOrFail($reportId);
+
         session()->flash('message', 'Report status updated successfully.');
-        $this->closeModal();
+    }
+
+    public function updateAdminNotes()
+    {
+        if ($this->selectedReport) {
+            $this->selectedReport->update([
+                'admin_notes' => $this->adminNotes,
+            ]);
+            $this->selectedReport->refresh();
+            session()->flash('message', 'Admin notes updated successfully.');
+        }
     }
 
     public function render()

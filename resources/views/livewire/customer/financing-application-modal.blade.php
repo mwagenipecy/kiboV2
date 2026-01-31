@@ -87,7 +87,7 @@
                                         </div>
                                         <div class="bg-white rounded p-2">
                                             <div class="text-gray-600 text-xs">Processing Fee</div>
-                                            <div class="font-semibold text-gray-900">${{ number_format($criteria->processing_fee, 0) }}</div>
+                                            <div class="font-semibold text-gray-900">TZS {{ number_format($criteria->processing_fee, 0) }}</div>
                                         </div>
                                     </div>
                                     
@@ -133,7 +133,7 @@
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-1">Vehicle Price</label>
-                                        <input type="text" value="${{ number_format($vehicle->price, 2) }}" disabled class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50">
+                                        <input type="text" value="TZS {{ number_format($vehicle->price, 2) }}" disabled class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50">
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-1">Loan Amount <span class="text-red-500">*</span></label>
@@ -178,6 +178,39 @@
                                     </div>
                                 </div>
                             </div>
+
+                            <!-- Required Documents -->
+                            @if($selectedCriteria && $selectedCriteria->required_documents && count($selectedCriteria->required_documents) > 0)
+                            <div>
+                                <h4 class="font-semibold text-gray-900 mb-3">Required Documents</h4>
+                                <p class="text-sm text-gray-600 mb-4">Please upload the following documents. Accepted formats: PDF, JPG, JPEG, PNG (Max 5MB each)</p>
+                                <div class="space-y-4">
+                                    @foreach($selectedCriteria->required_documents as $docType)
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                                            {{ ucwords(str_replace('_', ' ', $docType)) }} <span class="text-red-500">*</span>
+                                        </label>
+                                        <input 
+                                            type="file" 
+                                            wire:model="documents.{{ $docType }}" 
+                                            accept=".pdf,.jpg,.jpeg,.png"
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm">
+                                        @error('documents.' . $docType) 
+                                            <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> 
+                                        @enderror
+                                        @if(isset($documents[$docType]) && $documents[$docType])
+                                            <p class="text-xs text-green-600 mt-1">
+                                                <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                </svg>
+                                                File selected: {{ $documents[$docType]->getClientOriginalName() }}
+                                            </p>
+                                        @endif
+                                    </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                            @endif
 
                             <!-- Additional Notes -->
                             <div>

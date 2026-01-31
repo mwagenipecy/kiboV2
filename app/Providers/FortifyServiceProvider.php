@@ -16,6 +16,7 @@ use Laravel\Fortify\Fortify;
 use Laravel\Fortify\Contracts\LoginResponse;
 use Laravel\Fortify\Contracts\LogoutResponse;
 use Laravel\Fortify\Contracts\RegisterResponse;
+use Laravel\Fortify\Contracts\SuccessfulPasswordResetLinkRequestResponse;
 
 class FortifyServiceProvider extends ServiceProvider
 {
@@ -39,8 +40,12 @@ class FortifyServiceProvider extends ServiceProvider
                     'otp_expires_at' => now()->addMinutes(5),
                 ]);
                 
-                // Send OTP email asynchronously via queue
-                SendLoginOtp::dispatch($user->email, $user->name, $otpCode);
+                // Send OTP email immediately (synchronously)
+                try {
+                    Mail::to($user->email)->send(new LoginOtpMail($user, $otpCode));
+                } catch (\Exception $e) {
+                    \Log::error('Failed to send OTP email: ' . $e->getMessage());
+                }
                 
                 // Store intended URL in session for after OTP verification
                 // If user is not a customer and has a role, redirect to admin dashboard
@@ -92,6 +97,18 @@ class FortifyServiceProvider extends ServiceProvider
                 
                 // Fallback if user is not authenticated (shouldn't happen)
                 return redirect()->route('cars.index')->with('registrationSuccess', true);
+            }
+        });
+
+        // Register custom successful password reset link request response
+        $this->app->instance(SuccessfulPasswordResetLinkRequestResponse::class, new class implements SuccessfulPasswordResetLinkRequestResponse {
+            public function toResponse($request)
+            {
+                // Redirect back to home page with success message
+                // The message will be shown in the forgot password modal
+                return redirect()->route('cars.index')
+                    ->with('status', __('We have emailed your password reset link.'))
+                    ->with('showForgotPassword', true);
             }
         });
     }

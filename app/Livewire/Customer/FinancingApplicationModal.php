@@ -10,9 +10,12 @@ use App\Models\Vehicle;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\On;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 
 class FinancingApplicationModal extends Component
 {
+    use WithFileUploads;
+
     public $show = false;
     public $vehicleId;
     public $vehicle;
@@ -29,6 +32,9 @@ class FinancingApplicationModal extends Component
     public $creditScore = '';
     public $notes = '';
     public $agreeToTerms = false;
+    
+    // Documents - dynamic based on required_documents
+    public $documents = [];
     
     public $step = 1; // 1 = select lender, 2 = application form
 
@@ -62,6 +68,14 @@ class FinancingApplicationModal extends Component
         $this->loanAmount = $this->vehicle->price;
         $this->calculateDownPayment();
         $this->loanTermMonths = $this->selectedCriteria->min_loan_term_months;
+        
+        // Initialize document fields based on required_documents
+        $this->documents = [];
+        if ($this->selectedCriteria->required_documents && is_array($this->selectedCriteria->required_documents)) {
+            foreach ($this->selectedCriteria->required_documents as $docType) {
+                $this->documents[$docType] = null;
+            }
+        }
         
         $this->step = 2;
     }
@@ -99,6 +113,7 @@ class FinancingApplicationModal extends Component
         $this->agreeToTerms = false;
         $this->selectedCriteriaId = null;
         $this->selectedCriteria = null;
+        $this->documents = [];
     }
 
     public function submit()
@@ -108,7 +123,8 @@ class FinancingApplicationModal extends Component
             return redirect()->route('login');
         }
 
-        $this->validate([
+        // Build validation rules dynamically
+        $rules = [
             'loanAmount' => 'required|numeric|min:0',
             'loanTermMonths' => 'required|integer|min:' . $this->selectedCriteria->min_loan_term_months . '|max:' . $this->selectedCriteria->max_loan_term_months,
             'downPaymentAmount' => 'required|numeric|min:0',
@@ -116,14 +132,38 @@ class FinancingApplicationModal extends Component
             'employmentMonths' => 'required|integer|min:' . ($this->selectedCriteria->min_employment_months ?? 0),
             'creditScore' => 'nullable|integer|min:300|max:850',
             'agreeToTerms' => 'accepted',
-        ], [
+        ];
+
+        $messages = [
             'loanTermMonths.min' => 'Minimum loan term is ' . $this->selectedCriteria->min_loan_term_months . ' months',
             'loanTermMonths.max' => 'Maximum loan term is ' . $this->selectedCriteria->max_loan_term_months . ' months',
-            'monthlyIncome.min' => 'Minimum monthly income required is $' . number_format($this->selectedCriteria->min_monthly_income ?? 0),
+            'monthlyIncome.min' => 'Minimum monthly income required is TZS ' . number_format($this->selectedCriteria->min_monthly_income ?? 0),
             'employmentMonths.min' => 'Minimum employment duration is ' . ($this->selectedCriteria->min_employment_months ?? 0) . ' months',
-        ]);
+        ];
+
+        // Add document validation if required_documents exist
+        if ($this->selectedCriteria->required_documents && is_array($this->selectedCriteria->required_documents)) {
+            foreach ($this->selectedCriteria->required_documents as $docType) {
+                $rules['documents.' . $docType] = 'required|file|mimes:pdf,jpg,jpeg,png|max:5120';
+                $messages['documents.' . $docType . '.required'] = ucwords(str_replace('_', ' ', $docType)) . ' is required.';
+                $messages['documents.' . $docType . '.mimes'] = ucwords(str_replace('_', ' ', $docType)) . ' must be a PDF, JPG, JPEG, or PNG file.';
+                $messages['documents.' . $docType . '.max'] = ucwords(str_replace('_', ' ', $docType)) . ' must not exceed 5MB.';
+            }
+        }
+
+        $this->validate($rules, $messages);
 
         try {
+            // Upload documents
+            $uploadedDocuments = [];
+            if ($this->selectedCriteria->required_documents && is_array($this->selectedCriteria->required_documents)) {
+                foreach ($this->selectedCriteria->required_documents as $docType) {
+                    if (isset($this->documents[$docType]) && $this->documents[$docType]) {
+                        $uploadedDocuments[$docType] = $this->documents[$docType]->store('financing-documents/' . Auth::id(), 'public');
+                    }
+                }
+            }
+
             // Calculate monthly payment
             $monthlyPayment = $this->selectedCriteria->calculateMonthlyPayment(
                 $this->loanAmount - $this->downPaymentAmount,
@@ -151,6 +191,7 @@ class FinancingApplicationModal extends Component
                     'monthly_income' => $this->monthlyIncome,
                     'employment_months' => $this->employmentMonths,
                     'credit_score' => $this->creditScore,
+                    'documents' => $uploadedDocuments,
                     'dealer_approval' => 'pending',
                     'lender_approval' => 'pending',
                 ],

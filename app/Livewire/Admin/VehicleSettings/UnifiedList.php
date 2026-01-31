@@ -50,6 +50,12 @@ class UnifiedList extends Component
 
     public function setActiveTab($tab)
     {
+        // Close any open modals when switching tabs
+        $this->showMakeModal = false;
+        $this->showMakeDeleteModal = false;
+        $this->showModelModal = false;
+        $this->showModelDeleteModal = false;
+        
         $this->activeTab = $tab;
         $this->search = '';
         $this->filterMake = '';
@@ -60,6 +66,11 @@ class UnifiedList extends Component
     
     public function openMakeModal()
     {
+        // Close other modals first
+        $this->showModelModal = false;
+        $this->showMakeDeleteModal = false;
+        $this->showModelDeleteModal = false;
+        
         $this->resetMakeForm();
         $this->showMakeModal = true;
     }
@@ -158,6 +169,11 @@ class UnifiedList extends Component
     
     public function openModelModal()
     {
+        // Close other modals first
+        $this->showMakeModal = false;
+        $this->showMakeDeleteModal = false;
+        $this->showModelDeleteModal = false;
+        
         $this->resetModelForm();
         $this->showModelModal = true;
     }

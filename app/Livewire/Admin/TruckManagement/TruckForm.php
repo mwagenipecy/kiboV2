@@ -17,7 +17,6 @@ class TruckForm extends Component
     use WithFileUploads;
 
     // Basic Information
-    public $title;
     public $description;
     public $origin = 'local';
     public $registration_number;
@@ -69,6 +68,7 @@ class TruckForm extends Component
     public $image_side;
     public $image_back;
     public $other_images = [];
+    public $new_other_images = [];
     
     // Ownership
     public $entity_id;
@@ -102,7 +102,6 @@ class TruckForm extends Component
     protected function rules()
     {
         return [
-            'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'origin' => 'required|in:local,international',
             'registration_number' => 'nullable|string|max:255|unique:trucks,registration_number,' . $this->truckId,
@@ -141,6 +140,7 @@ class TruckForm extends Component
             'image_side' => 'nullable|image|max:5120',
             'image_back' => 'nullable|image|max:5120',
             'other_images.*' => 'nullable|image|max:5120',
+            'new_other_images.*' => 'nullable|image|max:5120',
         ];
     }
 
@@ -170,7 +170,6 @@ class TruckForm extends Component
     {
         $truck = Truck::findOrFail($this->truckId);
         
-        $this->title = $truck->title;
         $this->description = $truck->description;
         $this->origin = $truck->origin;
         $this->registration_number = $truck->registration_number;
@@ -325,6 +324,16 @@ class TruckForm extends Component
         }
     }
 
+    public function updatedNewOtherImages()
+    {
+        if (!empty($this->new_other_images)) {
+            // Merge new images with existing ones
+            $this->other_images = array_merge($this->other_images, $this->new_other_images);
+            // Clear the new images input
+            $this->new_other_images = [];
+        }
+    }
+
     public function removeOtherImage($index)
     {
         unset($this->other_images[$index]);
@@ -367,8 +376,17 @@ class TruckForm extends Component
         }
 
         try {
+            // Auto-generate title from make, model, and year
+            $make = VehicleMake::find($this->vehicle_make_id);
+            $model = VehicleModel::find($this->vehicle_model_id);
+            $title = ($make ? $make->name : '') . ' ' . ($model ? $model->name : '') . ' ' . $this->year;
+            $title = trim($title);
+            if (empty($title)) {
+                $title = 'Truck ' . date('Y');
+            }
+
             $data = [
-                'title' => $this->title,
+                'title' => $title,
                 'description' => $this->description,
                 'origin' => $this->origin,
                 'registration_number' => $this->registration_number ?: null,

@@ -144,7 +144,7 @@
                     </div>
                     <div>
                         <p class="text-sm text-gray-600">Price</p>
-                        <p class="font-medium text-gray-900">£{{ number_format($order->vehicle->price, 2) }}</p>
+                        <p class="font-medium text-gray-900">{{ $order->vehicle->currency ?? 'TZS' }} {{ number_format($order->vehicle->price, 2) }}</p>
                     </div>
                     <div>
                         <p class="text-sm text-gray-600">Year</p>
@@ -169,11 +169,11 @@
                     <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
                         <div>
                             <p class="text-sm text-gray-600">Loan Amount</p>
-                            <p class="text-lg font-bold text-gray-900">${{ number_format($order->order_data['loan_amount'] ?? 0, 2) }}</p>
+                            <p class="text-lg font-bold text-gray-900">TZS {{ number_format($order->order_data['loan_amount'] ?? 0, 2) }}</p>
                         </div>
                         <div>
                             <p class="text-sm text-gray-600">Down Payment</p>
-                            <p class="text-lg font-bold text-gray-900">${{ number_format($order->order_data['down_payment'] ?? 0, 2) }}</p>
+                            <p class="text-lg font-bold text-gray-900">TZS {{ number_format($order->order_data['down_payment'] ?? 0, 2) }}</p>
                         </div>
                         <div>
                             <p class="text-sm text-gray-600">Loan Term</p>
@@ -185,11 +185,11 @@
                         </div>
                         <div>
                             <p class="text-sm text-gray-600">Monthly Payment</p>
-                            <p class="text-lg font-bold text-green-600">${{ number_format($order->order_data['monthly_payment'] ?? 0, 2) }}</p>
+                            <p class="text-lg font-bold text-green-600">TZS {{ number_format($order->order_data['monthly_payment'] ?? 0, 2) }}</p>
                         </div>
                         <div>
                             <p class="text-sm text-gray-600">Processing Fee</p>
-                            <p class="text-lg font-bold text-gray-900">${{ number_format($order->order_data['processing_fee'] ?? 0, 2) }}</p>
+                            <p class="text-lg font-bold text-gray-900">TZS {{ number_format($order->order_data['processing_fee'] ?? 0, 2) }}</p>
                         </div>
                     </div>
                 </div>
@@ -201,7 +201,7 @@
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <p class="text-sm text-gray-600">Monthly Income</p>
-                        <p class="font-medium text-gray-900">${{ number_format($order->order_data['monthly_income'] ?? 0, 2) }}</p>
+                        <p class="font-medium text-gray-900">TZS {{ number_format($order->order_data['monthly_income'] ?? 0, 2) }}</p>
                     </div>
                     <div>
                         <p class="text-sm text-gray-600">Employment Duration</p>

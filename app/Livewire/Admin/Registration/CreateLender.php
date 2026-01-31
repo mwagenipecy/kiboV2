@@ -31,6 +31,11 @@ class CreateLender extends Component
     // Primary user fields
     public $user_name = '';
     public $user_email = '';
+    
+    // Error modal
+    public $showErrorModal = false;
+    public $errorTitle = 'Error';
+    public $errorMessage = '';
 
     protected $rules = [
         'name' => 'required|string|max:255',
@@ -67,7 +72,14 @@ class CreateLender extends Component
 
     public function save()
     {
-        $this->validate();
+        try {
+            $this->validate();
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Collect all validation errors
+            $errors = $e->validator->errors()->all();
+            $this->showError('Validation Error', implode("\n", $errors));
+            return;
+        }
 
         try {
             // Create entity with pending status (no user created yet)
@@ -96,8 +108,23 @@ class CreateLender extends Component
             
             return redirect()->route('admin.registration.lenders');
         } catch (\Exception $e) {
-            session()->flash('error', 'Failed to register lender: ' . $e->getMessage());
+            $this->showError('Registration Failed', 'Failed to register lender: ' . $e->getMessage());
         }
+    }
+
+    public function showError($title, $message)
+    {
+        $this->errorTitle = $title;
+        $this->errorMessage = $message;
+        $this->showErrorModal = true;
+        $this->dispatch('error-modal-shown');
+    }
+
+    public function closeErrorModal()
+    {
+        $this->showErrorModal = false;
+        $this->errorTitle = 'Error';
+        $this->errorMessage = '';
     }
 
     public function cancel()
