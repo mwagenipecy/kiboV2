@@ -174,3 +174,4 @@ class TruckDetail extends Component
 
 
 
+

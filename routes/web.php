@@ -1224,6 +1224,14 @@ Route::get('/terms', function () {
 Route::post('/api/chatbot/chat', [App\Http\Controllers\ChatbotController::class, 'chat'])->name('chatbot.chat');
 
 // ============================================
+// TWILIO WEBHOOK ROUTES
+// ============================================
+Route::post('/webhook/twilio/incoming', [App\Http\Controllers\TwilioWebhookController::class, 'handleIncomingMessage'])
+    ->name('twilio.webhook.incoming');
+Route::post('/webhook/twilio/status', [App\Http\Controllers\TwilioWebhookController::class, 'handleStatusCallback'])
+    ->name('twilio.webhook.status');
+
+// ============================================
 // TEST ROUTES (For Development)
 // ============================================
 Route::get('/test', function () {
