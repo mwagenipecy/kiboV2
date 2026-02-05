@@ -36,6 +36,7 @@ class TwilioWebhookController extends Controller
         $body = $request->input('Body');
 
         if (empty($body)) {
+            // Return empty 200 response (standard for webhooks)
             return response('', 200);
         }
 
@@ -53,6 +54,8 @@ class TwilioWebhookController extends Controller
             ]);
         }
 
+        // Return empty 200 response (standard for webhooks)
+        // Twilio expects a 200 OK response to acknowledge receipt
         return response('', 200);
     }
 

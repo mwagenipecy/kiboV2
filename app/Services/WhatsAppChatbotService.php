@@ -24,14 +24,25 @@ class WhatsAppChatbotService
      */
     public function processMessage(string $phoneNumber, string $message): void
     {
-        // Get or create conversation
+        // Get or create conversation (this will check for expiration and reset if needed)
         $conversation = ChatbotConversation::getOrCreate($phoneNumber);
+        
+        // Check if session was expired and reset
+        $wasExpired = $conversation->isExpired();
+        if ($wasExpired) {
+            Log::info('Chatbot session expired, resetting conversation', [
+                'phone_number' => $phoneNumber,
+                'last_interaction' => $conversation->last_interaction_at,
+            ]);
+            $conversation->reset();
+        }
         
         // Set locale based on conversation language
         App::setLocale($conversation->language);
         
-        // Update last interaction
+        // Update last interaction timestamp (session is now active)
         $conversation->last_interaction_at = now();
+        $conversation->is_active = true;
         $conversation->save();
 
         // Process based on current step
@@ -46,6 +57,12 @@ class WhatsAppChatbotService
         // Send response
         if ($response) {
             SendWhatsAppMessage::dispatch($phoneNumber, $response);
+            
+            Log::info('Chatbot response sent', [
+                'phone_number' => $phoneNumber,
+                'step' => $conversation->current_step,
+                'message_length' => strlen($response),
+            ]);
         }
     }
 
@@ -54,15 +71,20 @@ class WhatsAppChatbotService
      */
     protected function handleWelcome(ChatbotConversation $conversation, string $message): ?string
     {
-        // Check if user wants to start/reset
+        // Normalize message for comparison
         $message = strtolower(trim($message));
         
-        if (in_array($message, ['hi', 'hello', 'hey', 'start', 'hujambo', 'mambo', 'habari'])) {
+        // Check if user wants to start/reset or sent a greeting
+        $greetings = ['hi', 'hello', 'hey', 'start', 'hujambo', 'mambo', 'habari', 'salam', 'salaam'];
+        
+        if (in_array($message, $greetings)) {
+            // User sent a greeting, move to language selection
             $conversation->updateStep('language_selection');
             return $this->getWelcomeMessage();
         }
 
-        // If not a greeting, show welcome anyway
+        // If not a recognized greeting, show welcome anyway and move to language selection
+        // This handles cases where user sends something unexpected
         $conversation->updateStep('language_selection');
         return $this->getWelcomeMessage();
     }
@@ -165,13 +187,14 @@ class WhatsAppChatbotService
      */
     protected function handleDefault(ChatbotConversation $conversation, string $message): ?string
     {
-        // Reset to welcome if conversation is stale
-        if ($conversation->last_interaction_at && $conversation->last_interaction_at->diffInHours(now()) > 24) {
+        // Check if session expired (should already be handled in processMessage, but double-check)
+        if ($conversation->isExpired()) {
             $conversation->reset();
             return $this->getWelcomeMessage();
         }
 
-        // Try to route to appropriate step
+        // If we're in an unknown state, try to route to main menu
+        // This handles edge cases where step might be null or invalid
         $conversation->updateStep('main_menu');
         return $this->getMainMenu();
     }
