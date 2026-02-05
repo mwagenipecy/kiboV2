@@ -47,23 +47,45 @@ class TwilioWebhookController extends Controller
             // Process message through chatbot and get response
             $responseMessage = $this->chatbotService->processMessage($phoneNumber, $body);
             
+            Log::info('Chatbot processed message', [
+                'phone_number' => $phoneNumber,
+                'has_response' => !empty($responseMessage),
+                'response_length' => $responseMessage ? strlen($responseMessage) : 0,
+                'response_preview' => $responseMessage ? substr($responseMessage, 0, 50) . '...' : null,
+            ]);
+            
             // Send response directly (synchronously) if we have a message
             if ($responseMessage) {
                 try {
                     $twilioService = app(\App\Services\TwilioService::class);
+                    
+                    Log::info('Attempting to send WhatsApp response', [
+                        'phone_number' => $phoneNumber,
+                        'message_length' => strlen($responseMessage),
+                    ]);
+                    
                     $result = $twilioService->sendWhatsAppMessage($phoneNumber, $responseMessage);
                     
-                    Log::info('WhatsApp response sent directly', [
+                    Log::info('WhatsApp response sent successfully', [
                         'phone_number' => $phoneNumber,
                         'message_sid' => $result['sid'] ?? null,
                         'status' => $result['status'] ?? null,
+                        'to' => $result['to'] ?? null,
+                        'from' => $result['from'] ?? null,
                     ]);
                 } catch (\Exception $e) {
-                    Log::error('Failed to send WhatsApp response directly', [
+                    Log::error('Failed to send WhatsApp response', [
                         'phone_number' => $phoneNumber,
                         'error' => $e->getMessage(),
+                        'error_code' => $e->getCode(),
+                        'trace' => $e->getTraceAsString(),
                     ]);
                 }
+            } else {
+                Log::warning('No response message generated', [
+                    'phone_number' => $phoneNumber,
+                    'body' => $body,
+                ]);
             }
         } catch (\Exception $e) {
             Log::error('Error processing WhatsApp message', [
