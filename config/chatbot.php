@@ -27,5 +27,15 @@ return [
      * Default: 24 hours
      */
     'max_session_lifetime_hours' => env('CHATBOT_MAX_SESSION_LIFETIME_HOURS', 24),
+
+    /**
+     * Send messages synchronously (for testing)
+     * Set to true to send messages immediately instead of via queue
+     * 
+     * WARNING: Only use for testing! Production should use queue (false)
+     * 
+     * Default: false (uses queue)
+     */
+    'send_sync' => env('CHATBOT_SEND_SYNC', false),
 ];
 

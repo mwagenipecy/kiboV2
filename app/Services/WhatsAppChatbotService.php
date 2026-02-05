@@ -56,13 +56,35 @@ class WhatsAppChatbotService
 
         // Send response
         if ($response) {
-            SendWhatsAppMessage::dispatch($phoneNumber, $response);
+            // Check if we should send synchronously (for testing) or asynchronously (production)
+            $sendSync = config('chatbot.send_sync', false);
             
-            Log::info('Chatbot response sent', [
-                'phone_number' => $phoneNumber,
-                'step' => $conversation->current_step,
-                'message_length' => strlen($response),
-            ]);
+            if ($sendSync) {
+                // Send immediately (synchronous) - useful for testing
+                try {
+                    $result = $this->twilioService->sendWhatsAppMessage($phoneNumber, $response);
+                    Log::info('Chatbot response sent synchronously', [
+                        'phone_number' => $phoneNumber,
+                        'step' => $conversation->current_step,
+                        'message_length' => strlen($response),
+                        'message_sid' => $result['sid'] ?? null,
+                    ]);
+                } catch (\Exception $e) {
+                    Log::error('Failed to send chatbot response synchronously', [
+                        'phone_number' => $phoneNumber,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+            } else {
+                // Send asynchronously via queue (production)
+                SendWhatsAppMessage::dispatch($phoneNumber, $response);
+                
+                Log::info('Chatbot response queued', [
+                    'phone_number' => $phoneNumber,
+                    'step' => $conversation->current_step,
+                    'message_length' => strlen($response),
+                ]);
+            }
         }
     }
 

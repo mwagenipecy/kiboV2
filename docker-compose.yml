@@ -63,3 +63,21 @@ services:
     depends_on:
       - app
 
+  queue:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: kibo_queue
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html
+      - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    network_mode: host
+    command: php artisan queue:work --sleep=3 --tries=3 --max-time=3600
+    depends_on:
+      - app
+      - redis
+    environment:
+      - QUEUE_CONNECTION=${QUEUE_CONNECTION:-database}
+
