@@ -37,6 +37,23 @@ sleep 3
 echo -e "${GREEN}✅ Containers checked${NC}"
 echo ""
 
+# Step 1.5: Ensure queue worker is running
+echo "Step 1.5: Ensuring queue worker is running..."
+echo "---------------------------------------------"
+if $DOCKER_COMPOSE ps queue | grep -q "Up"; then
+    echo -e "${GREEN}✅ Queue worker is running${NC}"
+else
+    echo -e "${YELLOW}⚠️  Starting queue worker...${NC}"
+    $DOCKER_COMPOSE up -d queue
+    sleep 2
+    if $DOCKER_COMPOSE ps queue | grep -q "Up"; then
+        echo -e "${GREEN}✅ Queue worker started${NC}"
+    else
+        echo -e "${RED}❌ Queue worker failed to start${NC}"
+    fi
+fi
+echo ""
+
 # Step 2: Install/Update PHP dependencies
 echo "Step 2: Installing/Updating PHP dependencies..."
 echo "-----------------------------------------------"
@@ -107,7 +124,7 @@ echo ""
 # Step 9: Restart containers to ensure everything is fresh
 echo "Step 9: Restarting containers..."
 echo "---------------------------------"
-$DOCKER_COMPOSE restart app nginx
+$DOCKER_COMPOSE restart app nginx queue
 sleep 2
 echo -e "${GREEN}✅ Containers restarted${NC}"
 echo ""
@@ -132,7 +149,19 @@ echo "⚠️  Note: Currently using IP access. Update APP_URL in .env to domain 
 echo ""
 echo "📋 Quick commands:"
 echo "   - View logs: $DOCKER_COMPOSE logs -f"
+echo "   - View queue logs: $DOCKER_COMPOSE logs -f queue"
 echo "   - Check status: $DOCKER_COMPOSE ps"
 echo "   - Restart services: $DOCKER_COMPOSE restart"
+echo "   - Restart queue worker: $DOCKER_COMPOSE restart queue"
+echo ""
+echo "🔄 Queue Worker Status:"
+if $DOCKER_COMPOSE ps queue | grep -q "Up"; then
+    echo -e "   ${GREEN}✅ Queue worker is running${NC}"
+    echo "   - Processing WhatsApp messages from queue"
+    echo "   - Check logs: $DOCKER_COMPOSE logs -f queue"
+else
+    echo -e "   ${RED}❌ Queue worker is not running${NC}"
+    echo "   - Start it: $DOCKER_COMPOSE up -d queue"
+fi
 echo ""
 
