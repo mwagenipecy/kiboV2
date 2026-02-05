@@ -21,8 +21,9 @@ class WhatsAppChatbotService
 
     /**
      * Process incoming WhatsApp message
+     * Returns the response message to send (or null if no response needed)
      */
-    public function processMessage(string $phoneNumber, string $message): void
+    public function processMessage(string $phoneNumber, string $message): ?string
     {
         // Get or create conversation (this will check for expiration and reset if needed)
         $conversation = ChatbotConversation::getOrCreate($phoneNumber);
@@ -54,38 +55,8 @@ class WhatsAppChatbotService
             default => $this->handleDefault($conversation, $message),
         };
 
-        // Send response
-        if ($response) {
-            // Check if we should send synchronously (for testing) or asynchronously (production)
-            $sendSync = config('chatbot.send_sync', false);
-            
-            if ($sendSync) {
-                // Send immediately (synchronous) - useful for testing
-                try {
-                    $result = $this->twilioService->sendWhatsAppMessage($phoneNumber, $response);
-                    Log::info('Chatbot response sent synchronously', [
-                        'phone_number' => $phoneNumber,
-                        'step' => $conversation->current_step,
-                        'message_length' => strlen($response),
-                        'message_sid' => $result['sid'] ?? null,
-                    ]);
-                } catch (\Exception $e) {
-                    Log::error('Failed to send chatbot response synchronously', [
-                        'phone_number' => $phoneNumber,
-                        'error' => $e->getMessage(),
-                    ]);
-                }
-            } else {
-                // Send asynchronously via queue (production)
-                SendWhatsAppMessage::dispatch($phoneNumber, $response);
-                
-                Log::info('Chatbot response queued', [
-                    'phone_number' => $phoneNumber,
-                    'step' => $conversation->current_step,
-                    'message_length' => strlen($response),
-                ]);
-            }
-        }
+        // Return response message (will be sent directly by controller)
+        return $response;
     }
 
     /**

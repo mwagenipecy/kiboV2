@@ -18,7 +18,12 @@ class TwilioService
         $this->fromNumber = config('services.twilio.whatsapp_from');
 
         if (!$sid || !$token || !$this->fromNumber) {
-            throw new \Exception('Twilio credentials are not configured. Please check your .env file.');
+            \Log::error('Twilio credentials missing', [
+                'sid_set' => !empty($sid),
+                'token_set' => !empty($token),
+                'from_set' => !empty($this->fromNumber),
+            ]);
+            throw new \Exception('Twilio credentials are not configured. Please check your .env file. Required: TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_WHATSAPP_FROM');
         }
 
         $this->twilio = new Client($sid, $token);

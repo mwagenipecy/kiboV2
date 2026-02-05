@@ -44,8 +44,27 @@ class TwilioWebhookController extends Controller
         $phoneNumber = str_replace('whatsapp:', '', $from);
 
         try {
-            // Process message through chatbot
-            $this->chatbotService->processMessage($phoneNumber, $body);
+            // Process message through chatbot and get response
+            $responseMessage = $this->chatbotService->processMessage($phoneNumber, $body);
+            
+            // Send response directly (synchronously) if we have a message
+            if ($responseMessage) {
+                try {
+                    $twilioService = app(\App\Services\TwilioService::class);
+                    $result = $twilioService->sendWhatsAppMessage($phoneNumber, $responseMessage);
+                    
+                    Log::info('WhatsApp response sent directly', [
+                        'phone_number' => $phoneNumber,
+                        'message_sid' => $result['sid'] ?? null,
+                        'status' => $result['status'] ?? null,
+                    ]);
+                } catch (\Exception $e) {
+                    Log::error('Failed to send WhatsApp response directly', [
+                        'phone_number' => $phoneNumber,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+            }
         } catch (\Exception $e) {
             Log::error('Error processing WhatsApp message', [
                 'phone_number' => $phoneNumber,
