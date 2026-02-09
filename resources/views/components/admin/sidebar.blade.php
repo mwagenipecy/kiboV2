@@ -414,10 +414,10 @@
                     </svg>
                     <span class="menu-text whitespace-nowrap">Auctions</span>
                     @php
+                        // Auction vehicles don't have entity_id, they belong to users
+                        // For dealers, we can't filter by entity_id, so show all pending auctions
                         $pendingAuctionsQuery = \App\Models\AuctionVehicle::where('status', 'pending')->where('admin_approved', false);
-                        if (!$isAdmin && $userEntityId) {
-                            $pendingAuctionsQuery->where('entity_id', $userEntityId);
-                        }
+                        // Note: Auction vehicles are created by customers, not dealers, so we show all for dealers too
                         $pendingAuctions = $pendingAuctionsQuery->count();
                     @endphp
                     @if($pendingAuctions > 0)
@@ -434,6 +434,42 @@
                     </svg>
                     <span class="menu-text whitespace-nowrap">Car Requests</span>
                 </a>
+                @endif
+
+                <!-- Exchange Requests - Expandable (Admin and Dealer) -->
+                @if($userRole === 'admin' || $userRole === 'dealer')
+                <div x-data="{ open: {{ request()->is('admin/exchange-requests*') ? 'true' : 'false' }} }">
+                    <button @click="open = !open" class="w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-lg {{ request()->is('admin/exchange-requests*') ? 'text-white kibo-sidebar-active shadow-sm' : 'text-gray-700 kibo-sidebar-hover' }} transition-colors group">
+                        <div class="flex items-center min-w-0 flex-1">
+                            <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
+                            </svg>
+                            <span class="menu-text whitespace-nowrap">Exchange Requests</span>
+                            @php
+                                // Count pending exchange requests
+                                $exchangePendingQuery = \App\Models\CarExchangeRequest::where('status', 'pending');
+                                if (!$isAdmin && $userEntityId) {
+                                    $exchangePendingQuery->where('sent_to_dealer_id', $userEntityId);
+                                }
+                                $exchangePendingCount = $exchangePendingQuery->count();
+                            @endphp
+                            @if($exchangePendingCount > 0)
+                            <span class="ml-2 px-2 py-0.5 text-xs font-semibold text-yellow-700 bg-yellow-100 rounded-full whitespace-nowrap flex-shrink-0">{{ $exchangePendingCount }}</span>
+                            @endif
+                        </div>
+                        <svg class="w-4 h-4 transition-transform menu-text flex-shrink-0" :class="open ? 'rotate-90' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </button>
+                    <div x-show="open" x-transition class="ml-8 mt-1 space-y-1 submenu">
+                        <a href="{{ route('admin.exchange-requests.index') }}" class="block px-3 py-2 text-sm text-gray-600 rounded-lg kibo-sidebar-hover transition-colors">All Requests</a>
+                        <a href="{{ route('admin.exchange-requests.index') }}?filter=pending" class="block px-3 py-2 text-sm text-gray-600 rounded-lg kibo-sidebar-hover transition-colors">Pending</a>
+                        <a href="{{ route('admin.exchange-requests.index') }}?filter=admin_approved" class="block px-3 py-2 text-sm text-gray-600 rounded-lg kibo-sidebar-hover transition-colors">Approved</a>
+                        <a href="{{ route('admin.exchange-requests.index') }}?filter=sent_to_dealers" class="block px-3 py-2 text-sm text-gray-600 rounded-lg kibo-sidebar-hover transition-colors">Sent to Dealers</a>
+                        <a href="{{ route('admin.exchange-requests.index') }}?filter=completed" class="block px-3 py-2 text-sm text-gray-600 rounded-lg kibo-sidebar-hover transition-colors">Completed</a>
+                        <a href="{{ route('admin.exchange-requests.index') }}?filter=rejected" class="block px-3 py-2 text-sm text-gray-600 rounded-lg kibo-sidebar-hover transition-colors">Rejected</a>
+                    </div>
+                </div>
                 @endif
 
                 <!-- Customers - Expandable (Admin only) -->

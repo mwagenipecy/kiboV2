@@ -10,6 +10,7 @@
             <a href="{{ route('garage.index') }}" class="text-sm font-medium {{ $vehicleType === 'garage' || request()->routeIs('garage.*') ? 'text-gray-900 font-semibold border-b-2 border-green-600 pb-1' : 'text-gray-600' }} hover:text-green-700 transition-colors">Garage</a>
             <a href="{{ route('loan-calculator.index') }}" class="text-sm font-medium {{ $vehicleType === 'loan-calculator' || request()->routeIs('loan-calculator.*') ? 'text-gray-900 font-semibold border-b-2 border-green-600 pb-1' : 'text-gray-600' }} hover:text-green-700 transition-colors">Loan Calculator</a>
             <a href="{{ route('import-financing.index') }}" class="text-sm font-medium {{ $vehicleType === 'import-financing' || request()->routeIs('import-financing.*') ? 'text-gray-900 font-semibold border-b-2 border-green-600 pb-1' : 'text-gray-600' }} hover:text-green-700 transition-colors">Import Financing</a>
+            <a href="{{ route('car-exchange.index') }}" class="text-sm font-medium {{ $vehicleType === 'car-exchange' || request()->routeIs('car-exchange.*') ? 'text-gray-900 font-semibold border-b-2 border-green-600 pb-1' : 'text-gray-600' }} hover:text-green-700 transition-colors">Car Exchange</a>
             {{-- Hidden menus --}}
             {{-- <a href="{{ route('vans.index') }}" class="text-sm font-medium {{ $vehicleType === 'vans' ? 'text-gray-900' : 'text-gray-600' }} hover:text-green-700">{{ __('vehicles.vans') }}</a> --}}
             {{-- <a href="{{ route('bikes.index') }}" class="text-sm font-medium {{ $vehicleType === 'bikes' ? 'text-gray-900' : 'text-gray-600' }} hover:text-green-700">{{ __('vehicles.bikes') }}</a> --}}
@@ -124,6 +125,9 @@
                     </a>
                     <a href="{{ route('import-financing.index') }}" @click="mobileMenuOpen = false" class="block px-3 py-2 rounded-lg text-sm font-medium {{ $vehicleType === 'import-financing' || request()->routeIs('import-financing.*') ? 'bg-green-50 text-green-700' : 'text-gray-700 hover:bg-gray-50' }} transition-colors">
                         Import Financing
+                    </a>
+                    <a href="{{ route('car-exchange.index') }}" @click="mobileMenuOpen = false" class="block px-3 py-2 rounded-lg text-sm font-medium {{ $vehicleType === 'car-exchange' || request()->routeIs('car-exchange.*') ? 'bg-green-50 text-green-700' : 'text-gray-700 hover:bg-gray-50' }} transition-colors">
+                        Car Exchange
                     </a>
                 </div>
             </div>

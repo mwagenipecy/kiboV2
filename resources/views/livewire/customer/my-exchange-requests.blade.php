@@ -1,0 +1,173 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">My Exchange Requests</h1>
+        <p class="text-gray-600">View and manage your car exchange requests</p>
+    </div>
+
+    @if (session()->has('exchange_success'))
+        <div class="mb-6 rounded-xl px-4 py-3 text-center" style="background-color: rgba(0, 152, 102, 0.1); color: #007a52;">
+            {{ session('exchange_success') }}
+        </div>
+    @endif
+
+    @if (session()->has('success'))
+        <div class="mb-6 rounded-xl px-4 py-3 text-center bg-green-50 border border-green-200 text-green-800">
+            {{ session('success') }}
+        </div>
+    @endif
+
+    @if (session()->has('error'))
+        <div class="mb-6 rounded-xl px-4 py-3 text-center bg-red-50 border border-red-200 text-red-800">
+            {{ session('error') }}
+        </div>
+    @endif
+
+    @forelse($requests as $request)
+        <div class="bg-white border border-gray-200 rounded-xl p-6 mb-6 shadow-sm">
+            <div class="flex justify-between items-start mb-4">
+                <div>
+                    <h2 class="text-xl font-semibold text-gray-900 mb-2">Exchange Request #{{ $request->id }}</h2>
+                    <p class="text-sm text-gray-500">Submitted: {{ $request->created_at->format('M d, Y H:i') }}</p>
+                </div>
+                <div>
+                    @if($request->status === 'pending')
+                        <span class="inline-flex items-center px-3 py-1 rounded-full bg-yellow-100 text-yellow-800 font-medium text-sm">Pending Review</span>
+                    @elseif($request->status === 'admin_approved')
+                        <span class="inline-flex items-center px-3 py-1 rounded-full bg-blue-100 text-blue-800 font-medium text-sm">Approved</span>
+                    @elseif($request->status === 'sent_to_dealers')
+                        <span class="inline-flex items-center px-3 py-1 rounded-full bg-green-100 text-green-800 font-medium text-sm">Sent to Dealers</span>
+                    @elseif($request->status === 'completed')
+                        <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-100 text-gray-800 font-medium text-sm">Completed</span>
+                    @elseif($request->status === 'rejected')
+                        <span class="inline-flex items-center px-3 py-1 rounded-full bg-red-100 text-red-800 font-medium text-sm">Rejected</span>
+                    @endif
+                </div>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-6 mb-6">
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <h3 class="font-medium text-gray-700 mb-3">Current Vehicle</h3>
+                    <p class="text-gray-900 font-semibold">{{ $request->current_vehicle_make }} {{ $request->current_vehicle_model }}</p>
+                    <p class="text-sm text-gray-600 mt-1">Year: {{ $request->current_vehicle_year }}</p>
+                    @if($request->current_vehicle_mileage)
+                        <p class="text-sm text-gray-600">Mileage: {{ number_format($request->current_vehicle_mileage) }} km</p>
+                    @endif
+                    <p class="text-sm text-gray-600">Condition: {{ ucfirst($request->current_vehicle_condition) }}</p>
+                </div>
+
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <h3 class="font-medium text-gray-700 mb-3">Desired Vehicle</h3>
+                    <p class="text-gray-900 font-semibold">{{ $request->desiredMake?->name ?? 'Any' }} {{ $request->desiredModel?->name ?? '' }}</p>
+                    @if($request->desired_min_year || $request->desired_max_year)
+                        <p class="text-sm text-gray-600 mt-1">Year: {{ $request->desired_min_year ?? 'Any' }} - {{ $request->desired_max_year ?? 'Any' }}</p>
+                    @endif
+                    @if($request->max_budget)
+                        <p class="text-sm text-gray-600">Budget: {{ number_format($request->max_budget) }} TZS</p>
+                    @endif
+                </div>
+            </div>
+
+            @if($request->status === 'completed' && $request->accepted_quotation_id)
+                <div class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <p class="text-sm font-medium text-blue-900">✓ Exchange request completed. A quotation has been accepted and no further quotations can be submitted.</p>
+                </div>
+            @endif
+
+            @if($request->quotations->count() > 0)
+                <div class="mt-6">
+                    <h3 class="font-medium text-gray-700 mb-4">
+                        Quotations Received ({{ $request->quotations->count() }})
+                        @if($request->status === 'completed')
+                            <span class="text-sm text-gray-500 font-normal">- Request completed, no new quotations accepted</span>
+                        @endif
+                    </h3>
+                    <div class="space-y-4">
+                        @foreach($request->quotations as $quotation)
+                            <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                                <div class="flex justify-between items-start">
+                                    <div class="flex-1">
+                                        <h4 class="font-semibold text-gray-900">{{ $quotation->entity->name }}</h4>
+                                        <div class="mt-2 grid grid-cols-2 gap-4 text-sm">
+                                            <div>
+                                                <p class="text-gray-600">Your Vehicle Valuation:</p>
+                                                <p class="font-semibold text-gray-900">{{ number_format($quotation->current_vehicle_valuation, 2) }} {{ $quotation->currency }}</p>
+                                            </div>
+                                            <div>
+                                                <p class="text-gray-600">Desired Vehicle Price:</p>
+                                                <p class="font-semibold text-gray-900">{{ number_format($quotation->desired_vehicle_price, 2) }} {{ $quotation->currency }}</p>
+                                            </div>
+                                        </div>
+                                        <div class="mt-3">
+                                            <p class="text-gray-600">Amount to Pay:</p>
+                                            <p class="text-lg font-bold" style="color: #009866;">
+                                                {{ number_format($quotation->price_difference, 2) }} {{ $quotation->currency }}
+                                            </p>
+                                        </div>
+                                        @if($quotation->offeredVehicle)
+                                            <div class="mt-3 p-3 bg-blue-50 rounded-lg">
+                                                <p class="text-sm font-medium text-gray-700">Vehicle Offered:</p>
+                                                <p class="text-sm text-gray-900">
+                                                    {{ $quotation->offeredVehicle->make->name }} {{ $quotation->offeredVehicle->model->name }} 
+                                                    ({{ $quotation->offeredVehicle->year }})
+                                                </p>
+                                            </div>
+                                        @endif
+                                        @if($quotation->message)
+                                            <div class="mt-3">
+                                                <p class="text-sm text-gray-600 italic">"{{ $quotation->message }}"</p>
+                                            </div>
+                                        @endif
+                                        <p class="text-xs text-gray-500 mt-2">Sent: {{ $quotation->sent_at?->format('M d, Y H:i') ?? 'Pending' }}</p>
+                                    </div>
+                                    <div class="flex flex-col items-end gap-2">
+                                        @if($quotation->status === 'sent')
+                                            <span class="inline-flex items-center px-2 py-1 rounded-full bg-green-100 text-green-800 text-xs">Sent</span>
+                                        @elseif($quotation->status === 'accepted')
+                                            <span class="inline-flex items-center px-2 py-1 rounded-full bg-blue-100 text-blue-800 text-xs font-semibold">Accepted</span>
+                                        @else
+                                            <span class="inline-flex items-center px-2 py-1 rounded-full bg-yellow-100 text-yellow-800 text-xs">Pending</span>
+                                        @endif
+                                        
+                                        @if($request->status !== 'completed' && $quotation->status === 'sent' && !$request->accepted_quotation_id)
+                                            <button 
+                                                wire:click="acceptQuotation({{ $quotation->id }})"
+                                                wire:confirm="Are you sure you want to accept this quotation? Once accepted, no other quotations can be submitted for this request."
+                                                class="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors"
+                                            >
+                                                Accept Quotation
+                                            </button>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            @else
+                <div class="mt-6 text-center py-8 bg-gray-50 rounded-lg">
+                    <p class="text-gray-600">No quotations received yet.</p>
+                    <p class="text-sm text-gray-500 mt-1">
+                        @if($request->status === 'sent_to_dealers')
+                            Dealers are reviewing your request. You will receive quotations soon.
+                        @elseif($request->status === 'pending')
+                            Your request is pending admin approval.
+                        @elseif($request->status === 'admin_approved')
+                            Your request has been approved and will be sent to dealers soon.
+                        @endif
+                    </p>
+                </div>
+            @endif
+        </div>
+    @empty
+        <div class="bg-white border border-gray-200 rounded-xl p-12 text-center">
+            <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
+            </svg>
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">No Exchange Requests</h3>
+            <p class="text-gray-600 mb-6">You haven't submitted any car exchange requests yet.</p>
+            <a href="{{ route('car-exchange.index') }}" class="inline-block px-6 py-3 text-white font-semibold rounded-lg transition-colors" style="background-color: #009866;">
+                Submit Exchange Request
+            </a>
+        </div>
+    @endforelse
+</div>

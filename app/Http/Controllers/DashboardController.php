@@ -22,7 +22,7 @@ class DashboardController extends Controller
                 return redirect()->route('admin.dashboard');
 
             case 'dealer':
-                return redirect()->route('dealer.dashboard');
+                return redirect()->route('admin.dashboard');
 
             case 'lender':
                 return redirect()->route('lender.dashboard');

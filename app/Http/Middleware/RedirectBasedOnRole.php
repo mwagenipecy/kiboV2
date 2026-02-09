@@ -27,15 +27,17 @@ class RedirectBasedOnRole
                 }
             }
             
-            // Dealer redirects
+            // Dealer redirects - dealers now use admin interface
             if ($user->isDealer()) {
-                // If dealer trying to access admin or lender routes
-                if ($request->is('admin/*') || $request->is('lender/*')) {
-                    return redirect()->route('dealer.dashboard');
-                }
-                // If dealer trying to access home/public pages (except logout)
-                if (!$request->is('dealer/*') && !$request->is('logout') && !$request->is('lang/*')) {
-                    return redirect()->route('dealer.dashboard');
+                // Allow dealers to access all admin routes
+                if ($request->is('admin/*')) {
+                    // Allow access to all admin routes
+                } elseif ($request->is('lender/*')) {
+                    // If dealer trying to access lender routes
+                    return redirect()->route('admin.dashboard');
+                } elseif (!$request->is('admin/*') && !$request->is('logout') && !$request->is('lang/*')) {
+                    // If dealer trying to access home/public pages (except logout)
+                    return redirect()->route('admin.dashboard');
                 }
             }
             

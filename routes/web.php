@@ -533,6 +533,19 @@ Route::prefix('import-financing')->name('import-financing.')->group(function () 
 });
 
 // ============================================
+// CAR EXCHANGE ROUTES
+// ============================================
+Route::prefix('car-exchange')->name('car-exchange.')->group(function () {
+    Route::get('/', function () {
+        return view('car-exchange.index', ['vehicleType' => 'car-exchange']);
+    })->name('index');
+    
+    Route::middleware('auth')->group(function () {
+        Route::get('/my-requests', \App\Livewire\Customer\MyExchangeRequests::class)->name('my-requests');
+    });
+});
+
+// ============================================
 // UNIFIED PRICING ROUTE (for use in components)
 // ============================================
 Route::get('/pricing/{category}', function ($category) {
@@ -572,6 +585,12 @@ Route::prefix('dealer')->name('dealer.')->middleware(['auth', 'verified'])->grou
 
     // Find-me-a-car requests (dealers submit offers)
     Route::get('/car-requests', \App\Livewire\Dealer\CarRequests::class)->name('car-requests');
+    
+    // Exchange Requests
+    Route::prefix('exchange-requests')->name('exchange-requests.')->group(function () {
+        Route::get('/', \App\Livewire\Dealer\ExchangeRequests::class)->name('index');
+        Route::get('/{id}/quotation', \App\Livewire\Dealer\ExchangeQuotation::class)->name('quotation');
+    });
     
     // Auctions - Buy from private sellers
     Route::get('/auctions', \App\Livewire\Dealer\AuctionList::class)->name('auctions');
@@ -787,6 +806,12 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
     // Find-me-a-car requests
     Route::get('/car-requests', \App\Livewire\Admin\CarRequests::class)->name('car-requests');
     Route::get('/car-requests/{id}', \App\Livewire\Admin\CarRequestDetail::class)->name('car-requests.view');
+    
+    // Exchange Requests
+    Route::prefix('exchange-requests')->name('exchange-requests.')->group(function () {
+        Route::get('/', \App\Livewire\Admin\ExchangeRequests::class)->name('index');
+        Route::get('/{id}', \App\Livewire\Admin\ExchangeRequestDetail::class)->name('detail');
+    });
     
     // Auctions
     Route::get('/auctions', \App\Livewire\Admin\AuctionManagement::class)->name('auctions');
