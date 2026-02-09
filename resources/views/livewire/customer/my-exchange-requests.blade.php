@@ -117,24 +117,38 @@
                                                 <p class="text-sm text-gray-600 italic">"{{ $quotation->message }}"</p>
                                             </div>
                                         @endif
+                                        @if($quotation->quotation_documents && count($quotation->quotation_documents) > 0)
+                                            <div class="mt-3">
+                                                <p class="text-sm font-medium text-gray-700 mb-1">Documents:</p>
+                                                <div class="flex flex-wrap gap-2">
+                                                    @foreach($quotation->quotation_documents as $doc)
+                                                        <a href="{{ asset('storage/' . $doc) }}" target="_blank" class="text-sm text-blue-600 hover:text-blue-800 underline">
+                                                            View Document {{ $loop->iteration }}
+                                                        </a>
+                                                    @endforeach
+                                                </div>
+                                            </div>
+                                        @endif
                                         <p class="text-xs text-gray-500 mt-2">Sent: {{ $quotation->sent_at?->format('M d, Y H:i') ?? 'Pending' }}</p>
+                                        @if($quotation->accepted_at)
+                                            <p class="text-xs text-green-600 mt-1 font-medium">✓ Confirmed on: {{ $quotation->accepted_at->format('M d, Y H:i') }}</p>
+                                        @endif
                                     </div>
                                     <div class="flex flex-col items-end gap-2">
                                         @if($quotation->status === 'sent')
                                             <span class="inline-flex items-center px-2 py-1 rounded-full bg-green-100 text-green-800 text-xs">Sent</span>
                                         @elseif($quotation->status === 'accepted')
-                                            <span class="inline-flex items-center px-2 py-1 rounded-full bg-blue-100 text-blue-800 text-xs font-semibold">Accepted</span>
+                                            <span class="inline-flex items-center px-2 py-1 rounded-full bg-blue-100 text-blue-800 text-xs font-semibold">✓ Confirmed</span>
                                         @else
                                             <span class="inline-flex items-center px-2 py-1 rounded-full bg-yellow-100 text-yellow-800 text-xs">Pending</span>
                                         @endif
                                         
-                                        @if($request->status !== 'completed' && $quotation->status === 'sent' && !$request->accepted_quotation_id)
+                                        @if($request->status !== 'completed' && in_array($quotation->status, ['sent', 'pending']) && !$request->accepted_quotation_id)
                                             <button 
-                                                wire:click="acceptQuotation({{ $quotation->id }})"
-                                                wire:confirm="Are you sure you want to accept this quotation? Once accepted, no other quotations can be submitted for this request."
-                                                class="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors"
+                                                wire:click="openConfirmModal({{ $quotation->id }})"
+                                                class="px-6 py-3 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 transition-colors shadow-md hover:shadow-lg"
                                             >
-                                                Accept Quotation
+                                                ✓ Confirm Quotation
                                             </button>
                                         @endif
                                     </div>
@@ -170,4 +184,99 @@
             </a>
         </div>
     @endforelse
+
+    <!-- Confirmation Modal -->
+    @if($showConfirmModal && $quotationDetails)
+    <div 
+        x-data="{ show: true }"
+        x-show="show"
+        x-cloak
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+        class="fixed inset-0 z-[9999] overflow-y-auto"
+    >
+        <!-- Background overlay -->
+        <div 
+            @click="$wire.closeConfirmModal()"
+            class="fixed inset-0 bg-black/50 bg-opacity-50 transition-opacity"
+        ></div>
+
+        <!-- Modal panel -->
+        <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            
+            <div 
+                x-transition:enter="ease-out duration-300"
+                x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                x-transition:leave="ease-in duration-200"
+                x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                class="relative inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"
+            >
+                <!-- Modal header -->
+                <div class="bg-white px-6 py-4 border-b border-gray-200">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-lg font-semibold text-gray-900">Confirm Quotation</h3>
+                        <button 
+                            wire:click="closeConfirmModal"
+                            class="text-gray-400 hover:text-gray-500 focus:outline-none"
+                        >
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Modal body -->
+                <div class="bg-white px-6 py-4">
+                    <p class="text-sm text-gray-600 mb-4">
+                        Are you sure you want to confirm this quotation? Once confirmed, this exchange request will be completed and no other quotations can be submitted.
+                    </p>
+
+                    @if($quotationDetails)
+                    <div class="bg-gray-50 rounded-lg p-4 mb-4">
+                        <h4 class="font-semibold text-gray-900 mb-3">{{ $quotationDetails->entity->name }}</h4>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Your Vehicle Valuation:</span>
+                                <span class="font-semibold text-gray-900">{{ number_format($quotationDetails->current_vehicle_valuation, 2) }} {{ $quotationDetails->currency }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Desired Vehicle Price:</span>
+                                <span class="font-semibold text-gray-900">{{ number_format($quotationDetails->desired_vehicle_price, 2) }} {{ $quotationDetails->currency }}</span>
+                            </div>
+                            <div class="flex justify-between pt-2 border-t border-gray-200">
+                                <span class="text-gray-700 font-medium">Amount to Pay:</span>
+                                <span class="font-bold text-lg" style="color: #009866;">{{ number_format($quotationDetails->price_difference, 2) }} {{ $quotationDetails->currency }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    @endif
+                </div>
+
+                <!-- Modal footer -->
+                <div class="bg-gray-50 px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
+                    <button 
+                        wire:click="closeConfirmModal"
+                        class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 font-medium transition-colors"
+                    >
+                        Cancel
+                    </button>
+                    <button 
+                        wire:click="acceptQuotation"
+                        class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold transition-colors shadow-md hover:shadow-lg"
+                    >
+                        ✓ Confirm Quotation
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
 </div>

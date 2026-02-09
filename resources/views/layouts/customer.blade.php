@@ -14,6 +14,7 @@
         body {
             font-family: ATVFabriga, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif !important;
         }
+        [x-cloak] { display: none !important; }
     </style>
     @stack('styles')
     @livewireStyles
