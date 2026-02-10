@@ -10,8 +10,6 @@ use App\Models\User;
 use App\Models\VehicleMake;
 use App\Models\VehicleModel;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 class SparePartOrderChatbotService
@@ -62,6 +60,16 @@ class SparePartOrderChatbotService
      */
     protected function handleEmailRequest(ChatbotConversation $conversation, string $message): string
     {
+        $message = strtolower(trim($message));
+        $locale = $conversation->language === 'sw' ? 'sw' : 'en';
+        
+        // Check for back/cancel
+        if (in_array($message, ['back', 'cancel', 'rudi', 'ghairi', 'menu'])) {
+            $conversation->setContext('sparepart_substep', null);
+            $conversation->updateStep('main_menu');
+            return $this->getMainMenuMessage($conversation);
+        }
+        
         $email = trim($message);
         
         // Validate email
@@ -70,32 +78,26 @@ class SparePartOrderChatbotService
         ]);
 
         if ($validator->fails()) {
-            $locale = $conversation->language === 'sw' ? 'sw' : 'en';
             return $locale === 'sw'
-                ? "Tafadhali toa anwani ya barua pepe halali. Mfano: jina@example.com"
-                : "Please provide a valid email address. Example: name@example.com";
+                ? "Tafadhali toa anwani ya barua pepe halali. Mfano: jina@example.com\n\nAu andika 'rudi' ili kurudi kwenye menyu kuu."
+                : "Please provide a valid email address. Example: name@example.com\n\nOr type 'back' to return to main menu.";
         }
 
         // Store email in context
         $conversation->setContext('sparepart_email', $email);
         
-        // Generate and send OTP
+        // Generate OTP
         $otpCode = str_pad((string) random_int(0, 9999), 4, '0', STR_PAD_LEFT);
         
         // Store OTP in context (we'll verify it)
         $conversation->setContext('sparepart_otp', $otpCode);
         $conversation->setContext('sparepart_otp_expires_at', now()->addMinutes(10)->toDateTimeString());
         
-        // Send OTP email
+        // Send OTP email via Job
         try {
-            // Create a temporary user object for the mailable
-            $user = new \stdClass();
-            $user->name = 'Customer';
-            $user->email = $email;
-            
-            Mail::to($email)->send(new \App\Mail\LoginOtpMail($user, $otpCode));
+            SendLoginOtp::dispatch($email, 'Customer', $otpCode);
         } catch (\Exception $e) {
-            Log::error('Failed to send OTP email for sparepart order: ' . $e->getMessage());
+            Log::error('Failed to dispatch OTP email job for sparepart order: ' . $e->getMessage());
             $locale = $conversation->language === 'sw' ? 'sw' : 'en';
             return $locale === 'sw'
                 ? "Kumekuwa na hitilafu katika kutuma nambari ya uthibitisho. Tafadhali jaribu tena baadaye."
@@ -107,8 +109,59 @@ class SparePartOrderChatbotService
         
         $locale = $conversation->language === 'sw' ? 'sw' : 'en';
         return $locale === 'sw'
-            ? "Tumetuma nambari ya uthibitisho (OTP) kwenye anwani yako ya barua pepe: {$email}\n\nTafadhali ingiza nambari ya uthibitisho (tarakimu 4)."
-            : "We've sent a verification code (OTP) to your email: {$email}\n\nPlease enter the 4-digit verification code.";
+            ? "Tumetuma nambari ya uthibitisho kwenye barua pepe yako.\n\nTafadhali ingiza nambari ya uthibitisho iliyotumwa kwenye barua pepe yako (tarakimu 4).\n\nIkiwa hujapokea, andika 'tuma tena'."
+            : "We've sent a verification code to your email.\n\nPlease enter the verification code sent on your email (4 digits).\n\nIf you didn't receive it, type 'resend'.";
+    }
+
+    /**
+     * Resend OTP
+     */
+    protected function resendOtp(ChatbotConversation $conversation): string
+    {
+        $email = $conversation->getContext('sparepart_email');
+        
+        if (!$email) {
+            $locale = $conversation->language === 'sw' ? 'sw' : 'en';
+            $conversation->setContext('sparepart_substep', 'email_request');
+            return $locale === 'sw'
+                ? "Barua pepe haijasajiliwa. Tafadhali toa anwani yako ya barua pepe."
+                : "Email not found. Please provide your email address.";
+        }
+        
+        // Generate new OTP
+        $otpCode = str_pad((string) random_int(0, 9999), 4, '0', STR_PAD_LEFT);
+        
+        // Store new OTP
+        $conversation->setContext('sparepart_otp', $otpCode);
+        $conversation->setContext('sparepart_otp_expires_at', now()->addMinutes(10)->toDateTimeString());
+        
+        // Send OTP email via Job
+        try {
+            SendLoginOtp::dispatch($email, 'Customer', $otpCode);
+        } catch (\Exception $e) {
+            Log::error('Failed to dispatch OTP email job for sparepart order: ' . $e->getMessage());
+            $locale = $conversation->language === 'sw' ? 'sw' : 'en';
+            return $locale === 'sw'
+                ? "Kumekuwa na hitilafu katika kutuma nambari ya uthibitisho. Tafadhali jaribu tena baadaye."
+                : "There was an error sending the verification code. Please try again later.";
+        }
+        
+        $locale = $conversation->language === 'sw' ? 'sw' : 'en';
+        return $locale === 'sw'
+            ? "✓ Nambari mpya ya uthibitisho imetumwa kwenye barua pepe yako.\n\nTafadhali ingiza nambari ya uthibitisho (tarakimu 4)."
+            : "✓ A new verification code has been sent to your email.\n\nPlease enter the verification code (4 digits).";
+    }
+
+    /**
+     * Get main menu message (helper method)
+     */
+    protected function getMainMenuMessage(ChatbotConversation $conversation): string
+    {
+        $locale = $conversation->language === 'sw' ? 'sw' : 'en';
+        // This will be handled by WhatsAppChatbotService, but we return a simple message
+        return $locale === 'sw'
+            ? "Umerudi kwenye menyu kuu."
+            : "You've returned to the main menu.";
     }
 
     /**
@@ -116,24 +169,45 @@ class SparePartOrderChatbotService
      */
     protected function handleOtpVerification(ChatbotConversation $conversation, string $message): string
     {
+        $message = strtolower(trim($message));
+        $locale = $conversation->language === 'sw' ? 'sw' : 'en';
+        
+        // Check for resend request
+        if (in_array($message, ['resend', 'send again', 'tuma tena', 'tuma upya', 'retry'])) {
+            return $this->resendOtp($conversation);
+        }
+        
+        // Check for back/cancel
+        if (in_array($message, ['back', 'cancel', 'rudi', 'ghairi'])) {
+            $conversation->setContext('sparepart_substep', 'email_request');
+            return $locale === 'sw'
+                ? "Umerudi nyuma. Tafadhali toa anwani yako ya barua pepe tena."
+                : "You went back. Please provide your email address again.";
+        }
+        
         $otpCode = trim($message);
         $storedOtp = $conversation->getContext('sparepart_otp');
-        $otpExpiresAt = $conversation->getContext('sparepart_otp_expires_at');
+        $otpExpiresAtStr = $conversation->getContext('sparepart_otp_expires_at');
         
-        $locale = $conversation->language === 'sw' ? 'sw' : 'en';
+        // Check if OTP expired (parse the datetime string)
+        if ($otpExpiresAtStr) {
+            try {
+                $otpExpiresAt = \Carbon\Carbon::parse($otpExpiresAtStr);
+                if (now()->greaterThan($otpExpiresAt)) {
+                    return $locale === 'sw'
+                        ? "Nambari ya uthibitisho imeisha muda wake. Andika 'tuma tena' ili kupata nambari mpya."
+                        : "The verification code has expired. Type 'resend' to get a new code.";
+                }
+            } catch (\Exception $e) {
+                Log::warning('Failed to parse OTP expiration date: ' . $e->getMessage());
+            }
+        }
         
         // Check if OTP matches
         if ($otpCode !== $storedOtp) {
             return $locale === 'sw'
-                ? "Nambari ya uthibitisho si sahihi. Tafadhali jaribu tena."
-                : "The verification code is incorrect. Please try again.";
-        }
-        
-        // Check if OTP expired
-        if ($otpExpiresAt && now()->greaterThan($otpExpiresAt)) {
-            return $locale === 'sw'
-                ? "Nambari ya uthibitisho imeisha muda wake. Tafadhali anza upya na toa barua pepe yako tena."
-                : "The verification code has expired. Please start over and provide your email again.";
+                ? "Nambari ya uthibitisho si sahihi. Tafadhali jaribu tena. Au andika 'tuma tena' ili kupata nambari mpya."
+                : "The verification code is incorrect. Please try again. Or type 'resend' to get a new code.";
         }
         
         // OTP verified, clear it and move to vehicle make selection
@@ -171,6 +245,17 @@ class SparePartOrderChatbotService
      */
     protected function handleVehicleMake(ChatbotConversation $conversation, string $message): string
     {
+        $messageLower = strtolower(trim($message));
+        $locale = $conversation->language === 'sw' ? 'sw' : 'en';
+        
+        // Check for back/cancel
+        if (in_array($messageLower, ['back', 'cancel', 'rudi', 'ghairi'])) {
+            $conversation->setContext('sparepart_substep', 'otp_verification');
+            return $locale === 'sw'
+                ? "Umerudi nyuma. Tafadhali ingiza nambari ya uthibitisho."
+                : "You went back. Please enter the verification code.";
+        }
+        
         $message = trim($message);
         $makes = VehicleMake::active()->orderBy('name')->get();
         $selectedMake = null;
@@ -188,12 +273,18 @@ class SparePartOrderChatbotService
             });
         }
         
-        $locale = $conversation->language === 'sw' ? 'sw' : 'en';
-        
         if (!$selectedMake) {
-            return $locale === 'sw'
-                ? "Aina ya gari haijapatikana. Tafadhali chagua nambari au jina kutoka kwenye orodha."
-                : "Vehicle make not found. Please select a number or name from the list.";
+            // Show list again with better message
+            $response = $locale === 'sw'
+                ? "Aina ya gari haijapatikana. Tafadhali chagua nambari au jina kutoka kwenye orodha hapa chini:\n\n"
+                : "Vehicle make not found. Please select a number or name from the list below:\n\n";
+            
+            foreach ($makes as $index => $make) {
+                $response .= ($index + 1) . ". " . $make->name . "\n";
+            }
+            
+            $response .= "\n" . ($locale === 'sw' ? "Jibu kwa nambari au jina la aina ya gari." : "Reply with the number or name of the vehicle make.");
+            return $response;
         }
         
         // Store selected make
@@ -232,6 +323,26 @@ class SparePartOrderChatbotService
      */
     protected function handleVehicleModel(ChatbotConversation $conversation, string $message): string
     {
+        $messageLower = strtolower(trim($message));
+        $locale = $conversation->language === 'sw' ? 'sw' : 'en';
+        
+        // Check for back/cancel
+        if (in_array($messageLower, ['back', 'cancel', 'rudi', 'ghairi'])) {
+            $conversation->setContext('sparepart_substep', 'vehicle_make');
+            $makes = VehicleMake::active()->orderBy('name')->get();
+            
+            $response = $locale === 'sw'
+                ? "Umerudi nyuma. Tafadhali chagua aina ya gari:\n\n"
+                : "You went back. Please select the vehicle make:\n\n";
+            
+            foreach ($makes as $index => $make) {
+                $response .= ($index + 1) . ". " . $make->name . "\n";
+            }
+            
+            $response .= "\n" . ($locale === 'sw' ? "Jibu kwa nambari au jina la aina ya gari." : "Reply with the number or name of the vehicle make.");
+            return $response;
+        }
+        
         $message = trim($message);
         $makeId = $conversation->getContext('sparepart_current_make_id');
         $models = VehicleModel::where('vehicle_make_id', $makeId)->orderBy('name')->get();
@@ -250,12 +361,19 @@ class SparePartOrderChatbotService
             });
         }
         
-        $locale = $conversation->language === 'sw' ? 'sw' : 'en';
-        
         if (!$selectedModel) {
-            return $locale === 'sw'
-                ? "Modeli ya gari haijapatikana. Tafadhali chagua nambari au jina kutoka kwenye orodha."
-                : "Vehicle model not found. Please select a number or name from the list.";
+            // Show list again with better message
+            $makeName = $conversation->getContext('sparepart_current_make_name');
+            $response = $locale === 'sw'
+                ? "Modeli ya gari haijapatikana. Tafadhali chagua nambari au jina kutoka kwenye orodha hapa chini:\n\n"
+                : "Vehicle model not found. Please select a number or name from the list below:\n\n";
+            
+            foreach ($models as $index => $model) {
+                $response .= ($index + 1) . ". " . $model->name . "\n";
+            }
+            
+            $response .= "\n" . ($locale === 'sw' ? "Jibu kwa nambari au jina la modeli." : "Reply with the number or name of the model.");
+            return $response;
         }
         
         // Store selected model
@@ -275,10 +393,30 @@ class SparePartOrderChatbotService
      */
     protected function handlePartName(ChatbotConversation $conversation, string $message): string
     {
+        $messageLower = strtolower(trim($message));
+        $locale = $conversation->language === 'sw' ? 'sw' : 'en';
+        
+        // Check for back/cancel
+        if (in_array($messageLower, ['back', 'cancel', 'rudi', 'ghairi'])) {
+            $makeId = $conversation->getContext('sparepart_current_make_id');
+            $models = VehicleModel::where('vehicle_make_id', $makeId)->orderBy('name')->get();
+            
+            $response = $locale === 'sw'
+                ? "Umerudi nyuma. Tafadhali chagua modeli ya gari:\n\n"
+                : "You went back. Please select the vehicle model:\n\n";
+            
+            foreach ($models as $index => $model) {
+                $response .= ($index + 1) . ". " . $model->name . "\n";
+            }
+            
+            $response .= "\n" . ($locale === 'sw' ? "Jibu kwa nambari au jina la modeli." : "Reply with the number or name of the model.");
+            $conversation->setContext('sparepart_substep', 'vehicle_model');
+            return $response;
+        }
+        
         $partName = trim($message);
         
         if (empty($partName)) {
-            $locale = $conversation->language === 'sw' ? 'sw' : 'en';
             return $locale === 'sw'
                 ? "Jina la sehemu ya ziada ni lazima. Tafadhali ingiza jina la sehemu:"
                 : "Spare part name is required. Please enter the part name:";
@@ -352,10 +490,21 @@ class SparePartOrderChatbotService
      */
     protected function handleDeliveryDescription(ChatbotConversation $conversation, string $message): string
     {
+        $messageLower = strtolower(trim($message));
+        $locale = $conversation->language === 'sw' ? 'sw' : 'en';
+        
+        // Check for back/cancel
+        if (in_array($messageLower, ['back', 'cancel', 'rudi', 'ghairi'])) {
+            $conversation->setContext('sparepart_substep', 'has_image');
+            $partName = $conversation->getContext('sparepart_current_part_name');
+            return $locale === 'sw'
+                ? "Umerudi nyuma.\n\nJe, una picha ya sehemu hii? (Jibu 'ndiyo' au 'hapana')"
+                : "You went back.\n\nDo you have an image of this part? (Reply 'yes' or 'no')";
+        }
+        
         $deliveryDescription = trim($message);
         
         if (empty($deliveryDescription)) {
-            $locale = $conversation->language === 'sw' ? 'sw' : 'en';
             return $locale === 'sw'
                 ? "Maelezo ya uwasilishaji ni lazima. Tafadhali toa anwani kamili ya uwasilishaji:"
                 : "Delivery description is required. Please provide the full delivery address:";
@@ -492,9 +641,9 @@ class SparePartOrderChatbotService
             $response .= "\n";
         }
         
-        $response .= $locale === 'sw'
-            ? "Je, ungependa kuthibitisha agizo hili? (Jibu 'ndiyo' au 'hapana')"
-            : "Would you like to confirm this order? (Reply 'yes' or 'no')";
+        $response .= "\n" . ($locale === 'sw'
+            ? "Je, ungependa kuthibitisha agizo hili? (Jibu 'ndiyo' au 'hapana')\n\nAu andika 'rudi' ili kuongeza sehemu nyingine."
+            : "Would you like to confirm this order? (Reply 'yes' or 'no')\n\nOr type 'back' to add another part.");
         
         return $response;
     }
@@ -505,18 +654,35 @@ class SparePartOrderChatbotService
     protected function handleReviewOrders(ChatbotConversation $conversation, string $message): string
     {
         $message = strtolower(trim($message));
-        $confirm = in_array($message, ['yes', 'y', 'ndiyo', 'ndio', '1', 'confirm', 'thibitisha']);
-        
         $locale = $conversation->language === 'sw' ? 'sw' : 'en';
+        
+        // Check for back
+        if (in_array($message, ['back', 'rudi', 'modify', 'badilisha'])) {
+            // Go back to add more step
+            $conversation->setContext('sparepart_substep', 'add_more');
+            return $locale === 'sw'
+                ? "Je, ungependa kuongeza sehemu nyingine? (Jibu 'ndiyo' au 'hapana')"
+                : "Would you like to add another spare part? (Reply 'yes' or 'no')";
+        }
+        
+        $confirm = in_array($message, ['yes', 'y', 'ndiyo', 'ndio', '1', 'confirm', 'thibitisha']);
         
         if ($confirm) {
             $conversation->setContext('sparepart_substep', 'confirm_orders');
             return $this->createOrders($conversation);
         } else {
-            // User wants to cancel or modify
-            return $locale === 'sw'
-                ? "Agizo limeghairiwa. Unaweza kuanza upya kwa kuandika 'spare parts' au 'sehemu za ziada'."
-                : "Order cancelled. You can start over by typing 'spare parts'.";
+            // User wants to cancel
+            if (in_array($message, ['no', 'hapana', 'cancel', 'ghairi'])) {
+                $conversation->setContext('sparepart_substep', null);
+                $conversation->setContext('sparepart_orders', []);
+                $conversation->updateStep('main_menu');
+                return $locale === 'sw'
+                    ? "Agizo limeghairiwa. Unaweza kuanza upya kwa kuandika 'spare parts' au 'sehemu za ziada'."
+                    : "Order cancelled. You can start over by typing 'spare parts'.";
+            }
+            
+            // Show review again with instructions
+            return $this->getOrdersReview($conversation);
         }
     }
 
@@ -546,6 +712,15 @@ class SparePartOrderChatbotService
         }
         
         $locale = $conversation->language === 'sw' ? 'sw' : 'en';
+        
+        // Validate all orders have required fields
+        foreach ($orders as $index => $orderData) {
+            if (empty($orderData['make_id']) || empty($orderData['model_id']) || empty($orderData['part_name']) || empty($orderData['delivery_description'])) {
+                return $locale === 'sw'
+                    ? "Kuna hitilafu katika agizo #" . ($index + 1) . ". Tafadhali anza upya."
+                    : "There's an error in order #" . ($index + 1) . ". Please start over.";
+            }
+        }
         
         try {
             // Try to find or create user by email
@@ -589,10 +764,20 @@ class SparePartOrderChatbotService
             
             $orderCount = count($createdOrders);
             $orderNumbers = collect($createdOrders)->pluck('order_number')->implode(', ');
+            $baseUrl = config('app.url');
+            $ordersUrl = $baseUrl . '/spare-parts/orders';
             
-            return $locale === 'sw'
-                ? "✅ Asante! Agizo lako limeundwa kwa mafanikio!\n\nNambari za agizo: {$orderNumbers}\n\nTumetuma barua pepe ya uthibitisho kwenye: {$email}\n\nTunaweza kukusaidia na nini kingine?"
-                : "✅ Thank you! Your order has been created successfully!\n\nOrder number(s): {$orderNumbers}\n\nWe've sent a confirmation email to: {$email}\n\nHow else can we help you?";
+            if ($orderCount === 1) {
+                $orderNumber = $createdOrders[0]->order_number;
+                
+                return $locale === 'sw'
+                    ? "✅ Asante! Agizo lako limeundwa kwa mafanikio!\n\n📦 Nambari ya agizo: {$orderNumber}\n\n📧 Tumetuma barua pepe ya uthibitisho kwenye: {$email}\n\n📱 Unaweza kuangalia hali ya agizo lako wakati wowote:\n1. Ingia kwenye tovuti yetu: {$baseUrl}\n2. Nenda kwenye 'Spare Parts' > 'My Orders'\n3. Au tumia nambari ya agizo: {$orderNumber}\n\nBarua pepe ya uthibitisho ina maelezo kamili na kiungo cha kuangalia agizo lako.\n\nTunaweza kukusaidia na nini kingine?"
+                    : "✅ Thank you! Your order has been created successfully!\n\n📦 Order Number: {$orderNumber}\n\n📧 We've sent a confirmation email to: {$email}\n\n📱 You can check your order status anytime:\n1. Visit our website: {$baseUrl}\n2. Go to 'Spare Parts' > 'My Orders'\n3. Or use order number: {$orderNumber}\n\nThe confirmation email contains full details and a link to view your order.\n\nHow else can we help you?";
+            } else {
+                return $locale === 'sw'
+                    ? "✅ Asante! Maagizo yako yameundwa kwa mafanikio!\n\n📦 Nambari za agizo: {$orderNumbers}\n\n📧 Tumetuma barua pepe ya uthibitisho kwenye: {$email}\n\n📱 Unaweza kuangalia hali ya maagizo yako wakati wowote:\n1. Ingia kwenye tovuti yetu: {$baseUrl}\n2. Nenda kwenye 'Spare Parts' > 'My Orders'\n3. Au tumia nambari za agizo: {$orderNumbers}\n\nBarua pepe ya uthibitisho ina maelezo kamili na viungo vya kuangalia maagizo yako.\n\nTunaweza kukusaidia na nini kingine?"
+                    : "✅ Thank you! Your orders have been created successfully!\n\n📦 Order Numbers: {$orderNumbers}\n\n📧 We've sent a confirmation email to: {$email}\n\n📱 You can check your order status anytime:\n1. Visit our website: {$baseUrl}\n2. Go to 'Spare Parts' > 'My Orders'\n3. Or use order numbers: {$orderNumbers}\n\nThe confirmation email contains full details and links to view your orders.\n\nHow else can we help you?";
+            }
             
         } catch (\Exception $e) {
             Log::error('Failed to create sparepart orders: ' . $e->getMessage());
