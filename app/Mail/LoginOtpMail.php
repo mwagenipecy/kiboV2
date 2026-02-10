@@ -18,7 +18,7 @@ class LoginOtpMail extends Mailable
      * Create a new message instance.
      */
     public function __construct(
-        public User $user,
+        public User|object $user,
         public string $otpCode
     ) {
         //

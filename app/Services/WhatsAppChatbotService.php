@@ -445,6 +445,14 @@ class WhatsAppChatbotService
                 'selected_service' => $selectedService['key'],
                 'selected_at' => now()->toDateTimeString()
             ]);
+            
+            // Special handling for spare parts - automatically start order flow
+            if ($selectedService['key'] === 'spare_parts') {
+                $orderService = new \App\Services\SparePartOrderChatbotService();
+                $conversation->setContext('sparepart_substep', 'start');
+                return $orderService->handleOrderFlow($conversation, $message);
+            }
+            
             return $this->getServiceDetails($selectedService);
         }
 
@@ -479,6 +487,17 @@ class WhatsAppChatbotService
         if (!$service) {
             $conversation->updateStep('main_menu', ['previous_step' => 'service_selected', 'error' => 'service_not_found']);
             return $this->getMainMenu();
+        }
+
+        // Special handling for spare parts - automatically start order flow
+        if ($serviceKey === 'spare_parts') {
+            $subStep = $conversation->getContext('sparepart_substep');
+            // If not already in order flow, start it immediately
+            if (!$subStep) {
+                $orderService = new \App\Services\SparePartOrderChatbotService();
+                $conversation->setContext('sparepart_substep', 'start');
+                return $orderService->handleOrderFlow($conversation, $message);
+            }
         }
 
         // Handle service-specific actions
@@ -751,6 +770,11 @@ class WhatsAppChatbotService
     protected function isTerminationRequest(string $message): bool
     {
         $normalized = strtolower(trim($message));
+        
+        // Exclude "resend" from termination keywords (it's used for OTP resend)
+        if (in_array($normalized, ['resend', 'tuma tena', 'tuma upya', 'retry'])) {
+            return false;
+        }
         
         // English termination keywords
         $englishKeywords = [

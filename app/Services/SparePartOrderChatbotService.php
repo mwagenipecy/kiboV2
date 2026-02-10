@@ -96,19 +96,8 @@ class SparePartOrderChatbotService
         // Send OTP email via Job
         try {
             SendLoginOtp::dispatch($email, 'Customer', $otpCode);
-            Log::info('OTP email job dispatched for sparepart order', [
-                'email' => $email,
-                'otp_code' => $otpCode,
-                'queue_connection' => config('queue.default'),
-                'phone_number' => $conversation->phone_number,
-            ]);
         } catch (\Exception $e) {
-            Log::error('Failed to dispatch OTP email job for sparepart order', [
-                'email' => $email,
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'queue_connection' => config('queue.default'),
-            ]);
+            Log::error('Failed to dispatch OTP email job for sparepart order: ' . $e->getMessage());
             $locale = $conversation->language === 'sw' ? 'sw' : 'en';
             return $locale === 'sw'
                 ? "Kumekuwa na hitilafu katika kutuma nambari ya uthibitisho. Tafadhali jaribu tena baadaye."
@@ -149,19 +138,8 @@ class SparePartOrderChatbotService
         // Send OTP email via Job
         try {
             SendLoginOtp::dispatch($email, 'Customer', $otpCode);
-            Log::info('OTP email job dispatched (resend) for sparepart order', [
-                'email' => $email,
-                'otp_code' => $otpCode,
-                'queue_connection' => config('queue.default'),
-                'phone_number' => $conversation->phone_number,
-            ]);
         } catch (\Exception $e) {
-            Log::error('Failed to dispatch OTP email job (resend) for sparepart order', [
-                'email' => $email,
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'queue_connection' => config('queue.default'),
-            ]);
+            Log::error('Failed to dispatch OTP email job for sparepart order: ' . $e->getMessage());
             $locale = $conversation->language === 'sw' ? 'sw' : 'en';
             return $locale === 'sw'
                 ? "Kumekuwa na hitilafu katika kutuma nambari ya uthibitisho. Tafadhali jaribu tena baadaye."
@@ -786,20 +764,10 @@ class SparePartOrderChatbotService
             
             $orderCount = count($createdOrders);
             $orderNumbers = collect($createdOrders)->pluck('order_number')->implode(', ');
-            $baseUrl = config('app.url');
-            $ordersUrl = $baseUrl . '/spare-parts/orders';
             
-            if ($orderCount === 1) {
-                $orderNumber = $createdOrders[0]->order_number;
-                
-                return $locale === 'sw'
-                    ? "✅ Asante! Agizo lako limeundwa kwa mafanikio!\n\n📦 Nambari ya agizo: {$orderNumber}\n\n📧 Tumetuma barua pepe ya uthibitisho kwenye: {$email}\n\n📱 Unaweza kuangalia hali ya agizo lako wakati wowote:\n1. Ingia kwenye tovuti yetu: {$baseUrl}\n2. Nenda kwenye 'Spare Parts' > 'My Orders'\n3. Au tumia nambari ya agizo: {$orderNumber}\n\nBarua pepe ya uthibitisho ina maelezo kamili na kiungo cha kuangalia agizo lako.\n\nTunaweza kukusaidia na nini kingine?"
-                    : "✅ Thank you! Your order has been created successfully!\n\n📦 Order Number: {$orderNumber}\n\n📧 We've sent a confirmation email to: {$email}\n\n📱 You can check your order status anytime:\n1. Visit our website: {$baseUrl}\n2. Go to 'Spare Parts' > 'My Orders'\n3. Or use order number: {$orderNumber}\n\nThe confirmation email contains full details and a link to view your order.\n\nHow else can we help you?";
-            } else {
-                return $locale === 'sw'
-                    ? "✅ Asante! Maagizo yako yameundwa kwa mafanikio!\n\n📦 Nambari za agizo: {$orderNumbers}\n\n📧 Tumetuma barua pepe ya uthibitisho kwenye: {$email}\n\n📱 Unaweza kuangalia hali ya maagizo yako wakati wowote:\n1. Ingia kwenye tovuti yetu: {$baseUrl}\n2. Nenda kwenye 'Spare Parts' > 'My Orders'\n3. Au tumia nambari za agizo: {$orderNumbers}\n\nBarua pepe ya uthibitisho ina maelezo kamili na viungo vya kuangalia maagizo yako.\n\nTunaweza kukusaidia na nini kingine?"
-                    : "✅ Thank you! Your orders have been created successfully!\n\n📦 Order Numbers: {$orderNumbers}\n\n📧 We've sent a confirmation email to: {$email}\n\n📱 You can check your order status anytime:\n1. Visit our website: {$baseUrl}\n2. Go to 'Spare Parts' > 'My Orders'\n3. Or use order numbers: {$orderNumbers}\n\nThe confirmation email contains full details and links to view your orders.\n\nHow else can we help you?";
-            }
+            return $locale === 'sw'
+                ? "✅ Asante! Agizo lako limeundwa kwa mafanikio!\n\nNambari za agizo: {$orderNumbers}\n\nTumetuma barua pepe ya uthibitisho kwenye: {$email}\n\nTunaweza kukusaidia na nini kingine?"
+                : "✅ Thank you! Your order has been created successfully!\n\nOrder number(s): {$orderNumbers}\n\nWe've sent a confirmation email to: {$email}\n\nHow else can we help you?";
             
         } catch (\Exception $e) {
             Log::error('Failed to create sparepart orders: ' . $e->getMessage());
