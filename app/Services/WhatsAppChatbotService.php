@@ -462,6 +462,8 @@ class WhatsAppChatbotService
         // Check for back to menu
         if (in_array($message, ['back', 'menu', 'rudi', 'orodha'])) {
             $conversation->updateStep('main_menu', ['previous_step' => 'service_selected']);
+            // Clear sparepart order context when going back
+            $conversation->setContext('sparepart_substep', null);
             return $this->getMainMenu();
         }
 
@@ -600,8 +602,39 @@ class WhatsAppChatbotService
      */
     protected function handleSparePartsFlow(ChatbotConversation $conversation, string $message): ?string
     {
+        $subStep = $conversation->getContext('sparepart_substep');
+        
+        // If already in order flow, use the order service
+        if ($subStep && $subStep !== 'start') {
+            $orderService = new \App\Services\SparePartOrderChatbotService();
+            return $orderService->handleOrderFlow($conversation, $message);
+        }
+        
+        // Check if user wants to start ordering
+        $messageLower = strtolower(trim($message));
+        $orderKeywords = ['order', 'buy', 'purchase', 'agizo', 'nunua', 'omba', 'yes', 'y', 'ndiyo', 'ndio', '1'];
+        
+        // Check if user wants to order
+        $wantsToOrder = false;
+        foreach ($orderKeywords as $keyword) {
+            if ($messageLower === $keyword || str_contains($messageLower, $keyword)) {
+                $wantsToOrder = true;
+                break;
+            }
+        }
+        
+        // If user explicitly wants to order, start order flow
+        if ($wantsToOrder) {
+            $orderService = new \App\Services\SparePartOrderChatbotService();
+            return $orderService->handleOrderFlow($conversation, $message);
+        }
+        
+        // Otherwise show service details with order option
         $response = $this->getServiceDetails(collect($this->services)->firstWhere('key', 'spare_parts'));
-        $response .= "\n\n" . __('chatbot.service_help');
+        $locale = $conversation->language === 'sw' ? 'sw' : 'en';
+        $response .= "\n\n" . ($locale === 'sw' 
+            ? "Andika 'agizo' au 'nunua' au 'ndiyo' ili kuanza kuagiza sehemu za ziada."
+            : "Type 'order' or 'buy' or 'yes' to start ordering spare parts.");
         return $response;
     }
 
