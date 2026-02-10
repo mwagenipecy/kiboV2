@@ -41,13 +41,19 @@ class WhatsAppChatbotService
         // Set locale based on conversation language
         App::setLocale($conversation->language);
         
-        // Update last interaction timestamp (session is now active)
-        $conversation->last_interaction_at = now();
-        $conversation->is_active = true;
-        $conversation->save();
+        // Store current step before processing
+        $currentStep = $conversation->current_step;
+        
+        Log::info('Processing message', [
+            'phone_number' => $phoneNumber,
+            'message' => $message,
+            'current_step' => $currentStep,
+            'language' => $conversation->language,
+            'context' => $conversation->context,
+        ]);
 
         // Process based on current step
-        $responseMessage = match($conversation->current_step) {
+        $responseMessage = match($currentStep) {
             'welcome' => $this->handleWelcome($conversation, $message),
             'language_selection' => $this->handleLanguageSelection($conversation, $message),
             'main_menu' => $this->handleMainMenu($conversation, $message),
@@ -55,8 +61,16 @@ class WhatsAppChatbotService
             default => $this->handleDefault($conversation, $message),
         };
 
-        // Refresh conversation to get updated step after processing
-        $conversation->refresh();
+        // Reload conversation from database to get the latest state after processing
+        // This ensures we have the updated step and context
+        $conversation = ChatbotConversation::find($conversation->id);
+        
+        Log::info('After processing', [
+            'phone_number' => $phoneNumber,
+            'updated_step' => $conversation->current_step,
+            'updated_language' => $conversation->language,
+            'updated_context' => $conversation->context,
+        ]);
         
         // Check if we should use buttons for language selection
         $useButtons = false;
@@ -93,13 +107,19 @@ class WhatsAppChatbotService
         
         if (in_array($message, $greetings)) {
             // User sent a greeting, move to language selection
-            $conversation->updateStep('language_selection');
+            $conversation->updateStep('language_selection', [
+                'greeting_received' => true,
+                'greeting_at' => now()->toDateTimeString()
+            ]);
             return $this->getWelcomeMessage();
         }
 
         // If not a recognized greeting, show welcome anyway and move to language selection
         // This handles cases where user sends something unexpected
-        $conversation->updateStep('language_selection');
+        $conversation->updateStep('language_selection', [
+            'unexpected_message' => $message,
+            'greeting_at' => now()->toDateTimeString()
+        ]);
         return $this->getWelcomeMessage();
     }
 
@@ -108,32 +128,70 @@ class WhatsAppChatbotService
      */
     protected function handleLanguageSelection(ChatbotConversation $conversation, string $message): ?string
     {
-        $message = strtolower(trim($message));
+        // Normalize message - handle button payloads and text
+        $normalizedMessage = strtolower(trim($message));
         
-        // Check for language selection
-        if (in_array($message, ['1', 'en', 'english', 'kiingereza'])) {
+        Log::info('Handling language selection', [
+            'phone_number' => $conversation->phone_number,
+            'original_message' => $message,
+            'normalized_message' => $normalizedMessage,
+            'current_step' => $conversation->current_step,
+        ]);
+        
+        // Check for language selection - handle both button clicks and typed responses
+        if (in_array($normalizedMessage, ['1', 'en', 'english', 'kiingereza'])) {
             $conversation->language = 'en';
             App::setLocale('en');
-            // Update step with context to ensure it's saved (this also saves the language)
+            
+            // Update step with context - this will save everything
             $conversation->updateStep('main_menu', [
                 'language_selected' => 'en', 
-                'selected_at' => now()->toDateTimeString()
+                'selected_at' => now()->toDateTimeString(),
+                'selection_method' => 'button_or_text'
             ]);
+            
+            // Explicitly save to ensure language is persisted
+            $conversation->save();
+            
+            Log::info('Language selected: English', [
+                'phone_number' => $conversation->phone_number,
+                'new_step' => $conversation->current_step,
+                'context' => $conversation->context,
+            ]);
+            
             return $this->getMainMenu();
         }
         
-        if (in_array($message, ['2', 'sw', 'swahili', 'kiswahili'])) {
+        if (in_array($normalizedMessage, ['2', 'sw', 'swahili', 'kiswahili'])) {
             $conversation->language = 'sw';
             App::setLocale('sw');
-            // Update step with context to ensure it's saved (this also saves the language)
+            
+            // Update step with context - this will save everything
             $conversation->updateStep('main_menu', [
                 'language_selected' => 'sw', 
-                'selected_at' => now()->toDateTimeString()
+                'selected_at' => now()->toDateTimeString(),
+                'selection_method' => 'button_or_text'
             ]);
+            
+            // Explicitly save to ensure language is persisted
+            $conversation->save();
+            
+            Log::info('Language selected: Swahili', [
+                'phone_number' => $conversation->phone_number,
+                'new_step' => $conversation->current_step,
+                'context' => $conversation->context,
+            ]);
+            
             return $this->getMainMenu();
         }
 
         // Invalid selection, show language menu again
+        Log::warning('Invalid language selection', [
+            'phone_number' => $conversation->phone_number,
+            'message' => $message,
+            'normalized' => $normalizedMessage,
+        ]);
+        
         return $this->getLanguageSelectionMessage();
     }
 
