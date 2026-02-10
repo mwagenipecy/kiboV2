@@ -8,7 +8,8 @@ return [
     
     'main_menu_title' => '🏠 *Main Menu* - What can we help you with today?',
     
-    'service_help' => '💡 *Need more help?* Reply with "back" to return to the main menu or "start" to begin again.',
+    'service_help' => '💡 *Need more help?* Reply with "back" to return to the main menu, "reset" or "start" to begin again.',
+    'termination_keywords' => 'You can reset the session anytime by typing: reset, restart, new, start over, or menu',
     'visit_website' => '🌐 Visit our website',
     
     'service' => [

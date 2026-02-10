@@ -8,7 +8,8 @@ return [
     
     'main_menu_title' => '🏠 *Menyu Kuu* - Tunaweza kukusaidia nini leo?',
     
-    'service_help' => '💡 *Unahitaji msaada zaidi?* Jibu kwa "rudi" kurudi kwenye menyu kuu au "anza" kuanza tena.',
+    'service_help' => '💡 *Unahitaji msaada zaidi?* Jibu kwa "rudi" kurudi kwenye menyu kuu, "anza" au "anza upya" kuanza tena.',
+    'termination_keywords' => 'Unaweza kuanza upya wakati wowote kwa kuandika: anza, anza upya, rudi, au menyu',
     'visit_website' => '🌐 Tembelea tovuti yetu',
     
     'service' => [

@@ -25,6 +25,36 @@ class WhatsAppChatbotService
      */
     public function processMessage(string $phoneNumber, string $message): array
     {
+        // FIRST: Check if user wants to terminate/reset the session
+        if ($this->isTerminationRequest($message)) {
+            $conversation = ChatbotConversation::where('phone_number', $phoneNumber)->first();
+            if ($conversation) {
+                $conversation->reset();
+                // Ensure step is set to language_selection for buttons
+                $conversation->updateStep('language_selection');
+                Log::info('Session terminated by user request', [
+                    'phone_number' => $phoneNumber,
+                    'message' => $message,
+                    'termination_keyword' => trim($message),
+                ]);
+            } else {
+                $conversation = ChatbotConversation::getOrCreate($phoneNumber);
+                $conversation->updateStep('language_selection');
+            }
+            
+            // Return welcome message to start fresh with language selection buttons
+            return [
+                'message' => $this->getWelcomeMessage(),
+                'use_buttons' => true,
+                'buttons' => [
+                    ['id' => '1', 'title' => __('common.english')],
+                    ['id' => '2', 'title' => __('common.swahili')],
+                ],
+                'use_template' => false,
+                'template_sid' => null,
+            ];
+        }
+        
         // Get or create conversation (this will check for expiration and reset if needed)
         $conversation = ChatbotConversation::getOrCreate($phoneNumber);
         
@@ -668,6 +698,46 @@ class WhatsAppChatbotService
         $message .= __('chatbot.visit_website') . ": " . $service['url'];
         
         return $message;
+    }
+
+    /**
+     * Check if message is a termination/reset request
+     * 
+     * @param string $message
+     * @return bool
+     */
+    protected function isTerminationRequest(string $message): bool
+    {
+        $normalized = strtolower(trim($message));
+        
+        // English termination keywords
+        $englishKeywords = [
+            'reset', 'restart', 'start over', 'start again', 'new', 'new session',
+            'clear', 'cancel', 'end', 'stop', 'exit', 'quit', 'bye', 'goodbye',
+            'menu', 'main menu', 'home', 'back to start'
+        ];
+        
+        // Swahili termination keywords
+        $swahiliKeywords = [
+            'anza', 'anza upya', 'anza tena', 'rudi', 'rudi mwanzo',
+            'futa', 'ondoa', 'mwisho', 'acha', 'toka', 'kwaheri',
+            'orodha', 'menyu', 'nyumbani', 'rudi nyumbani'
+        ];
+        
+        // Check if message matches any termination keyword
+        foreach ($englishKeywords as $keyword) {
+            if ($normalized === $keyword || str_contains($normalized, $keyword)) {
+                return true;
+            }
+        }
+        
+        foreach ($swahiliKeywords as $keyword) {
+            if ($normalized === $keyword || str_contains($normalized, $keyword)) {
+                return true;
+            }
+        }
+        
+        return false;
     }
 
     /**
