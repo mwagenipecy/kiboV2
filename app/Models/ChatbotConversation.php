@@ -109,10 +109,14 @@ class ChatbotConversation extends Model
         // This will persist all changes to the database
         $saved = $this->save();
         
+        // Refresh the model to ensure we have the latest data from database
+        $this->refresh();
+        
         // Log for debugging
         \Log::info('Updated conversation step', [
             'phone_number' => $this->phone_number,
             'step' => $step,
+            'current_step_after_save' => $this->current_step,
             'context' => $this->context,
             'language' => $this->language,
             'saved' => $saved,
