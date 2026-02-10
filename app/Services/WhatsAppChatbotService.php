@@ -610,7 +610,15 @@ class WhatsAppChatbotService
             return $orderService->handleOrderFlow($conversation, $message);
         }
         
-        // Check if user wants to start ordering
+        // If no substep is set, this is the first time selecting spare parts
+        // Automatically start the order flow
+        if (!$subStep) {
+            $orderService = new \App\Services\SparePartOrderChatbotService();
+            $conversation->setContext('sparepart_substep', 'start');
+            return $orderService->handleOrderFlow($conversation, $message);
+        }
+        
+        // Check if user wants to start ordering (for cases where they might have cancelled)
         $messageLower = strtolower(trim($message));
         $orderKeywords = ['order', 'buy', 'purchase', 'agizo', 'nunua', 'omba', 'yes', 'y', 'ndiyo', 'ndio', '1'];
         
@@ -626,6 +634,7 @@ class WhatsAppChatbotService
         // If user explicitly wants to order, start order flow
         if ($wantsToOrder) {
             $orderService = new \App\Services\SparePartOrderChatbotService();
+            $conversation->setContext('sparepart_substep', 'start');
             return $orderService->handleOrderFlow($conversation, $message);
         }
         

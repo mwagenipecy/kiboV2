@@ -96,8 +96,19 @@ class SparePartOrderChatbotService
         // Send OTP email via Job
         try {
             SendLoginOtp::dispatch($email, 'Customer', $otpCode);
+            Log::info('OTP email job dispatched for sparepart order', [
+                'email' => $email,
+                'otp_code' => $otpCode,
+                'queue_connection' => config('queue.default'),
+                'phone_number' => $conversation->phone_number,
+            ]);
         } catch (\Exception $e) {
-            Log::error('Failed to dispatch OTP email job for sparepart order: ' . $e->getMessage());
+            Log::error('Failed to dispatch OTP email job for sparepart order', [
+                'email' => $email,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'queue_connection' => config('queue.default'),
+            ]);
             $locale = $conversation->language === 'sw' ? 'sw' : 'en';
             return $locale === 'sw'
                 ? "Kumekuwa na hitilafu katika kutuma nambari ya uthibitisho. Tafadhali jaribu tena baadaye."
@@ -138,8 +149,19 @@ class SparePartOrderChatbotService
         // Send OTP email via Job
         try {
             SendLoginOtp::dispatch($email, 'Customer', $otpCode);
+            Log::info('OTP email job dispatched (resend) for sparepart order', [
+                'email' => $email,
+                'otp_code' => $otpCode,
+                'queue_connection' => config('queue.default'),
+                'phone_number' => $conversation->phone_number,
+            ]);
         } catch (\Exception $e) {
-            Log::error('Failed to dispatch OTP email job for sparepart order: ' . $e->getMessage());
+            Log::error('Failed to dispatch OTP email job (resend) for sparepart order', [
+                'email' => $email,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'queue_connection' => config('queue.default'),
+            ]);
             $locale = $conversation->language === 'sw' ? 'sw' : 'en';
             return $locale === 'sw'
                 ? "Kumekuwa na hitilafu katika kutuma nambari ya uthibitisho. Tafadhali jaribu tena baadaye."
