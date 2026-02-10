@@ -63,7 +63,28 @@ class WhatsAppChatbotService
 
         // Reload conversation from database to get the latest state after processing
         // This ensures we have the updated step and context
-        $conversation = ChatbotConversation::find($conversation->id);
+        // Store ID before reloading
+        $conversationId = $conversation->id;
+        
+        // Use fresh() to bypass any model cache and get latest from DB
+        $conversation = $conversation->fresh();
+        
+        if (!$conversation) {
+            Log::error('Failed to reload conversation after processing', [
+                'phone_number' => $phoneNumber,
+                'conversation_id' => $conversationId,
+            ]);
+            // Fallback: try to get it again
+            $conversation = ChatbotConversation::where('phone_number', $phoneNumber)->first();
+            
+            if (!$conversation) {
+                Log::error('Could not find conversation after processing', [
+                    'phone_number' => $phoneNumber,
+                ]);
+                // Create a new one as last resort
+                $conversation = ChatbotConversation::getOrCreate($phoneNumber);
+            }
+        }
         
         Log::info('After processing', [
             'phone_number' => $phoneNumber,
@@ -138,10 +159,12 @@ class WhatsAppChatbotService
         
         Log::info('Handling language selection', [
             'phone_number' => $conversation->phone_number,
+            'conversation_id' => $conversation->id,
             'original_message' => $message,
             'raw_message' => $rawMessage,
             'normalized_message' => $normalizedMessage,
             'message_length' => strlen($message),
+            'message_bytes' => bin2hex($message), // Debug any hidden characters
             'current_step' => $conversation->current_step,
         ]);
         
@@ -149,7 +172,17 @@ class WhatsAppChatbotService
         // Check both normalized and raw message to catch "1", " 1 ", etc.
         $isEnglish = in_array($normalizedMessage, ['1', 'en', 'english', 'kiingereza']) 
                   || $rawMessage === '1' 
-                  || $rawMessage === '1.';
+                  || $rawMessage === '1.'
+                  || preg_match('/^1\s*\.?\s*$/', $rawMessage); // Match "1", "1.", "1 .", etc.
+        
+        Log::info('Language selection check', [
+            'phone_number' => $conversation->phone_number,
+            'is_english' => $isEnglish,
+            'normalized_in_array' => in_array($normalizedMessage, ['1', 'en', 'english', 'kiingereza']),
+            'raw_equals_1' => $rawMessage === '1',
+            'raw_equals_1_dot' => $rawMessage === '1.',
+            'preg_match' => preg_match('/^1\s*\.?\s*$/', $rawMessage),
+        ]);
         
         if ($isEnglish) {
             $conversation->language = 'en';

@@ -91,36 +91,51 @@ class ChatbotConversation extends Model
      */
     public function updateStep(string $step, ?array $context = null): void
     {
-        $this->current_step = $step;
-        $this->last_interaction_at = now();
-        $this->is_active = true;
-        
         // Ensure context is always an array (never null)
-        if ($this->context === null || !is_array($this->context)) {
-            $this->context = [];
+        $currentContext = $this->context;
+        if ($currentContext === null || !is_array($currentContext)) {
+            $currentContext = [];
         }
         
         // Merge new context with existing context
         if ($context !== null && is_array($context)) {
-            $this->context = array_merge($this->context, $context);
+            $currentContext = array_merge($currentContext, $context);
         }
         
-        // Save all attributes including language and context
-        // This will persist all changes to the database
-        $saved = $this->save();
+        // Use update() to ensure all fields are saved atomically
+        $updated = static::where('id', $this->id)->update([
+            'current_step' => $step,
+            'last_interaction_at' => now(),
+            'is_active' => true,
+            'context' => $currentContext,
+            // Also update language if it was changed on the model
+            'language' => $this->language ?? $this->getOriginal('language'),
+        ]);
         
-        // Refresh the model to ensure we have the latest data from database
+        // Refresh the model to get the latest data
         $this->refresh();
         
         // Log for debugging
         \Log::info('Updated conversation step', [
             'phone_number' => $this->phone_number,
-            'step' => $step,
-            'current_step_after_save' => $this->current_step,
+            'conversation_id' => $this->id,
+            'step_requested' => $step,
+            'current_step_after_update' => $this->current_step,
             'context' => $this->context,
             'language' => $this->language,
-            'saved' => $saved,
+            'rows_updated' => $updated,
+            'was_dirty' => $this->isDirty(),
         ]);
+        
+        // Verify the step was actually updated
+        if ($this->current_step !== $step) {
+            \Log::error('Step update failed!', [
+                'phone_number' => $this->phone_number,
+                'conversation_id' => $this->id,
+                'requested_step' => $step,
+                'actual_step' => $this->current_step,
+            ]);
+        }
     }
 
     /**
