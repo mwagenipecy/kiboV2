@@ -87,7 +87,7 @@
             @error('message') <p class="text-sm text-red-600 mt-1">{{ $message }}</p> @enderror
         </div>
 
-        <div>
+<div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Quotation Documents (Optional)</label>
             <input 
                 type="file" 

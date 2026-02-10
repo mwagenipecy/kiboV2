@@ -1,5 +1,5 @@
 <div class="p-6 space-y-6">
-    <div>
+<div>
         <h1 class="text-2xl font-bold text-gray-900">Car Exchange Requests</h1>
         <p class="text-gray-600">View exchange requests and submit quotations to customers.</p>
     </div>

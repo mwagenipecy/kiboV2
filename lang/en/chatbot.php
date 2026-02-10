@@ -36,5 +36,18 @@ return [
         'sell' => '💵 Sell Your Vehicle',
         'sell_description' => 'List your vehicle for sale. Reach thousands of potential buyers on Kibo Auto.',
     ],
+    
+    'cars' => [
+        'menu_title' => 'What would you like to do?',
+        'search' => 'Search Cars',
+        'browse_new' => 'Browse New Cars',
+        'browse_used' => 'Browse Used Cars',
+        'sell_car' => 'Sell Your Car',
+        'value_car' => 'Value Your Car',
+        'insurance' => 'Car Insurance',
+        'search_prompt' => 'You can search for cars on our website. Visit the search page to find your perfect car.',
+        'browse_new_prompt' => 'Browse our collection of new cars. Visit our website to see the latest models.',
+        'browse_used_prompt' => 'Browse our collection of used cars. Find great deals on quality vehicles.',
+    ],
 ];
 

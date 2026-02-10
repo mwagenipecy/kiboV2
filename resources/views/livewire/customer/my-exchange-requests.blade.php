@@ -92,7 +92,7 @@
                                                 <p class="text-gray-600">Your Vehicle Valuation:</p>
                                                 <p class="font-semibold text-gray-900">{{ number_format($quotation->current_vehicle_valuation, 2) }} {{ $quotation->currency }}</p>
                                             </div>
-                                            <div>
+<div>
                                                 <p class="text-gray-600">Desired Vehicle Price:</p>
                                                 <p class="font-semibold text-gray-900">{{ number_format($quotation->desired_vehicle_price, 2) }} {{ $quotation->currency }}</p>
                                             </div>

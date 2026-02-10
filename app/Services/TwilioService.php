@@ -151,6 +151,69 @@ class TwilioService
     }
 
     /**
+     * Send a WhatsApp message with interactive buttons
+     * Note: This uses Twilio's Content API with interactive templates
+     * For simple button replies, we'll format the message with numbered options
+     * and handle button clicks via the ButtonPayload parameter in webhook
+     *
+     * @param string $to The recipient's WhatsApp number (e.g., +255767582837)
+     * @param string $body The message body
+     * @param array $buttons Array of button configurations. Each button should have 'id' and 'title'
+     *                       Example: [['id' => '1', 'title' => 'English'], ['id' => '2', 'title' => 'Swahili']]
+     * @return array Returns message data including sid, status, etc.
+     * @throws TwilioException
+     */
+    public function sendWhatsAppMessageWithButtons(string $to, string $body, array $buttons): array
+    {
+        try {
+            // Ensure the number is in WhatsApp format
+            $to = $this->formatWhatsAppNumber($to);
+            $from = $this->formatWhatsAppNumber($this->fromNumber);
+
+            // Build the message body with button options formatted nicely
+            $messageBody = $body . "\n\n";
+            
+            // Add button options as numbered list (WhatsApp will show these as selectable)
+            foreach ($buttons as $index => $button) {
+                if (isset($button['id']) && isset($button['title'])) {
+                    $messageBody .= ($index + 1) . ". " . $button['title'] . "\n";
+                }
+            }
+            
+            $messageBody .= "\n" . "Please reply with the number of your choice.";
+
+            // For now, send as regular message with formatted buttons
+            // Twilio WhatsApp interactive buttons require Content Templates which need approval
+            // This approach works immediately and users can tap/type the number
+            $message = $this->twilio->messages->create(
+                $to,
+                [
+                    'from' => $from,
+                    'body' => $messageBody,
+                ]
+            );
+
+            return [
+                'success' => true,
+                'sid' => $message->sid,
+                'status' => $message->status,
+                'to' => $message->to,
+                'from' => $message->from,
+                'body' => $message->body,
+                'date_created' => $message->dateCreated?->format('Y-m-d H:i:s'),
+            ];
+        } catch (TwilioException $e) {
+            Log::error('Twilio WhatsApp message with buttons failed', [
+                'to' => $to,
+                'error' => $e->getMessage(),
+                'code' => $e->getCode(),
+            ]);
+
+            throw $e;
+        }
+    }
+
+    /**
      * Get message status by SID
      *
      * @param string $messageSid The message SID

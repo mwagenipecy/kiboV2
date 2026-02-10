@@ -21,9 +21,9 @@ class WhatsAppChatbotService
 
     /**
      * Process incoming WhatsApp message
-     * Returns the response message to send (or null if no response needed)
+     * Returns array with 'message' and optionally 'use_template' and 'template_sid'
      */
-    public function processMessage(string $phoneNumber, string $message): ?string
+    public function processMessage(string $phoneNumber, string $message): array
     {
         // Get or create conversation (this will check for expiration and reset if needed)
         $conversation = ChatbotConversation::getOrCreate($phoneNumber);
@@ -47,7 +47,7 @@ class WhatsAppChatbotService
         $conversation->save();
 
         // Process based on current step
-        $response = match($conversation->current_step) {
+        $responseMessage = match($conversation->current_step) {
             'welcome' => $this->handleWelcome($conversation, $message),
             'language_selection' => $this->handleLanguageSelection($conversation, $message),
             'main_menu' => $this->handleMainMenu($conversation, $message),
@@ -55,8 +55,29 @@ class WhatsAppChatbotService
             default => $this->handleDefault($conversation, $message),
         };
 
-        // Return response message (will be sent directly by controller)
-        return $response;
+        // Refresh conversation to get updated step after processing
+        $conversation->refresh();
+        
+        // Check if we should use buttons for language selection
+        $useButtons = false;
+        $buttons = [];
+        
+        if ($conversation->current_step === 'language_selection') {
+            // Use buttons for language selection
+            $useButtons = true;
+            $buttons = [
+                ['id' => '1', 'title' => __('common.english')],
+                ['id' => '2', 'title' => __('common.swahili')],
+            ];
+        }
+
+        return [
+            'message' => $responseMessage,
+            'use_buttons' => $useButtons,
+            'buttons' => $buttons,
+            'use_template' => false,
+            'template_sid' => null,
+        ];
     }
 
     /**
@@ -92,17 +113,23 @@ class WhatsAppChatbotService
         // Check for language selection
         if (in_array($message, ['1', 'en', 'english', 'kiingereza'])) {
             $conversation->language = 'en';
-            $conversation->save();
             App::setLocale('en');
-            $conversation->updateStep('main_menu');
+            // Update step with context to ensure it's saved (this also saves the language)
+            $conversation->updateStep('main_menu', [
+                'language_selected' => 'en', 
+                'selected_at' => now()->toDateTimeString()
+            ]);
             return $this->getMainMenu();
         }
         
         if (in_array($message, ['2', 'sw', 'swahili', 'kiswahili'])) {
             $conversation->language = 'sw';
-            $conversation->save();
             App::setLocale('sw');
-            $conversation->updateStep('main_menu');
+            // Update step with context to ensure it's saved (this also saves the language)
+            $conversation->updateStep('main_menu', [
+                'language_selected' => 'sw', 
+                'selected_at' => now()->toDateTimeString()
+            ]);
             return $this->getMainMenu();
         }
 
@@ -136,7 +163,10 @@ class WhatsAppChatbotService
 
         if ($selectedService) {
             $conversation->setContext('selected_service', $selectedService['key']);
-            $conversation->updateStep('service_selected');
+            $conversation->updateStep('service_selected', [
+                'selected_service' => $selectedService['key'],
+                'selected_at' => now()->toDateTimeString()
+            ]);
             return $this->getServiceDetails($selectedService);
         }
 
@@ -153,7 +183,7 @@ class WhatsAppChatbotService
         
         // Check for back to menu
         if (in_array($message, ['back', 'menu', 'rudi', 'orodha'])) {
-            $conversation->updateStep('main_menu');
+            $conversation->updateStep('main_menu', ['previous_step' => 'service_selected']);
             return $this->getMainMenu();
         }
 
@@ -167,7 +197,7 @@ class WhatsAppChatbotService
         $service = collect($this->services)->firstWhere('key', $serviceKey);
 
         if (!$service) {
-            $conversation->updateStep('main_menu');
+            $conversation->updateStep('main_menu', ['previous_step' => 'service_selected', 'error' => 'service_not_found']);
             return $this->getMainMenu();
         }
 
@@ -197,13 +227,153 @@ class WhatsAppChatbotService
      */
     protected function handleServiceAction(ChatbotConversation $conversation, array $service, string $message): ?string
     {
-        // For now, provide basic information and link
-        // You can extend this to handle specific queries, searches, etc.
+        $serviceKey = $service['key'];
         
-        $response = $this->getServiceDetails($service);
+        // Route to service-specific handler
+        return match($serviceKey) {
+            'cars' => $this->handleCarsFlow($conversation, $message),
+            'trucks' => $this->handleTrucksFlow($conversation, $message),
+            'spare_parts' => $this->handleSparePartsFlow($conversation, $message),
+            'garage' => $this->handleGarageFlow($conversation, $message),
+            'leasing' => $this->handleLeasingFlow($conversation, $message),
+            'financing' => $this->handleFinancingFlow($conversation, $message),
+            'valuation' => $this->handleValuationFlow($conversation, $message),
+            'sell' => $this->handleSellFlow($conversation, $message),
+            default => $this->getServiceDetails($service) . "\n\n" . __('chatbot.service_help') . "\n" . __('chatbot.visit_website') . ": " . $service['url'],
+        };
+    }
+
+    /**
+     * Handle cars service flow
+     */
+    protected function handleCarsFlow(ChatbotConversation $conversation, string $message): ?string
+    {
+        $subStep = $conversation->getContext('cars_substep', 'menu');
+        
+        return match($subStep) {
+            'menu' => $this->getCarsMenu($conversation),
+            'search' => $this->handleCarsSearch($conversation, $message),
+            'browse' => $this->handleCarsBrowse($conversation, $message),
+            default => $this->getCarsMenu($conversation),
+        };
+    }
+
+    /**
+     * Get cars menu
+     */
+    protected function getCarsMenu(ChatbotConversation $conversation): string
+    {
+        $conversation->setContext('cars_substep', 'menu');
+        
+        $message = __('chatbot.service.cars') . "\n\n";
+        $message .= __('chatbot.cars.menu_title') . "\n\n";
+        $message .= "1. " . __('chatbot.cars.search') . "\n";
+        $message .= "2. " . __('chatbot.cars.browse_new') . "\n";
+        $message .= "3. " . __('chatbot.cars.browse_used') . "\n";
+        $message .= "4. " . __('chatbot.cars.sell_car') . "\n";
+        $message .= "5. " . __('chatbot.cars.value_car') . "\n";
+        $message .= "6. " . __('chatbot.cars.insurance') . "\n\n";
+        $message .= __('chatbot.reply_with_number');
+        
+        return $message;
+    }
+
+    /**
+     * Handle cars search
+     */
+    protected function handleCarsSearch(ChatbotConversation $conversation, string $message): ?string
+    {
+        $conversation->setContext('cars_substep', 'search');
+        return __('chatbot.cars.search_prompt') . "\n" . __('chatbot.visit_website') . ": " . config('app.url') . '/cars/search';
+    }
+
+    /**
+     * Handle cars browse
+     */
+    protected function handleCarsBrowse(ChatbotConversation $conversation, string $message): ?string
+    {
+        $message = strtolower(trim($message));
+        
+        if ($message === '2') {
+            $conversation->setContext('cars_substep', 'browse');
+            return __('chatbot.cars.browse_new_prompt') . "\n" . __('chatbot.visit_website') . ": " . config('app.url') . '/cars/new';
+        }
+        
+        if ($message === '3') {
+            $conversation->setContext('cars_substep', 'browse');
+            return __('chatbot.cars.browse_used_prompt') . "\n" . __('chatbot.visit_website') . ": " . config('app.url') . '/cars/used';
+        }
+        
+        return $this->getCarsMenu($conversation);
+    }
+
+    /**
+     * Handle trucks service flow
+     */
+    protected function handleTrucksFlow(ChatbotConversation $conversation, string $message): ?string
+    {
+        $response = $this->getServiceDetails(collect($this->services)->firstWhere('key', 'trucks'));
         $response .= "\n\n" . __('chatbot.service_help');
-        $response .= "\n" . __('chatbot.visit_website') . ": " . $service['url'];
-        
+        return $response;
+    }
+
+    /**
+     * Handle spare parts service flow
+     */
+    protected function handleSparePartsFlow(ChatbotConversation $conversation, string $message): ?string
+    {
+        $response = $this->getServiceDetails(collect($this->services)->firstWhere('key', 'spare_parts'));
+        $response .= "\n\n" . __('chatbot.service_help');
+        return $response;
+    }
+
+    /**
+     * Handle garage service flow
+     */
+    protected function handleGarageFlow(ChatbotConversation $conversation, string $message): ?string
+    {
+        $response = $this->getServiceDetails(collect($this->services)->firstWhere('key', 'garage'));
+        $response .= "\n\n" . __('chatbot.service_help');
+        return $response;
+    }
+
+    /**
+     * Handle leasing service flow
+     */
+    protected function handleLeasingFlow(ChatbotConversation $conversation, string $message): ?string
+    {
+        $response = $this->getServiceDetails(collect($this->services)->firstWhere('key', 'leasing'));
+        $response .= "\n\n" . __('chatbot.service_help');
+        return $response;
+    }
+
+    /**
+     * Handle financing service flow
+     */
+    protected function handleFinancingFlow(ChatbotConversation $conversation, string $message): ?string
+    {
+        $response = $this->getServiceDetails(collect($this->services)->firstWhere('key', 'financing'));
+        $response .= "\n\n" . __('chatbot.service_help');
+        return $response;
+    }
+
+    /**
+     * Handle valuation service flow
+     */
+    protected function handleValuationFlow(ChatbotConversation $conversation, string $message): ?string
+    {
+        $response = $this->getServiceDetails(collect($this->services)->firstWhere('key', 'valuation'));
+        $response .= "\n\n" . __('chatbot.service_help');
+        return $response;
+    }
+
+    /**
+     * Handle sell service flow
+     */
+    protected function handleSellFlow(ChatbotConversation $conversation, string $message): ?string
+    {
+        $response = $this->getServiceDetails(collect($this->services)->firstWhere('key', 'sell'));
+        $response .= "\n\n" . __('chatbot.service_help');
         return $response;
     }
 
@@ -220,12 +390,8 @@ class WhatsAppChatbotService
      */
     protected function getLanguageSelectionMessage(): string
     {
-        $message = __('chatbot.select_language') . "\n\n";
-        $message .= "1. " . __('common.english') . "\n";
-        $message .= "2. " . __('common.swahili') . "\n\n";
-        $message .= __('chatbot.reply_with_number');
-        
-        return $message;
+        // Return just the prompt - buttons will be added by TwilioService
+        return __('chatbot.select_language');
     }
 
     /**

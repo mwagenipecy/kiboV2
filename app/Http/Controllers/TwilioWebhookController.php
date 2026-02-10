@@ -34,24 +34,46 @@ class TwilioWebhookController extends Controller
         // Extract message details
         $from = $request->input('From'); // whatsapp:+255767582837
         $body = $request->input('Body');
+        $buttonPayload = $request->input('ButtonPayload'); // For interactive button clicks
+        $buttonText = $request->input('ButtonText'); // For interactive button clicks
 
-        if (empty($body)) {
+        // Use button payload if available (user clicked a button), otherwise use body text
+        $messageText = $buttonPayload ?? $buttonText ?? $body;
+
+        if (empty($messageText)) {
             // Return empty 200 response (standard for webhooks)
             return response('', 200);
         }
 
         // Remove whatsapp: prefix to get the phone number
         $phoneNumber = str_replace('whatsapp:', '', $from);
+        
+        Log::info('Processing WhatsApp message', [
+            'phone_number' => $phoneNumber,
+            'body' => $body,
+            'button_payload' => $buttonPayload,
+            'button_text' => $buttonText,
+            'message_text' => $messageText,
+        ]);
 
         try {
             // Process message through chatbot and get response
-            $responseMessage = $this->chatbotService->processMessage($phoneNumber, $body);
+            $response = $this->chatbotService->processMessage($phoneNumber, $messageText);
+            $responseMessage = $response['message'] ?? null;
+            $useButtons = $response['use_buttons'] ?? false;
+            $buttons = $response['buttons'] ?? [];
+            $useTemplate = $response['use_template'] ?? false;
+            $templateSid = $response['template_sid'] ?? null;
             
             Log::info('Chatbot processed message', [
                 'phone_number' => $phoneNumber,
                 'has_response' => !empty($responseMessage),
                 'response_length' => $responseMessage ? strlen($responseMessage) : 0,
                 'response_preview' => $responseMessage ? substr($responseMessage, 0, 50) . '...' : null,
+                'use_buttons' => $useButtons,
+                'buttons_count' => count($buttons),
+                'use_template' => $useTemplate,
+                'template_sid' => $templateSid,
             ]);
             
             // Send response directly (synchronously) if we have a message
@@ -62,9 +84,18 @@ class TwilioWebhookController extends Controller
                     Log::info('Attempting to send WhatsApp response', [
                         'phone_number' => $phoneNumber,
                         'message_length' => strlen($responseMessage),
+                        'use_buttons' => $useButtons,
+                        'use_template' => $useTemplate,
                     ]);
                     
-                    $result = $twilioService->sendWhatsAppMessage($phoneNumber, $responseMessage);
+                    // Use buttons if configured, otherwise use template or plain text
+                    if ($useButtons && !empty($buttons)) {
+                        $result = $twilioService->sendWhatsAppMessageWithButtons($phoneNumber, $responseMessage, $buttons);
+                    } elseif ($useTemplate && $templateSid) {
+                        $result = $twilioService->sendWhatsAppTemplate($phoneNumber, $templateSid, [], $responseMessage);
+                    } else {
+                        $result = $twilioService->sendWhatsAppMessage($phoneNumber, $responseMessage);
+                    }
                     
                     Log::info('WhatsApp response sent successfully', [
                         'phone_number' => $phoneNumber,
@@ -72,6 +103,8 @@ class TwilioWebhookController extends Controller
                         'status' => $result['status'] ?? null,
                         'to' => $result['to'] ?? null,
                         'from' => $result['from'] ?? null,
+                        'used_buttons' => $useButtons,
+                        'used_template' => $useTemplate,
                     ]);
                 } catch (\Exception $e) {
                     Log::error('Failed to send WhatsApp response', [
@@ -84,7 +117,7 @@ class TwilioWebhookController extends Controller
             } else {
                 Log::warning('No response message generated', [
                     'phone_number' => $phoneNumber,
-                    'body' => $body,
+                    'body' => $messageText,
                 ]);
             }
         } catch (\Exception $e) {

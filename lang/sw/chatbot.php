@@ -36,5 +36,18 @@ return [
         'sell' => '💵 Uza Gari Lako',
         'sell_description' => 'Orodhesha gari lako kwa kuuza. Fikia maelfu ya wanunuzi wanaoweza kununua kwenye Kibo Auto.',
     ],
+    
+    'cars' => [
+        'menu_title' => 'Ungependa kufanya nini?',
+        'search' => 'Tafuta Magari',
+        'browse_new' => 'Vinjari Magari Mapya',
+        'browse_used' => 'Vinjari Magari Yaliyotumika',
+        'sell_car' => 'Uza Gari Lako',
+        'value_car' => 'Thamini Gari Lako',
+        'insurance' => 'Bima Ya Gari',
+        'search_prompt' => 'Unaweza kutafuta magari kwenye tovuti yetu. Tembelea ukurasa wa utafutaji kupata gari lako kamili.',
+        'browse_new_prompt' => 'Vinjari mkusanyiko wetu wa magari mapya. Tembelea tovuti yetu kuona mifano ya hivi karibuni.',
+        'browse_used_prompt' => 'Vinjari mkusanyiko wetu wa magari yaliyotumika. Pata makubaliano mazuri kwenye magari bora.',
+    ],
 ];
 

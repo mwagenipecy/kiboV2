@@ -93,11 +93,18 @@ class ChatbotConversation extends Model
     {
         $this->current_step = $step;
         $this->last_interaction_at = now();
+        $this->is_active = true;
         
-        if ($context !== null) {
-            $this->context = array_merge($this->context ?? [], $context);
+        // Ensure context is always an array
+        if ($this->context === null) {
+            $this->context = [];
         }
         
+        if ($context !== null) {
+            $this->context = array_merge($this->context, $context);
+        }
+        
+        // Save all attributes including language if it was changed
         $this->save();
     }
 

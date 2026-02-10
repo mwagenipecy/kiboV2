@@ -36,7 +36,7 @@ class RedirectBasedOnRole
                     // If dealer trying to access lender routes
                     return redirect()->route('admin.dashboard');
                 } elseif (!$request->is('admin/*') && !$request->is('logout') && !$request->is('lang/*')) {
-                    // If dealer trying to access home/public pages (except logout)
+                // If dealer trying to access home/public pages (except logout)
                     return redirect()->route('admin.dashboard');
                 }
             }

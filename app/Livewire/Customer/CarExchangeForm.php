@@ -174,7 +174,7 @@ class CarExchangeForm extends Component
         $validated['status'] = 'pending';
         $validated['user_id'] = auth()->id();
         $validated['current_vehicle_images'] = $imagePaths;
-        
+
         // Store make and model names (for display) while keeping IDs for relationships
         $validated['current_vehicle_make'] = $currentMake->name;
         $validated['current_vehicle_model'] = $currentModel->name;
@@ -189,7 +189,7 @@ class CarExchangeForm extends Component
     public function render()
     {
         $makes = VehicleMake::where('status', 'active')->orderBy('name')->get(['id', 'name']);
-        
+
         // Generate years from 1950 to current year + 1
         $currentYear = date('Y');
         $years = [];
