@@ -60,6 +60,7 @@ class ChatbotConversation extends Model
     /**
      * Check if the conversation session has expired due to inactivity
      * Default idle timeout: 30 minutes
+     * Minimum timeout: 4 minutes (prevents premature expiration)
      */
     public function isExpired(): bool
     {
@@ -68,11 +69,21 @@ class ChatbotConversation extends Model
         }
         
         $idleTimeoutMinutes = config('chatbot.idle_timeout_minutes', 30);
+        $minIdleTimeoutMinutes = config('chatbot.min_idle_timeout_minutes', 4);
         $maxLifetimeHours = config('chatbot.max_session_lifetime_hours', 24);
         
-        // Check idle timeout (minutes since last interaction)
+        // Calculate time since last interaction
         $idleMinutes = $this->last_interaction_at->diffInMinutes(now());
-        if ($idleMinutes > $idleTimeoutMinutes) {
+        $idleSeconds = $this->last_interaction_at->diffInSeconds(now());
+        
+        // NEVER expire if less than minimum timeout has passed
+        // This prevents premature expiration during active conversation
+        if ($idleSeconds < ($minIdleTimeoutMinutes * 60)) {
+            return false;
+        }
+        
+        // Check idle timeout (minutes since last interaction)
+        if ($idleMinutes >= $idleTimeoutMinutes) {
             return true;
         }
         

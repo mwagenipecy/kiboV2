@@ -16,9 +16,19 @@ return [
      * After this many minutes of inactivity, the session will expire
      * and the conversation will reset to welcome when user sends a new message.
      * 
+     * Minimum: 4 minutes (to prevent premature expiration during active conversation)
      * Default: 30 minutes
      */
     'idle_timeout_minutes' => env('CHATBOT_IDLE_TIMEOUT_MINUTES', 30),
+    
+    /**
+     * Minimum idle timeout in minutes
+     * Session will never expire if less than this time has passed
+     * This prevents premature expiration during active conversation
+     * 
+     * Default: 4 minutes
+     */
+    'min_idle_timeout_minutes' => env('CHATBOT_MIN_IDLE_TIMEOUT_MINUTES', 4),
 
     /**
      * Maximum session lifetime in hours

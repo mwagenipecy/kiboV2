@@ -28,32 +28,59 @@ class WhatsAppChatbotService
         // Get or create conversation (this will check for expiration and reset if needed)
         $conversation = ChatbotConversation::getOrCreate($phoneNumber);
         
-        // Update last interaction BEFORE checking expiration
-        // This prevents resetting if user is actively responding
+        // Store the OLD last_interaction_at before updating
+        $oldLastInteraction = $conversation->last_interaction_at;
+        
+        // Update last interaction to mark user as active
         $conversation->last_interaction_at = now();
         $conversation->is_active = true;
         $conversation->save();
         
-        // Check if session was expired (but only if it's been a significant time)
-        // Don't reset if user is actively responding (within last 5 minutes)
-        $wasExpired = $conversation->isExpired();
-        if ($wasExpired) {
-            // Check if message is a language selection attempt ("1" or "2")
-            // If so, don't reset - user is trying to select language
-            $trimmedMsg = trim($message);
-            $isLanguageSelection = in_array($trimmedMsg, ['1', '2']) || 
-                                   in_array(strtolower($trimmedMsg), ['1', '2', 'en', 'sw', 'english', 'swahili']);
+        // Refresh to ensure we have the latest data
+        $conversation->refresh();
+        
+        // Check if session was expired BEFORE we updated the timestamp
+        // Use the old timestamp to check expiration, not the new one
+        // This prevents false expiration during active conversation
+        if ($oldLastInteraction) {
+            $idleSeconds = $oldLastInteraction->diffInSeconds(now());
+            $minIdleTimeoutSeconds = config('chatbot.min_idle_timeout_minutes', 4) * 60;
+            $idleTimeoutMinutes = config('chatbot.idle_timeout_minutes', 30);
             
-            if (!$isLanguageSelection) {
-                Log::info('Chatbot session expired, resetting conversation', [
-                    'phone_number' => $phoneNumber,
-                    'last_interaction' => $conversation->last_interaction_at,
-                ]);
-                $conversation->reset();
+            // Only check expiration if at least 4 minutes have passed
+            // This prevents premature expiration during active conversation
+            if ($idleSeconds >= $minIdleTimeoutSeconds) {
+                $idleMinutes = $oldLastInteraction->diffInMinutes(now());
+                
+                // Check if truly expired (using old timestamp)
+                if ($idleMinutes >= $idleTimeoutMinutes) {
+                    // Check if message is a language selection attempt ("1" or "2")
+                    // If so, don't reset - user is trying to select language
+                    $trimmedMsg = trim($message);
+                    $isLanguageSelection = in_array($trimmedMsg, ['1', '2']) || 
+                                           in_array(strtolower($trimmedMsg), ['1', '2', 'en', 'sw', 'english', 'swahili']);
+                    
+                    if (!$isLanguageSelection) {
+                        Log::info('Chatbot session expired, resetting conversation', [
+                            'phone_number' => $phoneNumber,
+                            'last_interaction' => $oldLastInteraction,
+                            'idle_minutes' => $idleMinutes,
+                            'idle_seconds' => $idleSeconds,
+                        ]);
+                        $conversation->reset();
+                    } else {
+                        Log::info('Session expired but user is selecting language, not resetting', [
+                            'phone_number' => $phoneNumber,
+                            'message' => $message,
+                        ]);
+                    }
+                }
             } else {
-                Log::info('Session expired but user is selecting language, not resetting', [
+                // User is actively chatting (less than 4 minutes), never expire
+                Log::debug('User is actively chatting, not checking expiration', [
                     'phone_number' => $phoneNumber,
-                    'message' => $message,
+                    'idle_seconds' => $idleSeconds,
+                    'min_timeout' => $minIdleTimeoutSeconds,
                 ]);
             }
         }
