@@ -102,15 +102,21 @@ class ChatbotConversation extends Model
             $currentContext = array_merge($currentContext, $context);
         }
         
-        // Use update() to ensure all fields are saved atomically
-        $updated = static::where('id', $this->id)->update([
+        // Prepare update data
+        $updateData = [
             'current_step' => $step,
             'last_interaction_at' => now(),
             'is_active' => true,
             'context' => $currentContext,
-            // Also update language if it was changed on the model
-            'language' => $this->language ?? $this->getOriginal('language'),
-        ]);
+        ];
+        
+        // Include language if it was set on the model (it might have been changed before updateStep was called)
+        if (isset($this->language) && $this->language !== null) {
+            $updateData['language'] = $this->language;
+        }
+        
+        // Use update() to ensure all fields are saved atomically
+        $updated = static::where('id', $this->id)->update($updateData);
         
         // Refresh the model to get the latest data
         $this->refresh();

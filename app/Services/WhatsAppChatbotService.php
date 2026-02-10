@@ -53,6 +53,12 @@ class WhatsAppChatbotService
         ]);
 
         // Process based on current step
+        Log::info('Routing to handler', [
+            'phone_number' => $phoneNumber,
+            'current_step' => $currentStep,
+            'message' => $message,
+        ]);
+        
         $responseMessage = match($currentStep) {
             'welcome' => $this->handleWelcome($conversation, $message),
             'language_selection' => $this->handleLanguageSelection($conversation, $message),
@@ -60,6 +66,13 @@ class WhatsAppChatbotService
             'service_selected' => $this->handleServiceSelected($conversation, $message),
             default => $this->handleDefault($conversation, $message),
         };
+        
+        Log::info('Handler returned response', [
+            'phone_number' => $phoneNumber,
+            'response_length' => strlen($responseMessage ?? ''),
+            'response_preview' => substr($responseMessage ?? '', 0, 100),
+            'is_main_menu' => str_contains($responseMessage ?? '', __('chatbot.main_menu_title')),
+        ]);
 
         // Reload conversation from database to get the latest state after processing
         // This ensures we have the updated step and context
@@ -94,16 +107,36 @@ class WhatsAppChatbotService
         ]);
         
         // Check if we should use buttons for language selection
+        // Only add buttons if:
+        // 1. Step is still language_selection AND
+        // 2. Response message is the language selection message (not main menu)
         $useButtons = false;
         $buttons = [];
         
-        if ($conversation->current_step === 'language_selection') {
+        $isLanguageSelectionMessage = str_contains($responseMessage, __('chatbot.select_language')) 
+                                   || str_contains($responseMessage, __('chatbot.welcome'));
+        $isMainMenuMessage = str_contains($responseMessage, __('chatbot.main_menu_title'));
+        
+        if ($conversation->current_step === 'language_selection' && $isLanguageSelectionMessage && !$isMainMenuMessage) {
             // Use buttons for language selection
             $useButtons = true;
             $buttons = [
                 ['id' => '1', 'title' => __('common.english')],
                 ['id' => '2', 'title' => __('common.swahili')],
             ];
+            
+            Log::info('Adding buttons to language selection message', [
+                'phone_number' => $phoneNumber,
+                'step' => $conversation->current_step,
+            ]);
+        } else {
+            Log::info('Not adding buttons', [
+                'phone_number' => $phoneNumber,
+                'step' => $conversation->current_step,
+                'is_language_selection_msg' => $isLanguageSelectionMessage,
+                'is_main_menu_msg' => $isMainMenuMessage,
+                'response_preview' => substr($responseMessage, 0, 50),
+            ]);
         }
 
         return [
@@ -151,50 +184,75 @@ class WhatsAppChatbotService
     {
         // Normalize message - handle button payloads and text
         // Remove any whitespace and convert to lowercase
-        $normalizedMessage = trim($message);
-        $normalizedMessage = strtolower($normalizedMessage);
-        
-        // Also check the raw message in case it's just a number
-        $rawMessage = trim($message);
+        $trimmedMessage = trim($message);
+        $normalizedMessage = strtolower($trimmedMessage);
         
         Log::info('Handling language selection', [
             'phone_number' => $conversation->phone_number,
             'conversation_id' => $conversation->id,
             'original_message' => $message,
-            'raw_message' => $rawMessage,
+            'trimmed_message' => $trimmedMessage,
             'normalized_message' => $normalizedMessage,
             'message_length' => strlen($message),
-            'message_bytes' => bin2hex($message), // Debug any hidden characters
+            'trimmed_length' => strlen($trimmedMessage),
+            'message_bytes' => bin2hex($message),
             'current_step' => $conversation->current_step,
         ]);
         
-        // Check for language selection - handle both button clicks and typed responses
-        // Check both normalized and raw message to catch "1", " 1 ", etc.
-        $isEnglish = in_array($normalizedMessage, ['1', 'en', 'english', 'kiingereza']) 
-                  || $rawMessage === '1' 
-                  || $rawMessage === '1.'
-                  || preg_match('/^1\s*\.?\s*$/', $rawMessage); // Match "1", "1.", "1 .", etc.
+        // SIMPLIFIED: Check if message is "1" or "2" (most common case)
+        // Use the simplest possible check - just compare the trimmed message
+        $isEnglish = false;
+        $isSwahili = false;
         
-        Log::info('Language selection check', [
+        // Direct string comparison - this should catch "1" exactly
+        if ($trimmedMessage === '1') {
+            $isEnglish = true;
+        } 
+        // Also check normalized for other variations
+        elseif ($normalizedMessage === '1' || in_array($normalizedMessage, ['1', 'en', 'english', 'kiingereza'])) {
+            $isEnglish = true;
+        }
+        // Regex as fallback
+        elseif (preg_match('/^1\s*\.?\s*$/i', $trimmedMessage)) {
+            $isEnglish = true;
+        }
+        // Check for Swahili - same logic
+        elseif ($trimmedMessage === '2') {
+            $isSwahili = true;
+        }
+        elseif ($normalizedMessage === '2' || in_array($normalizedMessage, ['2', 'sw', 'swahili', 'kiswahili'])) {
+            $isSwahili = true;
+        }
+        elseif (preg_match('/^2\s*\.?\s*$/i', $trimmedMessage)) {
+            $isSwahili = true;
+        }
+        
+        Log::info('Language selection check result', [
             'phone_number' => $conversation->phone_number,
             'is_english' => $isEnglish,
-            'normalized_in_array' => in_array($normalizedMessage, ['1', 'en', 'english', 'kiingereza']),
-            'raw_equals_1' => $rawMessage === '1',
-            'raw_equals_1_dot' => $rawMessage === '1.',
-            'preg_match' => preg_match('/^1\s*\.?\s*$/', $rawMessage),
+            'is_swahili' => $isSwahili,
+            'trimmed' => $trimmedMessage,
+            'normalized' => $normalizedMessage,
         ]);
         
         if ($isEnglish) {
+            // Set language on the model BEFORE updating step
             $conversation->language = 'en';
             App::setLocale('en');
             
-            // Update step with context - this will save everything
+            // Update step with context - this will save everything including language
             $conversation->updateStep('main_menu', [
                 'language_selected' => 'en', 
                 'selected_at' => now()->toDateTimeString(),
                 'selection_method' => 'button_or_text',
                 'original_message' => $message,
             ]);
+            
+            // Ensure language is persisted (updateStep should handle this, but double-check)
+            if ($conversation->language !== 'en') {
+                $conversation->language = 'en';
+                $conversation->save();
+            }
             
             // Refresh to get latest state
             $conversation->refresh();
@@ -215,22 +273,24 @@ class WhatsAppChatbotService
             return $mainMenu;
         }
         
-        // Check for Swahili
-        $isSwahili = in_array($normalizedMessage, ['2', 'sw', 'swahili', 'kiswahili']) 
-                   || $rawMessage === '2' 
-                   || $rawMessage === '2.';
-        
         if ($isSwahili) {
+            // Set language on the model BEFORE updating step
             $conversation->language = 'sw';
             App::setLocale('sw');
             
-            // Update step with context - this will save everything
+            // Update step with context - this will save everything including language
             $conversation->updateStep('main_menu', [
                 'language_selected' => 'sw', 
                 'selected_at' => now()->toDateTimeString(),
                 'selection_method' => 'button_or_text',
                 'original_message' => $message,
             ]);
+            
+            // Ensure language is persisted (updateStep should handle this, but double-check)
+            if ($conversation->language !== 'sw') {
+                $conversation->language = 'sw';
+                $conversation->save();
+            }
             
             // Refresh to get latest state
             $conversation->refresh();
