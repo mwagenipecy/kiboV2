@@ -28,14 +28,34 @@ class WhatsAppChatbotService
         // Get or create conversation (this will check for expiration and reset if needed)
         $conversation = ChatbotConversation::getOrCreate($phoneNumber);
         
-        // Check if session was expired and reset
+        // Update last interaction BEFORE checking expiration
+        // This prevents resetting if user is actively responding
+        $conversation->last_interaction_at = now();
+        $conversation->is_active = true;
+        $conversation->save();
+        
+        // Check if session was expired (but only if it's been a significant time)
+        // Don't reset if user is actively responding (within last 5 minutes)
         $wasExpired = $conversation->isExpired();
         if ($wasExpired) {
-            Log::info('Chatbot session expired, resetting conversation', [
-                'phone_number' => $phoneNumber,
-                'last_interaction' => $conversation->last_interaction_at,
-            ]);
-            $conversation->reset();
+            // Check if message is a language selection attempt ("1" or "2")
+            // If so, don't reset - user is trying to select language
+            $trimmedMsg = trim($message);
+            $isLanguageSelection = in_array($trimmedMsg, ['1', '2']) || 
+                                   in_array(strtolower($trimmedMsg), ['1', '2', 'en', 'sw', 'english', 'swahili']);
+            
+            if (!$isLanguageSelection) {
+                Log::info('Chatbot session expired, resetting conversation', [
+                    'phone_number' => $phoneNumber,
+                    'last_interaction' => $conversation->last_interaction_at,
+                ]);
+                $conversation->reset();
+            } else {
+                Log::info('Session expired but user is selecting language, not resetting', [
+                    'phone_number' => $phoneNumber,
+                    'message' => $message,
+                ]);
+            }
         }
         
         // Set locale based on conversation language
@@ -154,12 +174,27 @@ class WhatsAppChatbotService
     protected function handleWelcome(ChatbotConversation $conversation, string $message): ?string
     {
         // Normalize message for comparison
-        $message = strtolower(trim($message));
+        $trimmedMessage = trim($message);
+        $normalizedMessage = strtolower($trimmedMessage);
+        
+        // FIRST: Check if user is trying to select language ("1" or "2")
+        // This handles cases where session expired but user is responding to language selection
+        $isEnglish = $trimmedMessage === '1' || $normalizedMessage === '1' || 
+                     in_array($normalizedMessage, ['1', 'en', 'english', 'kiingereza']);
+        $isSwahili = $trimmedMessage === '2' || $normalizedMessage === '2' || 
+                     in_array($normalizedMessage, ['2', 'sw', 'swahili', 'kiswahili']);
+        
+        if ($isEnglish || $isSwahili) {
+            // User is selecting language, move directly to language selection step and process it
+            $conversation->updateStep('language_selection');
+            // Now handle it as language selection
+            return $this->handleLanguageSelection($conversation, $message);
+        }
         
         // Check if user wants to start/reset or sent a greeting
         $greetings = ['hi', 'hello', 'hey', 'start', 'hujambo', 'mambo', 'habari', 'salam', 'salaam'];
         
-        if (in_array($message, $greetings)) {
+        if (in_array($normalizedMessage, $greetings)) {
             // User sent a greeting, move to language selection
             $conversation->updateStep('language_selection', [
                 'greeting_received' => true,

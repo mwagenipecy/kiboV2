@@ -42,8 +42,15 @@ class ChatbotConversation extends Model
             ]
         );
         
-        // Check if session has expired (idle timeout)
-        if ($conversation->isExpired()) {
+        // Update last interaction when conversation is retrieved (user is active)
+        // This prevents false expiration if user is actively chatting
+        $conversation->last_interaction_at = now();
+        $conversation->is_active = true;
+        $conversation->save();
+        
+        // Only check expiration if last_interaction_at exists and is significantly old
+        // Don't reset if conversation was just created or recently active
+        if ($conversation->last_interaction_at && $conversation->isExpired()) {
             $conversation->reset();
         }
         
