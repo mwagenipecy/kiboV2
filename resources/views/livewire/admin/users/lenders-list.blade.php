@@ -5,12 +5,7 @@
             <h1 class="text-2xl font-bold text-gray-900">Lenders</h1>
             <p class="mt-1 text-sm text-gray-500">View and manage users with lender role</p>
         </div>
-        <a href="{{ route('admin.registration.lenders.create') }}" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-            </svg>
-            Register Lender
-        </a>
+       
     </div>
 
     <!-- Flash Messages -->
