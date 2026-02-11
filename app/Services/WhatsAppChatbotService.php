@@ -25,9 +25,19 @@ class WhatsAppChatbotService
      */
     public function processMessage(string $phoneNumber, string $message): array
     {
-        // FIRST: Check if user wants to terminate/reset the session
-        if ($this->isTerminationRequest($message)) {
-            $conversation = ChatbotConversation::where('phone_number', $phoneNumber)->first();
+        // Get conversation first to check context before termination check
+        $conversation = ChatbotConversation::where('phone_number', $phoneNumber)->first();
+        
+        // Check if user is in OTP verification step - don't treat "resend" as termination
+        $messageLower = strtolower(trim($message));
+        $isResendRequest = in_array($messageLower, ['resend', 'tuma tena', 'tuma upya', 'retry']);
+        $isInOtpVerification = $conversation && $conversation->getContext('sparepart_substep') === 'otp_verification';
+        
+        // If user is in OTP verification and types resend, skip termination check
+        if ($isResendRequest && $isInOtpVerification) {
+            // Continue to normal processing - resend will be handled in OTP verification handler
+        } elseif ($this->isTerminationRequest($message)) {
+            // FIRST: Check if user wants to terminate/reset the session
             if ($conversation) {
                 $conversation->reset();
                 // Ensure step is set to language_selection for buttons
@@ -55,8 +65,10 @@ class WhatsAppChatbotService
             ];
         }
         
-        // Get or create conversation (this will check for expiration and reset if needed)
-        $conversation = ChatbotConversation::getOrCreate($phoneNumber);
+        // Get or create conversation if not already retrieved (this will check for expiration and reset if needed)
+        if (!$conversation) {
+            $conversation = ChatbotConversation::getOrCreate($phoneNumber);
+        }
         
         // Store the OLD last_interaction_at before updating
         $oldLastInteraction = $conversation->last_interaction_at;
