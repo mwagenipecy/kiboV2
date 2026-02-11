@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Customer;
 
-use App\Models\CarExchangeRequest;
+use App\Models\CarExchangeRequest as CarExchangeRequestModel;
 use App\Models\Customer;
 use App\Models\VehicleMake;
 use App\Models\VehicleModel;
@@ -143,7 +143,7 @@ class CarExchangeRequest extends Component
         $validated['user_id'] = auth()->id();
         $validated['current_vehicle_images'] = $imagePaths;
 
-        CarExchangeRequest::create($validated);
+        CarExchangeRequestModel::create($validated);
 
         session()->flash('exchange_success', 'Your exchange request has been submitted. Our admin team will review it and send it to dealers soon.');
 
