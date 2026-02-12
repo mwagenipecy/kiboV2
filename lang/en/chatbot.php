@@ -12,6 +12,7 @@ return [
     'termination_keywords' => 'You can reset the session anytime by typing: reset, restart, new, start over, or menu',
     'visit_website' => '🌐 Visit our website',
     
+    
     'service' => [
         'cars' => '🚗 Cars',
         'cars_description' => 'Browse and search through thousands of quality cars. Find new or used vehicles from trusted dealers.',

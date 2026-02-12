@@ -33,6 +33,8 @@
         <div class="bg-white rounded-xl overflow-hidden shadow-sm mb-6">
             <div class="grid grid-cols-2 md:grid-cols-4 gap-2 p-2">
                 {{-- Display all images --}}
+
+                
                 @if(count($allImages) > 0)
                     @foreach($allImages as $index => $image)
                         <div wire:click="openImageModal({{ $index }})" class="relative aspect-[4/3] bg-gradient-to-br from-gray-200 to-gray-300 rounded-lg overflow-hidden cursor-pointer hover:opacity-90 transition-opacity {{ $index === 0 ? 'md:col-span-2 md:row-span-2 aspect-[16/10]' : '' }}">
@@ -473,9 +475,14 @@
     <div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-95 animate-fadeIn" wire:click="closeImageModal">
         {{-- Close Button --}}
         <button wire:click="closeImageModal" class="absolute top-4 right-4 w-12 h-12 flex items-center justify-center bg-white bg-opacity-20 hover:bg-opacity-30 rounded-full transition-colors z-10">
-            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+       
+
+            <svg class="w-6 h-6 " stroke="currentColor" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
             </svg>
+
+
+
         </button>
 
         {{-- Image Counter --}}
@@ -486,9 +493,14 @@
         {{-- Previous Button --}}
         @if(count($allImages) > 1)
         <button wire:click.stop="previousImage" class="absolute left-4 w-12 h-12 flex items-center justify-center bg-white bg-opacity-20 hover:bg-opacity-30 rounded-full transition-colors z-10">
-            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-6 h-6 " fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
             </svg>
+
+          
+
+
+
         </button>
         @endif
 
@@ -500,7 +512,7 @@
         {{-- Next Button --}}
         @if(count($allImages) > 1)
         <button wire:click.stop="nextImage" class="absolute right-4 w-12 h-12 flex items-center justify-center bg-white bg-opacity-20 hover:bg-opacity-30 rounded-full transition-colors z-10">
-            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-6 h-6 " fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
             </svg>
         </button>

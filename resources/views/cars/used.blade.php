@@ -8,7 +8,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div class="relative">
                 <!-- Hero Text Section (Instead of Image) -->
-                <div class="relative h-80 rounded-2xl overflow-hidden bg-black flex items-center justify-center">
+                <div class="relative h-80 rounded-2xl overflow-hidden bg-black flex items-center justify-center" style="background-image:url('/image/usedcar.png'); background-repeat:no-repeat; background-size:cover;">
                     <div class="text-center text-white px-4">
                         <h1 class="text-5xl md:text-6xl font-bold mb-4">Used cars</h1>
                         <p class="text-xl md:text-2xl text-white">Meet your perfect car</p>

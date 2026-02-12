@@ -34,6 +34,16 @@ class VehicleDetail extends Component
         if ($this->vehicle->image_front) {
             $this->allImages[] = $this->vehicle->image_front;
         }
+
+         if ($this->vehicle->image_side) {
+            $this->allImages[] = $this->vehicle->image_side;
+        }
+
+       if ($this->vehicle->image_back) {
+            $this->allImages[] = $this->vehicle->image_back;
+        }
+
+
         if ($this->vehicle->other_images && count($this->vehicle->other_images) > 0) {
             $this->allImages = array_merge($this->allImages, $this->vehicle->other_images);
         }

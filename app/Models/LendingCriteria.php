@@ -154,5 +154,7 @@ class LendingCriteria extends Model
 
         return round($payment, 2);
     }
+
+    
 }
 

@@ -39,7 +39,6 @@
                 <p class="text-sm font-medium text-gray-600">Orders</p>
                 <p class="text-2xl font-bold text-gray-900 mt-2">{{ number_format($totalOrders) }}</p>
                 <p class="text-sm text-gray-500 mt-1">{{ number_format($pendingOrders) }} pending · {{ number_format($completedOrders) }} completed</p>
-                <a href="{{ route('admin.orders.index') }}" class="text-xs text-green-700 hover:text-green-800 mt-1 inline-block">Review orders →</a>
             </div>
             <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
                 <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
