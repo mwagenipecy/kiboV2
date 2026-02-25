@@ -5,6 +5,8 @@ return [
     'select_language' => 'Tafadhali chagua lugha unayopendelea:',
     'reply_with_number' => 'Tafadhali jibu kwa nambari ya chaguo lako.',
     'invalid_selection' => '❌ Chaguo si sahihi. Tafadhali jaribu tena.',
+    'wrong_language_selection' => 'Chaguo si sahihi. Tafadhali chagua 1 kwa Kiingereza au 2 kwa Kiswahili.',
+    'start_over' => 'Anza upya',
     
     'main_menu_title' => '🏠 *Menyu Kuu* - Tunaweza kukusaidia nini leo?',
     

@@ -5,6 +5,8 @@ return [
     'select_language' => 'Please select your preferred language:',
     'reply_with_number' => 'Please reply with the number of your choice.',
     'invalid_selection' => '❌ Invalid selection. Please try again.',
+    'wrong_language_selection' => 'Wrong selection. Please choose 1 for English or 2 for Swahili.',
+    'start_over' => 'Start over',
     
     'main_menu_title' => '🏠 *Main Menu* - What can we help you with today?',
     

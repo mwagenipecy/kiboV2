@@ -52,16 +52,18 @@ class WhatsAppChatbotService
                 $conversation->updateStep('language_selection');
             }
             
-            // Return welcome message to start fresh with language selection buttons
+            // Return welcome message; use template for selection if configured, else buttons
+            $templateSid = config('services.twilio.language_selection_template_sid');
+            $useTemplate = !empty($templateSid);
             return [
                 'message' => $this->getWelcomeMessage(),
-                'use_buttons' => true,
-                'buttons' => [
+                'use_buttons' => !$useTemplate,
+                'buttons' => $useTemplate ? [] : [
                     ['id' => '1', 'title' => __('common.english')],
                     ['id' => '2', 'title' => __('common.swahili')],
                 ],
-                'use_template' => false,
-                'template_sid' => null,
+                'use_template' => $useTemplate,
+                'template_sid' => $useTemplate ? $templateSid : null,
             ];
         }
         
@@ -195,35 +197,65 @@ class WhatsAppChatbotService
             'updated_context' => $conversation->context,
         ]);
         
-        // Check if we should use buttons for language selection
-        // Only add buttons if:
-        // 1. Step is still language_selection AND
-        // 2. Response message is the language selection message (not main menu)
+        // Check if we should use buttons or template for selection messages
         $useButtons = false;
         $buttons = [];
-        
-        $isLanguageSelectionMessage = str_contains($responseMessage, __('chatbot.select_language')) 
+        $useTemplate = false;
+        $templateSid = null;
+
+        $isLanguageSelectionMessage = str_contains($responseMessage, __('chatbot.select_language'))
                                    || str_contains($responseMessage, __('chatbot.welcome'));
         $isMainMenuMessage = str_contains($responseMessage, __('chatbot.main_menu_title'));
-        
+        $isOtherMenuMessage = str_contains($responseMessage, __('chatbot.reply_with_number'))
+                           && !$isLanguageSelectionMessage
+                           && !$isMainMenuMessage;
+
         if ($conversation->current_step === 'language_selection' && $isLanguageSelectionMessage && !$isMainMenuMessage) {
-            // Use buttons for language selection
-            $useButtons = true;
-            $buttons = [
-                ['id' => '1', 'title' => __('common.english')],
-                ['id' => '2', 'title' => __('common.swahili')],
-            ];
-            
-            Log::info('Adding buttons to language selection message', [
-                'phone_number' => $phoneNumber,
-                'step' => $conversation->current_step,
-            ]);
-        } else {
-            Log::info('Not adding buttons', [
+            $templateSid = config('services.twilio.language_selection_template_sid');
+            if ($templateSid) {
+                $useTemplate = true;
+                Log::info('Using template for language selection', [
+                    'phone_number' => $phoneNumber,
+                    'template_sid' => $templateSid,
+                ]);
+            } else {
+                $useButtons = true;
+                $buttons = [
+                    ['id' => '1', 'title' => __('common.english')],
+                    ['id' => '2', 'title' => __('common.swahili')],
+                ];
+                Log::info('Adding buttons to language selection message', [
+                    'phone_number' => $phoneNumber,
+                    'step' => $conversation->current_step,
+                ]);
+            }
+        } elseif ($isMainMenuMessage) {
+            $templateSid = config('services.twilio.main_menu_template_sid');
+            if ($templateSid) {
+                $useTemplate = true;
+                Log::info('Using template for main menu', [
+                    'phone_number' => $phoneNumber,
+                    'template_sid' => $templateSid,
+                ]);
+            }
+        } elseif ($isOtherMenuMessage) {
+            $templateSid = config('services.twilio.menu_template_sid');
+            if ($templateSid) {
+                $useTemplate = true;
+                Log::info('Using template for menu selection', [
+                    'phone_number' => $phoneNumber,
+                    'template_sid' => $templateSid,
+                ]);
+            }
+        }
+
+        if (!$useTemplate && !$useButtons) {
+            Log::info('Not using template or buttons', [
                 'phone_number' => $phoneNumber,
                 'step' => $conversation->current_step,
                 'is_language_selection_msg' => $isLanguageSelectionMessage,
                 'is_main_menu_msg' => $isMainMenuMessage,
+                'is_other_menu_msg' => $isOtherMenuMessage,
                 'response_preview' => substr($responseMessage, 0, 50),
             ]);
         }
@@ -232,8 +264,8 @@ class WhatsAppChatbotService
             'message' => $responseMessage,
             'use_buttons' => $useButtons,
             'buttons' => $buttons,
-            'use_template' => false,
-            'template_sid' => null,
+            'use_template' => $useTemplate,
+            'template_sid' => $useTemplate ? $templateSid : null,
         ];
     }
 
@@ -415,16 +447,16 @@ class WhatsAppChatbotService
             return $mainMenu;
         }
 
-        // Invalid selection, show language menu again
+        // Invalid selection - tell user it's wrong and show language menu again
         Log::warning('Invalid language selection', [
             'phone_number' => $conversation->phone_number,
             'message' => $message,
-            'raw_message' => $rawMessage,
+            'trimmed_message' => $trimmedMessage,
             'normalized' => $normalizedMessage,
-            'message_bytes' => bin2hex($message), // Debug any hidden characters
+            'message_bytes' => bin2hex($message),
         ]);
-        
-        return $this->getLanguageSelectionMessage();
+
+        return __('chatbot.wrong_language_selection') . "\n\n" . $this->getLanguageSelectionMessage();
     }
 
     /**
@@ -434,6 +466,13 @@ class WhatsAppChatbotService
     {
         $message = strtolower(trim($message));
         $selectedService = null;
+
+        // Check for "Start over" (0) - return to language selection and begin again
+        if ($message === '0' || in_array($message, ['start over', 'startover', 'rudi mwanzo', 'anza upya', 'anza'])) {
+            $conversation->reset();
+            $conversation->updateStep('language_selection');
+            return $this->getWelcomeMessage();
+        }
 
         // Check if message matches a service number or name
         foreach ($this->services as $index => $service) {
@@ -751,13 +790,11 @@ class WhatsAppChatbotService
     protected function getMainMenu(): string
     {
         $message = __('chatbot.main_menu_title') . "\n\n";
-        
+        $message .= "0. " . __('chatbot.start_over') . "\n";
         foreach ($this->services as $index => $service) {
             $message .= ($index + 1) . ". " . __($service['translation_key']) . "\n";
         }
-        
         $message .= "\n" . __('chatbot.reply_with_number');
-        
         return $message;
     }
 
