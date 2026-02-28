@@ -440,7 +440,7 @@
                         <p class="text-sm text-gray-700 mb-4">
                             Get an instant insurance quote for this {{ $truck->year }} {{ $truck->make->name ?? '' }} {{ $truck->model->name ?? '' }}. Compare quotes from multiple insurers.
                         </p>
-                        <a href="{{ route('trucks.insurance') }}?truck_id={{ $truckId }}" class="w-full bg-green-600 text-white py-3 px-6 rounded-full font-semibold hover:bg-green-700 transition-colors flex items-center justify-center gap-2">
+                        <a href="{{ route('trucks.insurance') }}" class="w-full bg-green-600 text-white py-3 px-6 rounded-full font-semibold hover:bg-green-700 transition-colors flex items-center justify-center gap-2">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
                             </svg>
@@ -486,7 +486,7 @@
 
     {{-- Image Lightbox Modal --}}
     @if($showImageModal && $currentImage !== null && isset($allImages[$currentImage]))
-    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-95 animate-fadeIn" wire:click="closeImageModal">
+    <div class="fixed inset-0 z-[110] flex items-center justify-center bg-black bg-opacity-95 animate-fadeIn" wire:click="closeImageModal">
         {{-- Close Button --}}
         <button wire:click="closeImageModal" class="absolute top-4 right-4 w-12 h-12 flex items-center justify-center bg-white bg-opacity-20 hover:bg-opacity-30 rounded-full transition-colors z-10">
             <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -556,13 +556,12 @@
     </style>
     @endif
 
-    {{-- Info Side Modal --}}
+    {{-- Info Side Modal (same pattern as filter / login) --}}
     @if($showInfoModal)
-    <div class="fixed inset-0 z-50">
+    <div class="fixed inset-0 z-[110]" aria-modal="true" role="dialog">
         {{-- Backdrop --}}
-        <div wire:click="closeInfoModal" class="fixed inset-0 bg-black/50 bg-opacity-50 animate-fadeIn"></div>
-        
-        {{-- Modal Panel --}}
+        <div wire:click="closeInfoModal" class="fixed inset-0 bg-black/50 animate-fadeIn"></div>
+        {{-- Panel --}}
         <div class="fixed right-0 top-0 h-full w-full max-w-lg bg-white shadow-2xl overflow-y-auto animate-slideInRight">
             {{-- Header --}}
             <div class="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between z-10">
@@ -700,7 +699,7 @@
                             Truck Details: {{ $truck->year }} {{ $truck->make->name ?? '' }} {{ $truck->model->name ?? '' }}
                         </p>
 
-                        <a href="{{ route('trucks.insurance') }}?truck_id={{ $truckId }}" class="w-full bg-green-600 text-white py-3 px-6 rounded-full font-semibold hover:bg-green-700 transition-colors flex items-center justify-center gap-2">
+                        <a href="{{ route('trucks.insurance') }}" class="w-full bg-green-600 text-white py-3 px-6 rounded-full font-semibold hover:bg-green-700 transition-colors flex items-center justify-center gap-2">
                             Get Insurance Quote
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
@@ -709,18 +708,15 @@
                     </div>
 
                 @elseif($modalContent === 'review')
-                    {{-- Expert Review Content --}}
+                    {{-- Expert Review Content (stars only, no numbers) --}}
                     <div class="mb-6">
                         <div class="flex items-center gap-4 mb-6">
-                            <div class="text-center">
-                                <div class="text-5xl font-bold text-gray-900 mb-2">3.7</div>
-                                <div class="flex justify-center">
-                                    @for($i = 0; $i < 5; $i++)
-                                        <svg class="w-6 h-6 {{ $i < 4 ? 'fill-orange-400 text-orange-400' : 'text-gray-300' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
-                                        </svg>
-                                    @endfor
-                                </div>
+                            <div class="flex items-center gap-1">
+                                @foreach(range(1, 5) as $i)
+                                <svg class="w-10 h-10 {{ $i <= 4 ? 'fill-amber-400 text-amber-400' : 'fill-gray-200 text-gray-200' }}" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+                                </svg>
+                                @endforeach
                             </div>
                         </div>
 
@@ -729,7 +725,9 @@
                             <div>
                                 <div class="flex justify-between text-sm mb-1">
                                     <span class="font-medium text-gray-700">Running Costs</span>
-                                    <span class="text-gray-600">4.0</span>
+                                    <div class="flex gap-0.5">
+                                        @foreach(range(1, 5) as $i) <svg class="w-4 h-4 {{ $i <= 4 ? 'fill-amber-400' : 'fill-gray-200' }}" viewBox="0 0 24 24"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg> @endforeach
+                                    </div>
                                 </div>
                                 <div class="w-full bg-gray-200 rounded-full h-2">
                                     <div class="bg-green-600 h-2 rounded-full" style="width: 80%"></div>
@@ -738,7 +736,9 @@
                             <div>
                                 <div class="flex justify-between text-sm mb-1">
                                     <span class="font-medium text-gray-700">Reliability</span>
-                                    <span class="text-gray-600">3.5</span>
+                                    <div class="flex gap-0.5">
+                                        @foreach(range(1, 5) as $i) <svg class="w-4 h-4 {{ $i <= 3 ? 'fill-amber-400' : 'fill-gray-200' }}" viewBox="0 0 24 24"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg> @endforeach
+                                    </div>
                                 </div>
                                 <div class="w-full bg-gray-200 rounded-full h-2">
                                     <div class="bg-green-600 h-2 rounded-full" style="width: 70%"></div>
@@ -747,7 +747,9 @@
                             <div>
                                 <div class="flex justify-between text-sm mb-1">
                                     <span class="font-medium text-gray-700">Safety</span>
-                                    <span class="text-gray-600">4.2</span>
+                                    <div class="flex gap-0.5">
+                                        @foreach(range(1, 5) as $i) <svg class="w-4 h-4 {{ $i <= 4 ? 'fill-amber-400' : 'fill-gray-200' }}" viewBox="0 0 24 24"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg> @endforeach
+                                    </div>
                                 </div>
                                 <div class="w-full bg-gray-200 rounded-full h-2">
                                     <div class="bg-green-600 h-2 rounded-full" style="width: 84%"></div>
@@ -756,7 +758,9 @@
                             <div>
                                 <div class="flex justify-between text-sm mb-1">
                                     <span class="font-medium text-gray-700">Comfort</span>
-                                    <span class="text-gray-600">3.8</span>
+                                    <div class="flex gap-0.5">
+                                        @foreach(range(1, 5) as $i) <svg class="w-4 h-4 {{ $i <= 4 ? 'fill-amber-400' : 'fill-gray-200' }}" viewBox="0 0 24 24"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg> @endforeach
+                                    </div>
                                 </div>
                                 <div class="w-full bg-gray-200 rounded-full h-2">
                                     <div class="bg-green-600 h-2 rounded-full" style="width: 76%"></div>
@@ -765,7 +769,9 @@
                             <div>
                                 <div class="flex justify-between text-sm mb-1">
                                     <span class="font-medium text-gray-700">Features</span>
-                                    <span class="text-gray-600">3.5</span>
+                                    <div class="flex gap-0.5">
+                                        @foreach(range(1, 5) as $i) <svg class="w-4 h-4 {{ $i <= 3 ? 'fill-amber-400' : 'fill-gray-200' }}" viewBox="0 0 24 24"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg> @endforeach
+                                    </div>
                                 </div>
                                 <div class="w-full bg-gray-200 rounded-full h-2">
                                     <div class="bg-green-600 h-2 rounded-full" style="width: 70%"></div>
@@ -774,7 +780,9 @@
                             <div>
                                 <div class="flex justify-between text-sm mb-1">
                                     <span class="font-medium text-gray-700">Power</span>
-                                    <span class="text-gray-600">3.5</span>
+                                    <div class="flex gap-0.5">
+                                        @foreach(range(1, 5) as $i) <svg class="w-4 h-4 {{ $i <= 3 ? 'fill-amber-400' : 'fill-gray-200' }}" viewBox="0 0 24 24"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg> @endforeach
+                                    </div>
                                 </div>
                                 <div class="w-full bg-gray-200 rounded-full h-2">
                                     <div class="bg-green-600 h-2 rounded-full" style="width: 70%"></div>

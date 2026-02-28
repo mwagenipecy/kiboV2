@@ -5,6 +5,7 @@ namespace App\Livewire\Admin\Registration;
 use App\Enums\EntityStatus;
 use App\Enums\EntityType;
 use App\Models\Entity;
+use App\Models\PricingPlan;
 use Livewire\Component;
 
 class EditDealer extends Component
@@ -29,6 +30,9 @@ class EditDealer extends Component
     public $user_name = '';
     public $user_email = '';
 
+    /** @var int|null Subscription bundle (pricing plan) – max active car listings */
+    public $pricing_plan_id = null;
+
     protected function rules()
     {
         return [
@@ -46,6 +50,7 @@ class EditDealer extends Component
             'description' => 'nullable|string',
             'user_name' => 'required|string|max:255',
             'user_email' => 'required|email',
+            'pricing_plan_id' => 'nullable|exists:advertising_pricing,id',
         ];
     }
 
@@ -81,6 +86,8 @@ class EditDealer extends Component
         // Load primary user info from metadata
         $this->user_name = $entity->metadata['primary_user_name'] ?? '';
         $this->user_email = $entity->metadata['primary_user_email'] ?? '';
+
+        $this->pricing_plan_id = $entity->pricing_plan_id;
     }
 
     public function update()
@@ -103,6 +110,7 @@ class EditDealer extends Component
                 'tax_id' => $this->tax_id,
                 'website' => $this->website,
                 'description' => $this->description,
+                'pricing_plan_id' => $this->pricing_plan_id ?: null,
                 'metadata' => [
                     'primary_user_name' => $this->user_name,
                     'primary_user_email' => $this->user_email,
@@ -124,6 +132,14 @@ class EditDealer extends Component
 
     public function render()
     {
-        return view('livewire.admin.registration.edit-dealer');
+        $subscriptionBundles = PricingPlan::active()
+            ->byCategory('cars')
+            ->whereNotNull('max_listings')
+            ->ordered()
+            ->get();
+
+        return view('livewire.admin.registration.edit-dealer', [
+            'subscriptionBundles' => $subscriptionBundles,
+        ]);
     }
 }

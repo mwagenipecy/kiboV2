@@ -17,6 +17,7 @@ class SparePartOrders extends Component
 
     public $search = '';
     public $statusFilter = '';
+    public $channelFilter = ''; // '', 'portal', 'whatsapp'
     public $activeTab = 'open'; // 'open', 'my_quotations', 'all'
     
     // Quote Modal
@@ -26,6 +27,8 @@ class SparePartOrders extends Component
     public $currency = 'TZS';
     public $quotationNotes = '';
     public $estimatedDays = '';
+    /** When admin submits a quote, they must select which agent the quote is from */
+    public $selectedAgentId = null;
     
     // Success/Error
     public $showSuccessModal = false;
@@ -33,7 +36,7 @@ class SparePartOrders extends Component
     public $successMessage = '';
     public $errorMessage = '';
 
-    protected $queryString = ['search', 'statusFilter', 'activeTab'];
+    protected $queryString = ['search', 'statusFilter', 'channelFilter', 'activeTab'];
 
     public function updatingSearch()
     {
@@ -41,6 +44,11 @@ class SparePartOrders extends Component
     }
 
     public function updatingStatusFilter()
+    {
+        $this->resetPage();
+    }
+
+    public function updatingChannelFilter()
     {
         $this->resetPage();
     }
@@ -82,6 +90,12 @@ class SparePartOrders extends Component
         $this->currency = 'TZS';
         $this->quotationNotes = '';
         $this->estimatedDays = '';
+        $this->selectedAgentId = null;
+        // Default to first spare part agent for admin
+        if (Auth::user()->role === 'admin') {
+            $first = Agent::where('agent_type', 'spare_part')->where('status', 'active')->orderBy('name')->first();
+            $this->selectedAgentId = $first?->id;
+        }
         $this->showQuoteModal = true;
     }
 
@@ -92,30 +106,38 @@ class SparePartOrders extends Component
         $this->quotedPrice = '';
         $this->quotationNotes = '';
         $this->estimatedDays = '';
+        $this->selectedAgentId = null;
     }
 
     public function submitQuotation()
     {
-        $this->validate([
+        $rules = [
             'quotedPrice' => 'required|numeric|min:0',
             'currency' => 'required|in:TZS,USD,EUR,KES',
             'quotationNotes' => 'nullable|string|max:2000',
             'estimatedDays' => 'nullable|integer|min:1|max:365',
-        ]);
-
-        $agent = $this->getCurrentAgent();
-        
-        if (!$agent && Auth::user()->role !== 'admin') {
-            $this->errorMessage = 'You must be an agent to submit quotations.';
-            $this->showErrorModal = true;
-            return;
+        ];
+        if (Auth::user()->role === 'admin') {
+            $rules['selectedAgentId'] = 'required|exists:agents,id';
         }
+        $this->validate($rules);
 
-        // For admin, we need to select an agent or create a system agent
-        $agentId = $agent ? $agent->id : null;
-        
-        if (!$agentId) {
-            $this->errorMessage = 'Agent profile not found. Please contact administrator.';
+        $user = Auth::user();
+        $agent = $this->getCurrentAgent();
+
+        // Agent users: use their own agent profile. Admin: use selected agent.
+        $agentId = null;
+        if ($user->role === 'admin') {
+            $agentId = $this->selectedAgentId ? (int) $this->selectedAgentId : null;
+            if (!$agentId) {
+                $this->errorMessage = 'Please select an agent to submit the quotation on behalf of.';
+                $this->showErrorModal = true;
+                return;
+            }
+        } elseif ($agent) {
+            $agentId = $agent->id;
+        } else {
+            $this->errorMessage = 'You must be an agent to submit quotations.';
             $this->showErrorModal = true;
             return;
         }
@@ -143,9 +165,12 @@ class SparePartOrders extends Component
             'expires_at' => now()->addDays(7), // Quotations expire in 7 days
         ]);
 
-        // Update order status if it's the first quotation
+        // Update order status and quoted_at if it's the first quotation
         if ($this->selectedOrder->status === 'pending') {
-            $this->selectedOrder->update(['status' => 'quoted']);
+            $this->selectedOrder->update([
+                'status' => 'quoted',
+                'quoted_at' => now(),
+            ]);
         }
 
         $this->closeQuoteModal();
@@ -218,6 +243,12 @@ class SparePartOrders extends Component
             $allOrdersQuery->where('status', $this->statusFilter);
         }
 
+        // Apply channel filter (portal / whatsapp)
+        if ($this->channelFilter) {
+            $openRequestsQuery->where('order_channel', $this->channelFilter);
+            $allOrdersQuery->where('order_channel', $this->channelFilter);
+        }
+
         // Get counts
         $openRequestsCount = (clone $openRequestsQuery)->count();
         $myQuotationsCount = (clone $myQuotationsQuery)->count();
@@ -250,6 +281,8 @@ class SparePartOrders extends Component
             'cancelled' => 'Cancelled',
         ];
 
+        $sparePartAgents = $isAdmin ? Agent::where('agent_type', 'spare_part')->where('status', 'active')->orderBy('name')->get() : collect();
+
         return view('livewire.admin.spare-part-orders', [
             'openRequests' => $openRequests,
             'myQuotations' => $myQuotations,
@@ -260,6 +293,7 @@ class SparePartOrders extends Component
             'statuses' => $statuses,
             'isAdmin' => $isAdmin,
             'currentAgent' => $agent,
+            'sparePartAgents' => $sparePartAgents,
         ]);
     }
 }

@@ -225,6 +225,7 @@ class SparePartSourcing extends Component
             
             $order = SparePartOrder::create([
                 'order_number' => SparePartOrder::generateOrderNumber(),
+                'order_channel' => 'portal',
                 'user_id' => Auth::id(),
                 'customer_name' => $this->customerName,
                 'customer_email' => $this->customerEmail,

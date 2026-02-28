@@ -11,6 +11,7 @@ class SparePartOrder extends Model
 {
     protected $fillable = [
         'order_number',
+        'order_channel',
         'user_id',
         'customer_name',
         'customer_email',

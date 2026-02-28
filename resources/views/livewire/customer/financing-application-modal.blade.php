@@ -1,6 +1,6 @@
 <div>
     @if($show)
-    <div class="fixed inset-0 z-50 overflow-y-auto" x-data="{ show: @entangle('show') }" x-show="show" style="display: none;">
+    <div class="fixed inset-0 z-[110] overflow-y-auto" x-data="{ show: @entangle('show') }" x-show="show" style="display: none;" aria-modal="true" role="dialog">
         <!-- Background overlay -->
         <div class="fixed inset-0 bg-black/50 bg-opacity-50 transition-opacity" wire:click="close"></div>
 

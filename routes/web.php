@@ -64,10 +64,10 @@ Route::prefix('cars')->name('cars.')->group(function () {
     
     Route::get('/list-vehicle', function () {
         return view('cars.list-vehicle', ['vehicleType' => 'cars']);
-    })->middleware('auth')->name('list-vehicle');
+    })->middleware(['auth', 'otp.verified'])->name('list-vehicle');
     
     Route::get('/sell-to-dealer', \App\Livewire\Customer\AuctionVehicleForm::class)
-        ->middleware('auth')->name('sell-to-dealer');
+        ->middleware(['auth', 'otp.verified'])->name('sell-to-dealer');
     
     Route::get('/find-me-a-car', \App\Livewire\Customer\FindMeACar::class)
         ->name('find');
@@ -285,11 +285,11 @@ Route::prefix('trucks')->name('trucks.')->group(function () {
     Route::get('/search', \App\Livewire\Customer\TruckSearch::class)->name('search');
     
     Route::get('/used', function () {
-        return view('trucks.index', ['vehicleType' => 'trucks']);
+        return redirect()->route('trucks.search', ['condition' => 'used']);
     })->name('used');
     
     Route::get('/new', function () {
-        return view('trucks.index', ['vehicleType' => 'trucks']);
+        return redirect()->route('trucks.search', ['condition' => 'new']);
     })->name('new');
     
     Route::get('/sell', function () {
@@ -475,7 +475,7 @@ Route::prefix('spare-parts')->name('spare-parts.')->group(function () {
         return view('spare-parts.sourcing', ['vehicleType' => 'spare-parts']);
     })->name('sourcing');
     
-    Route::middleware('auth')->group(function () {
+    Route::middleware(['auth', 'otp.verified'])->group(function () {
         Route::get('/orders', function () {
             return view('spare-parts.orders', ['vehicleType' => 'spare-parts']);
         })->name('orders');
@@ -526,7 +526,7 @@ Route::prefix('loan-calculator')->name('loan-calculator.')->group(function () {
 Route::prefix('import-financing')->name('import-financing.')->group(function () {
     Route::get('/', \App\Livewire\Customer\ImportFinancing::class)->name('index');
     
-    Route::middleware('auth')->group(function () {
+    Route::middleware(['auth', 'otp.verified'])->group(function () {
         Route::get('/requests', \App\Livewire\Customer\ImportFinancingRequests::class)->name('requests');
         Route::get('/requests/{id}', \App\Livewire\Customer\ImportFinancingRequestDetail::class)->name('request-detail');
     });
@@ -540,10 +540,18 @@ Route::prefix('car-exchange')->name('car-exchange.')->group(function () {
         return view('car-exchange.index', ['vehicleType' => 'car-exchange']);
     })->name('index');
     
-    Route::middleware('auth')->group(function () {
+    Route::middleware(['auth', 'otp.verified'])->group(function () {
         Route::get('/my-requests', \App\Livewire\Customer\MyExchangeRequests::class)->name('my-requests');
     });
 });
+
+// ============================================
+// PRICING CHECKOUT (cars subscription – auth required)
+// ============================================
+Route::get('/pricing/cars/checkout/{plan}', \App\Livewire\Customer\SubscriptionCheckout::class)
+    ->middleware(['auth', 'verified', 'otp.verified'])
+    ->where('plan', '[0-9]+')
+    ->name('pricing.cars.checkout');
 
 // ============================================
 // UNIFIED PRICING ROUTE (for use in components)
@@ -556,7 +564,7 @@ Route::get('/pricing/{category}', function ($category) {
 // ============================================
 // DEALER PANEL ROUTES
 // ============================================
-Route::prefix('dealer')->name('dealer.')->middleware(['auth', 'verified'])->group(function () {
+Route::prefix('dealer')->name('dealer.')->middleware(['auth', 'verified', 'otp.verified'])->group(function () {
     // Dashboard
     Route::get('/dashboard', function () {
         return view('dealer.dashboard');
@@ -619,7 +627,7 @@ Route::prefix('dealer')->name('dealer.')->middleware(['auth', 'verified'])->grou
 // ============================================
 // LENDER PANEL ROUTES
 // ============================================
-Route::prefix('lender')->name('lender.')->middleware(['auth', 'verified'])->group(function () {
+Route::prefix('lender')->name('lender.')->middleware(['auth', 'verified', 'otp.verified'])->group(function () {
     // Dashboard
     Route::get('/dashboard', function () {
         return view('lender.dashboard');
@@ -675,7 +683,7 @@ Route::prefix('lender')->name('lender.')->middleware(['auth', 'verified'])->grou
 // ============================================
 // ADMIN PANEL ROUTES
 // ============================================
-Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(function () {
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'otp.verified'])->group(function () {
     // Dashboard - Shows different components based on user role (switch case)
     Route::get('/dashboard', function () {
         $user = auth()->user();
@@ -686,6 +694,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
     
     // Reports (Admin only)
     Route::get('/reports', \App\Livewire\Admin\Reports::class)->name('reports');
+
+    // Promotion – send branded emails to agents, CFC, dealers, lenders, etc. (Admin only)
+    Route::get('/promotion', \App\Livewire\Admin\PromotionMail::class)->name('promotion');
     
     // Profile & Settings (Common to all roles)
     Route::get('/profile', function () {
@@ -1019,6 +1030,29 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
         Route::get('/agents/create', function () {
             return view('admin.registration.agents-create');
         })->name('agents.create');
+        Route::get('/agents/{id}', function ($id) {
+            $agent = \App\Models\Agent::findOrFail($id);
+            $agentTypes = [
+                'garage_owner' => 'Garage Owner',
+                'lubricant_shop' => 'Lubricant Shop',
+                'spare_part' => 'Spare Part',
+            ];
+            $serviceLabels = [
+                'washing' => 'Washing', 'oiling' => 'Oiling', 'repair' => 'Repair',
+                'maintenance' => 'Maintenance', 'diagnostics' => 'Diagnostics',
+                'tire_service' => 'Tire Service', 'battery_service' => 'Battery Service',
+                'air_conditioning' => 'Air Conditioning',
+            ];
+            $vehicleMakeNames = $agent->vehicle_makes
+                ? \App\Models\VehicleMake::whereIn('id', $agent->vehicle_makes)->orderBy('name')->pluck('name')->toArray()
+                : [];
+            return view('admin.registration.agents-show', [
+                'agent' => $agent,
+                'agentTypes' => $agentTypes,
+                'serviceLabels' => $serviceLabels,
+                'vehicleMakeNames' => $vehicleMakeNames,
+            ]);
+        })->name('agents.show');
         Route::get('/agents/{id}/edit', function ($id) {
             return view('admin.registration.agents-edit', ['id' => $id]);
         })->name('agents.edit');
@@ -1198,10 +1232,10 @@ Route::middleware(['auth'])->group(function () {
 // ============================================
 // Unified dashboard route – redirects by user role
 Route::get('dashboard', \App\Http\Controllers\DashboardController::class)
-    ->middleware(['auth', 'verified'])
+    ->middleware(['auth', 'verified', 'otp.verified'])
     ->name('dashboard');
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'otp.verified'])->group(function () {
     Route::redirect('settings', 'settings/profile');
 
     Route::get('settings/profile', function () {

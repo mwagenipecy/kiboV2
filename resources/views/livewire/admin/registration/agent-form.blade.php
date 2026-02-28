@@ -149,6 +149,17 @@
                         <p class="text-red-500 text-sm mt-1">{{ $message }}</p> 
                     @enderror
                 </div>
+                <div>
+                    <label class="flex items-center space-x-2 cursor-pointer">
+                        <input 
+                            type="checkbox" 
+                            wire:model="supportLogistics" 
+                            class="rounded border-gray-300 text-green-600 focus:ring-green-500"
+                        >
+                        <span class="text-sm font-medium text-gray-700">Support logistics</span>
+                    </label>
+                    <p class="text-xs text-gray-500 mt-1 ml-6">Check if this spare part agent supports logistics (e.g. delivery/shipping).</p>
+                </div>
                 @endif
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">

@@ -24,6 +24,9 @@
         </div>
     </section>
 
+    <!-- Trucks List Preview (few trucks + Used / New links) -->
+    <x-customer.trucks-list-preview />
+
     <!-- Discovery Component -->
     <x-customer.discovery />
 

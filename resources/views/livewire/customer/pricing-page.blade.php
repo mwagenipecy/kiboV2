@@ -37,6 +37,11 @@
 
     <!-- Pricing Plans -->
     <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+        @if (session()->has('error'))
+            <div class="mb-6 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-red-800 text-sm">
+                {{ session('error') }}
+            </div>
+        @endif
         @if($plans->count() > 0)
             <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                 @foreach($plans as $plan)
@@ -67,6 +72,14 @@
                                         <span class="ml-2 text-gray-600">one-time</span>
                                     @endif
                                 </div>
+                                @if($plan->max_listings !== null || $plan->max_trucks !== null)
+                                    <p class="mt-2 text-sm font-medium text-green-700">
+                                        @if($plan->max_listings !== null){{ $plan->max_listings }} {{ $plan->max_listings === 1 ? 'car' : 'cars' }}@endif
+                                        @if($plan->max_listings !== null && $plan->max_trucks !== null) · @endif
+                                        @if($plan->max_trucks !== null){{ $plan->max_trucks }} {{ $plan->max_trucks === 1 ? 'truck' : 'trucks' }}@endif
+                                        can be listed
+                                    </p>
+                                @endif
                             </div>
 
                             @if($plan->features && count($plan->features) > 0)
@@ -82,9 +95,25 @@
                                 </ul>
                             @endif
 
-                            <button class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors">
-                                Select Plan
-                            </button>
+                            @if($category === 'cars')
+                                @php
+                                    $isCurrentPlan = $currentPlan && $currentPlan->id === $plan->id;
+                                    $isUpgrade = $currentPlan && !$isCurrentPlan && isset($currentPlanIndex) && $plans->search(fn ($p) => $p->id === $plan->id) > $currentPlanIndex;
+                                @endphp
+                                @if($isCurrentPlan)
+                                    <div class="w-full bg-gray-200 text-gray-700 font-semibold py-3 px-6 rounded-lg text-center cursor-default">
+                                        Current plan
+                                    </div>
+                                @else
+                                    <a href="{{ route('pricing.cars.checkout', ['plan' => $plan->id]) }}" class="block w-full text-center font-semibold py-3 px-6 rounded-lg transition-colors {{ $isUpgrade ? 'bg-amber-500 hover:bg-amber-600 text-white' : 'bg-green-600 hover:bg-green-700 text-white' }}">
+                                        {{ $isUpgrade ? 'Upgrade to this plan' : 'Select Plan' }}
+                                    </a>
+                                @endif
+                            @else
+                                <button class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors">
+                                    Select Plan
+                                </button>
+                            @endif
                         </div>
                     </div>
                 @endforeach

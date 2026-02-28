@@ -1,6 +1,6 @@
 <div>
     @if($show)
-    <div class="fixed inset-0 z-50 flex items-center justify-center p-4" wire:click="close">
+    <div class="fixed inset-0 z-[110] flex items-center justify-center p-4" wire:click="close" aria-modal="true" role="dialog">
         <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6" wire:click.stop>
             <div class="flex items-center justify-between mb-6">
                 <h2 class="text-2xl font-bold text-gray-900">Report This Listing</h2>

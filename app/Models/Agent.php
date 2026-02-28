@@ -14,6 +14,7 @@ class Agent extends Model
         'vehicle_makes',
         'services',
         'spare_part_details',
+        'support_logistics',
         'license_number',
         'address',
         'latitude',
@@ -30,6 +31,7 @@ class Agent extends Model
         'approved_at' => 'datetime',
         'vehicle_makes' => 'array',
         'services' => 'array',
+        'support_logistics' => 'boolean',
     ];
 
     public function user()

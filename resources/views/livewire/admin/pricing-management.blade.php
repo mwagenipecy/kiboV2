@@ -29,6 +29,9 @@
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Duration</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Max cars</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Max trucks</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Max leases</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Features</th>
                     <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
@@ -59,6 +62,15 @@
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             {{ $plan->duration_days ? $plan->duration_days . ' days' : 'One-time' }}
                         </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {{ $plan->max_listings !== null ? $plan->max_listings . ' cars' : '—' }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {{ $plan->max_trucks !== null ? $plan->max_trucks . ' trucks' : '—' }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {{ $plan->max_leases !== null ? $plan->max_leases . ' leases' : '—' }}
+                        </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <button wire:click="toggleActive({{ $plan->id }})" class="px-2 py-1 text-xs font-semibold rounded-full {{ $plan->is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
                                 {{ $plan->is_active ? 'Active' : 'Inactive' }}
@@ -76,7 +88,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" class="px-6 py-4 text-center text-gray-500">
+                        <td colspan="10" class="px-6 py-4 text-center text-gray-500">
                             No pricing plans found. Create your first plan!
                         </td>
                     </tr>
@@ -122,7 +134,7 @@
                             <textarea wire:model="description" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"></textarea>
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700">Price *</label>
                                 <input type="number" step="0.01" wire:model="price" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
@@ -139,6 +151,24 @@
                                 <label class="block text-sm font-medium text-gray-700">Duration (Days)</label>
                                 <input type="number" wire:model="durationDays" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
                                 <p class="text-xs text-gray-500 mt-1">Leave empty for one-time payment</p>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Number of cars</label>
+                                <input type="number" min="0" wire:model="maxListings" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500" placeholder="e.g. 5, 10">
+                                <p class="text-xs text-gray-500 mt-1">Max cars (dealers). Empty = N/A.</p>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Number of trucks</label>
+                                <input type="number" min="0" wire:model="maxTrucks" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500" placeholder="e.g. 2, 5">
+                                <p class="text-xs text-gray-500 mt-1">Max trucks (dealers). Empty = N/A.</p>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Number of leases</label>
+                                <input type="number" min="0" wire:model="maxLeases" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500" placeholder="e.g. 1, 3">
+                                <p class="text-xs text-gray-500 mt-1">Max lease listings (dealers). Empty = N/A.</p>
                             </div>
                         </div>
 

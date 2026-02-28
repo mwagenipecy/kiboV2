@@ -1,7 +1,7 @@
 <div>
     @if($show)
     <!-- Modal Overlay -->
-    <div class="fixed inset-0 bg-black/50 bg-opacity-50 z-50 flex items-center justify-center p-4" wire:click="close">
+    <div class="fixed inset-0 bg-black/50 z-[110] flex items-center justify-center p-4" wire:click="close" aria-modal="true" role="dialog">
         <!-- Modal Content -->
         <div class="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" wire:click.stop>
             <!-- Header -->

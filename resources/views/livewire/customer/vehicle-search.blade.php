@@ -8,80 +8,89 @@
         input:focus, select:focus { --tw-ring-color: #009866 !important; }
         [x-cloak] { display: none !important; }
     </style>
-    {{-- Filter Bar --}}
-    <div class="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 py-4">
+    {{-- Filter Bar: sticky top-0 so no gap; padding-top so content sits just below navbar; z-40 so navbar/dropdown stay on top --}}
+    <div class="sticky top-0 z-40 pt-16 md:pt-[7rem] -mt-16 md:-mt-[7rem] px-4 pb-2">
+        <div class="max-w-4xl mx-auto rounded-2xl border border-gray-200 bg-white shadow-sm pt-4 pb-4 px-4 sm:px-6">
             <div class="flex items-center gap-3 justify-between flex-wrap">
                 {{-- Left side - Filter chips --}}
                 <div class="flex items-center gap-3 flex-wrap">
-                    {{-- Condition Filter Chip --}}
+                    {{-- Mobile: single chip (Used) + Filter button. Desktop: all chips. --}}
+                    {{-- Condition Filter Chip (on mobile this is the single chip when set) --}}
                     @if($condition)
                         <button wire:click="$toggle('showFilters')" class="px-6 py-2 kibo-bg text-white rounded-full font-medium transition-colors">
                             {{ ucfirst($condition) }}
                         </button>
                     @endif
 
-                    {{-- Make Filter Chip --}}
+                    {{-- Make Filter Chip (hidden on mobile) --}}
                     @if($make)
                         @php
                             $makeName = $makes->firstWhere('id', $make)?->name ?? 'Make';
                         @endphp
-                        <button wire:click="$toggle('showFilters')" class="px-6 py-2 kibo-bg text-white rounded-full font-medium transition-colors">
+                        <button wire:click="$toggle('showFilters')" class="hidden md:inline-flex px-6 py-2 kibo-bg text-white rounded-full font-medium transition-colors">
                             {{ $makeName }}
                         </button>
                     @endif
 
-                    {{-- Model Filter Chip --}}
+                    {{-- Model Filter Chip (hidden on mobile) --}}
                     @if($model)
                         @php
                             $modelName = $models->firstWhere('id', $model)?->name ?? 'Model';
                         @endphp
-                        <button wire:click="$toggle('showFilters')" class="px-6 py-2 kibo-bg text-white rounded-full font-medium transition-colors">
+                        <button wire:click="$toggle('showFilters')" class="hidden md:inline-flex px-6 py-2 kibo-bg text-white rounded-full font-medium transition-colors">
                             {{ $modelName }}
                         </button>
                     @endif
 
-                    {{-- Price Filter Chip (Always visible) --}}
-                    <button wire:click="$toggle('showFilters')" class="px-6 py-2 border-2 border-gray-300 text-gray-700 rounded-full font-medium hover:border-gray-400 transition-colors">
+                    {{-- Price Filter Chip (hidden on mobile) --}}
+                    <button wire:click="$toggle('showFilters')" class="hidden md:inline-flex px-6 py-2 border-2 border-gray-300 text-gray-700 rounded-full font-medium hover:border-gray-400 transition-colors">
                         Price
                     </button>
 
-                    {{-- Year Filter Chip (Always visible) --}}
-                    <button wire:click="$toggle('showFilters')" class="px-6 py-2 border-2 border-gray-300 text-gray-700 rounded-full font-medium hover:border-gray-400 transition-colors">
+                    {{-- Year Filter Chip (hidden on mobile) --}}
+                    <button wire:click="$toggle('showFilters')" class="hidden md:inline-flex px-6 py-2 border-2 border-gray-300 text-gray-700 rounded-full font-medium hover:border-gray-400 transition-colors">
                         Year
                     </button>
 
-                    {{-- Mileage Filter Chip (Always visible) --}}
-                    <button wire:click="$toggle('showFilters')" class="px-6 py-2 border-2 border-gray-300 text-gray-700 rounded-full font-medium hover:border-gray-400 transition-colors">
+                    {{-- Mileage Filter Chip (hidden on mobile) --}}
+                    <button wire:click="$toggle('showFilters')" class="hidden md:inline-flex px-6 py-2 border-2 border-gray-300 text-gray-700 rounded-full font-medium hover:border-gray-400 transition-colors">
                         Mileage
                     </button>
 
-                    {{-- Gearbox Filter Chip (Always visible) --}}
-                    <button wire:click="$toggle('showFilters')" class="px-6 py-2 border-2 border-gray-300 text-gray-700 rounded-full font-medium hover:border-gray-400 transition-colors">
+                    {{-- Gearbox Filter Chip (hidden on mobile) --}}
+                    <button wire:click="$toggle('showFilters')" class="hidden md:inline-flex px-6 py-2 border-2 border-gray-300 text-gray-700 rounded-full font-medium hover:border-gray-400 transition-colors">
                         Gearbox
                     </button>
 
-                    {{-- Body Type Filter Chip (Always visible) --}}
-                    <button wire:click="$toggle('showFilters')" class="px-6 py-2 border-2 border-gray-300 text-gray-700 rounded-full font-medium hover:border-gray-400 transition-colors">
+                    {{-- Body Type Filter Chip (hidden on mobile) --}}
+                    <button wire:click="$toggle('showFilters')" class="hidden md:inline-flex px-6 py-2 border-2 border-gray-300 text-gray-700 rounded-full font-medium hover:border-gray-400 transition-colors">
                         Body type
                     </button>
+
+                    {{-- Mobile only: single chip (Used when no condition set; otherwise condition chip is shown above) --}}
+                    @if(!$condition)
+                    <button wire:click="$toggle('showFilters')" class="md:hidden px-6 py-2 border-2 border-gray-300 text-gray-700 rounded-full font-medium hover:border-gray-400 transition-colors">
+                        Used
+                    </button>
+                    @endif
                 </div>
 
-                {{-- Right side - Filter and sort button --}}
+                {{-- Right side - Filter button (mobile: "Filter", desktop: "Filter and sort") --}}
                 <button wire:click="$toggle('showFilters')" class="px-6 py-2 kibo-bg text-white rounded-full font-medium transition-colors flex items-center gap-2 whitespace-nowrap">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
                     </svg>
-                    Filter and sort
+                    <span class="hidden md:inline">Filter and sort</span><span class="md:hidden">Filter</span>
                 </button>
             </div>
         </div>
     </div>
 
-    {{-- Filter Modal --}}
+    {{-- Filter Modal (side modal) --}}
     @if($showFilters)
-    <div class="fixed inset-0 bg-black/50 bg-opacity-50 z-40 animate-fadeIn" wire:click="$set('showFilters', false)"></div>
-    <div class="fixed right-0 top-0 h-full w-full max-w-md bg-white shadow-2xl z-60 overflow-y-auto animate-slideInRight">
+    <div class="fixed inset-0 z-[110]" aria-modal="true" role="dialog">
+        <div class="fixed inset-0 bg-black/50 animate-fadeIn" wire:click="$set('showFilters', false)"></div>
+        <div class="fixed right-0 top-0 h-full w-full max-w-md bg-white shadow-2xl overflow-y-auto animate-slideInRight">
         {{-- Header --}}
         <div class="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between z-10">
             <h2 class="text-2xl font-bold text-gray-900">Filter and sort</h2>
@@ -406,25 +415,15 @@
             </button>
         </div>
     </div>
-
-    {{-- Animations --}}
-    <style>
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        @keyframes slideInRight {
-            from { transform: translateX(100%); }
-            to { transform: translateX(0); }
-        }
-        .animate-fadeIn {
-            animation: fadeIn 0.2s ease-out;
-        }
-        .animate-slideInRight {
-            animation: slideInRight 0.3s ease-out;
-        }
-    </style>
+    </div>
     @endif
+
+    <style>
+        .animate-fadeIn { animation: fadeIn 0.2s ease-out; }
+        .animate-slideInRight { animation: slideInRight 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
+    </style>
 
     {{-- Results --}}
     <div class="max-w-7xl mx-auto px-4 py-6">
@@ -579,10 +578,10 @@
                     </div>
                 </a>
 
-                {{-- Action Buttons --}}
-                <div class="px-4 pb-4 space-y-2 relative" style="z-index: 50; overflow: visible;">
+                {{-- Action Buttons: z-20 so dropdown stays below filter navbar (z-40) --}}
+                <div class="px-4 pb-4 space-y-2 relative z-20 overflow-visible">
                     {{-- Main action button dropdown (no Alpine; uses native <details>) --}}
-                    <details class="relative kibo-details" style="z-index: 50;">
+                    <details class="relative kibo-details z-20">
                         <summary class="w-full px-4 py-2 kibo-bg text-white text-sm font-medium rounded-lg hover:opacity-90 transition-colors flex items-center justify-center gap-2 cursor-pointer select-none">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
@@ -595,8 +594,8 @@
 
                         {{-- Dropdown Menu --}}
                         <div
-                            class="absolute bottom-full mb-2 left-0 right-0 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden"
-                            style="z-index: 9999; min-width: 100%;"
+                            class="absolute bottom-full mb-2 left-0 right-0 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden z-20"
+                            style="min-width: 100%;"
                         >
                             {{-- Valuation Report --}}
                             @auth

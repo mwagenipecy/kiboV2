@@ -53,6 +53,16 @@
                     style="focus:ring-color: #009866;"
                 >
             </div>
+            <div>
+                <select 
+                    wire:model.live="channelFilter" 
+                    class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
+                >
+                    <option value="">All Channels</option>
+                    <option value="portal">Portal</option>
+                    <option value="whatsapp">WhatsApp</option>
+                </select>
+            </div>
             @if($activeTab === 'all')
             <div>
                 <select 
@@ -78,6 +88,7 @@
                 <thead class="bg-gray-50">
                     <tr>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order #</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Channel</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vehicle / Part</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Delivery Location</th>
@@ -91,6 +102,13 @@
                     <tr class="hover:bg-gray-50">
                         <td class="px-6 py-4 whitespace-nowrap">
                             <span class="text-sm font-medium text-gray-900">{{ $order->order_number }}</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            @if(($order->order_channel ?? 'portal') === 'whatsapp')
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">WhatsApp</span>
+                            @else
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">Portal</span>
+                            @endif
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="text-sm font-medium text-gray-900">{{ $order->customer_name }}</div>
@@ -113,18 +131,28 @@
                             {{ $order->created_at->format('M d, Y') }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <button
-                                wire:click="openQuoteModal({{ $order->id }})"
-                                class="inline-flex items-center px-3 py-1.5 text-white text-sm font-medium rounded-lg transition-colors"
-                                style="background-color: #009866;"
-                                onmouseover="this.style.backgroundColor='#007a52'"
-                                onmouseout="this.style.backgroundColor='#009866'"
-                            >
-                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                </svg>
-                                Submit Quote
-                            </button>
+                            <div class="flex items-center gap-2">
+                                <a href="{{ route('admin.spare-part-orders.show', $order) }}" class="inline-flex items-center px-3 py-1.5 text-gray-700 text-sm font-medium rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors" title="View order details">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                    </svg>
+                                    View
+                                </a>
+                                <button
+                                    wire:click="openQuoteModal({{ $order->id }})"
+                                    class="inline-flex items-center px-3 py-1.5 text-white text-sm font-medium rounded-lg transition-colors"
+                                    style="background-color: #009866;"
+                                    onmouseover="this.style.backgroundColor='#007a52'"
+                                    onmouseout="this.style.backgroundColor='#009866'"
+                                    title="Submit quotation"
+                                >
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                    </svg>
+                                    Submit Quote
+                                </button>
+                            </div>
                         </td>
                     </tr>
                     @endforeach
@@ -155,6 +183,7 @@
                 <thead class="bg-gray-50">
                     <tr>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order #</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Channel</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Part</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">My Quote</th>
@@ -168,6 +197,13 @@
                     <tr class="hover:bg-gray-50">
                         <td class="px-6 py-4 whitespace-nowrap">
                             <span class="text-sm font-medium text-gray-900">{{ $quotation->order->order_number }}</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            @if(($quotation->order->order_channel ?? 'portal') === 'whatsapp')
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">WhatsApp</span>
+                            @else
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">Portal</span>
+                            @endif
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="text-sm font-medium text-gray-900">{{ $quotation->order->customer_name }}</div>
@@ -197,17 +233,26 @@
                             {{ $quotation->created_at->format('M d, Y') }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            @if($quotation->status === 'accepted')
-                            <a href="{{ route('admin.spare-part-orders.show', $quotation->order) }}" class="inline-flex items-center px-3 py-1.5 text-white text-sm font-medium rounded-lg transition-colors" style="background-color: #009866;" onmouseover="this.style.backgroundColor='#007a52'" onmouseout="this.style.backgroundColor='#009866'">
-                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                </svg>
-                                Manage Order
-                            </a>
-                            @else
-                            <span class="text-sm text-gray-500">Awaiting response</span>
-                            @endif
+                            <div class="flex items-center gap-2">
+                                <a href="{{ route('admin.spare-part-orders.show', $quotation->order) }}" class="inline-flex items-center px-3 py-1.5 text-gray-700 text-sm font-medium rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors" title="View order details">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                    </svg>
+                                    View
+                                </a>
+                                @if($quotation->status === 'accepted')
+                                <a href="{{ route('admin.spare-part-orders.show', $quotation->order) }}" class="inline-flex items-center px-3 py-1.5 text-white text-sm font-medium rounded-lg transition-colors" style="background-color: #009866;" onmouseover="this.style.backgroundColor='#007a52'" onmouseout="this.style.backgroundColor='#009866'" title="Manage order">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    </svg>
+                                    Manage Order
+                                </a>
+                                @else
+                                <span class="text-sm text-gray-500">Awaiting response</span>
+                                @endif
+                            </div>
                         </td>
                     </tr>
                     @endforeach
@@ -238,6 +283,7 @@
                 <thead class="bg-gray-50">
                     <tr>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order #</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Channel</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Part</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quotations</th>
@@ -251,6 +297,13 @@
                     <tr class="hover:bg-gray-50">
                         <td class="px-6 py-4 whitespace-nowrap">
                             <span class="text-sm font-medium text-gray-900">{{ $order->order_number }}</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            @if(($order->order_channel ?? 'portal') === 'whatsapp')
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">WhatsApp</span>
+                            @else
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">Portal</span>
+                            @endif
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="text-sm font-medium text-gray-900">{{ $order->customer_name }}</div>
@@ -355,6 +408,22 @@
                 </div>
                 
                 <form wire:submit.prevent="submitQuotation" class="space-y-4">
+                    @if($isAdmin)
+                    <div>
+                        @if($sparePartAgents->isNotEmpty())
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Submit quote as (Agent) *</label>
+                        <select wire:model="selectedAgentId" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent">
+                            <option value="">Select agent...</option>
+                            @foreach($sparePartAgents as $a)
+                                <option value="{{ $a->id }}">{{ $a->name }} ({{ $a->company_name ?? $a->email }})</option>
+                            @endforeach
+                        </select>
+                        @error('selectedAgentId') <p class="text-sm text-red-600 mt-1">{{ $message }}</p> @enderror
+                        @else
+                        <p class="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-4 py-3">No spare part agents available. Please add agents from <strong>Registration → Agents</strong> (with type Spare Part) first.</p>
+                        @endif
+                    </div>
+                    @endif
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Quoted Price *</label>

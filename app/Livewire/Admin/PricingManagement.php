@@ -24,6 +24,9 @@ class PricingManagement extends Component
     public $isPopular = false;
     public $isActive = true;
     public $sortOrder = 0;
+    public $maxListings = '';
+    public $maxTrucks = '';
+    public $maxLeases = '';
 
     protected $rules = [
         'name' => 'required|string|max:255',
@@ -32,6 +35,9 @@ class PricingManagement extends Component
         'price' => 'required|numeric|min:0',
         'currency' => 'required|string|size:3',
         'durationDays' => 'nullable|integer|min:1',
+        'maxListings' => 'nullable|integer|min:0',
+        'maxTrucks' => 'nullable|integer|min:0',
+        'maxLeases' => 'nullable|integer|min:0',
         'isFeatured' => 'boolean',
         'isPopular' => 'boolean',
         'isActive' => 'boolean',
@@ -55,6 +61,9 @@ class PricingManagement extends Component
             $this->price = $plan->price;
             $this->currency = $plan->currency;
             $this->durationDays = $plan->duration_days;
+            $this->maxListings = $plan->max_listings !== null ? (string) $plan->max_listings : '';
+            $this->maxTrucks = $plan->max_trucks !== null ? (string) $plan->max_trucks : '';
+            $this->maxLeases = $plan->max_leases !== null ? (string) $plan->max_leases : '';
             $this->features = $plan->features ?? [];
             $this->isFeatured = $plan->is_featured;
             $this->isPopular = $plan->is_popular;
@@ -79,6 +88,9 @@ class PricingManagement extends Component
         $this->price = '';
         $this->currency = 'GBP';
         $this->durationDays = '';
+        $this->maxListings = '';
+        $this->maxTrucks = '';
+        $this->maxLeases = '';
         $this->features = [];
         $this->newFeature = '';
         $this->isFeatured = false;
@@ -112,6 +124,9 @@ class PricingManagement extends Component
             'price' => $this->price,
             'currency' => $this->currency,
             'duration_days' => $this->durationDays ?: null,
+            'max_listings' => $this->maxListings !== '' && $this->maxListings !== null ? (int) $this->maxListings : null,
+            'max_trucks' => $this->maxTrucks !== '' && $this->maxTrucks !== null ? (int) $this->maxTrucks : null,
+            'max_leases' => $this->maxLeases !== '' && $this->maxLeases !== null ? (int) $this->maxLeases : null,
             'features' => $this->features,
             'is_featured' => $this->isFeatured,
             'is_popular' => $this->isPopular,

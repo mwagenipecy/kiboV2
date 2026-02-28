@@ -2,7 +2,7 @@
     <!-- Debug: Component is loaded -->
     @if($showModal && $vehicle)
     <!-- Modal Overlay -->
-    <div class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" wire:click="closeModal">
+    <div class="fixed inset-0 bg-black/60 z-[110] flex items-center justify-center p-4" wire:click="closeModal" aria-modal="true" role="dialog">
         <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" wire:click.stop>
             <!-- Modal Header -->
             <div class="sticky top-0 bg-gradient-to-r from-green-600 to-green-700 px-6 py-5 rounded-t-2xl flex items-center justify-between z-10">

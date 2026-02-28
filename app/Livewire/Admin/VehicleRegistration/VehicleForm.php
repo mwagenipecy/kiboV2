@@ -261,6 +261,16 @@ class VehicleForm extends Component
             // Force entity_id to user's entity_id (prevent tampering)
             $this->entity_id = $user->entity_id;
         }
+
+        $entity = $this->entity_id ? Entity::with('pricingPlan')->find($this->entity_id) : null;
+        if ($entity && !$this->editMode) {
+            if (!$entity->canAddVehicle()) {
+                $max = $entity->max_allowed_cars;
+                $current = $entity->vehiclesCountExcludingSold();
+                session()->flash('error', "Your package allows up to {$max} car listing(s) (excluding sold). You currently have {$current}. Please upgrade your plan to add more.");
+                return;
+            }
+        }
         
         $this->validate();
 

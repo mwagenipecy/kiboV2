@@ -731,6 +731,7 @@ class SparePartOrderChatbotService
             foreach ($orders as $orderData) {
                 $order = SparePartOrder::create([
                     'order_number' => SparePartOrder::generateOrderNumber(),
+                    'order_channel' => 'whatsapp',
                     'user_id' => $user?->id,
                     'customer_name' => $user?->name ?? 'Chatbot Customer',
                     'customer_email' => $email,

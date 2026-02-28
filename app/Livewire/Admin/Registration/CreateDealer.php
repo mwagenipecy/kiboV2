@@ -6,6 +6,7 @@ use App\Enums\EntityStatus;
 use App\Enums\EntityType;
 use App\Jobs\SendEntityUserCredentials;
 use App\Models\Entity;
+use App\Models\PricingPlan;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -32,6 +33,9 @@ class CreateDealer extends Component
     public $user_name = '';
     public $user_email = '';
 
+    /** @var int|null Subscription bundle (pricing plan) – max active car listings */
+    public $pricing_plan_id = null;
+
     protected $rules = [
         'name' => 'required|string|max:255',
         'email' => 'required|email|unique:entities,email',
@@ -47,6 +51,7 @@ class CreateDealer extends Component
         'description' => 'nullable|string',
         'user_name' => 'required|string|max:255',
         'user_email' => 'required|email|unique:users,email',
+        'pricing_plan_id' => 'nullable|exists:advertising_pricing,id',
     ];
 
     protected $messages = [
@@ -86,6 +91,7 @@ class CreateDealer extends Component
                 'tax_id' => $this->tax_id,
                 'website' => $this->website,
                 'description' => $this->description,
+                'pricing_plan_id' => $this->pricing_plan_id ?: null,
                 'metadata' => [
                     'primary_user_name' => $this->user_name,
                     'primary_user_email' => $this->user_email,
@@ -107,6 +113,14 @@ class CreateDealer extends Component
 
     public function render()
     {
-        return view('livewire.admin.registration.create-dealer');
+        $subscriptionBundles = PricingPlan::active()
+            ->byCategory('cars')
+            ->whereNotNull('max_listings')
+            ->ordered()
+            ->get();
+
+        return view('livewire.admin.registration.create-dealer', [
+            'subscriptionBundles' => $subscriptionBundles,
+        ]);
     }
 }

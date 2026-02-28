@@ -10,6 +10,11 @@
             </a>
             <h1 class="text-2xl font-bold text-gray-900">Order: {{ $order->order_number }}</h1>
             <p class="text-sm text-gray-500 mt-1">Created {{ $order->created_at->format('M d, Y h:i A') }}</p>
+            @if(($order->order_channel ?? 'portal') === 'whatsapp')
+                <span class="inline-flex items-center mt-2 px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">WhatsApp</span>
+            @else
+                <span class="inline-flex items-center mt-2 px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">Portal</span>
+            @endif
         </div>
         
         {{-- Status Badge --}}
@@ -375,6 +380,18 @@
             <div class="relative bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 z-[9999]" wire:click.stop>
                 <h3 class="text-xl font-bold text-gray-900 mb-4">Send Quotation</h3>
                 <form wire:submit.prevent="submitQuote" class="space-y-4">
+                    @if($isAdmin && $sparePartAgents->isNotEmpty())
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Submit quote as (Agent) *</label>
+                        <select wire:model="selectedAgentId" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent">
+                            <option value="">Select agent...</option>
+                            @foreach($sparePartAgents as $a)
+                                <option value="{{ $a->id }}">{{ $a->name }} ({{ $a->company_name ?? $a->email }})</option>
+                            @endforeach
+                        </select>
+                        @error('selectedAgentId') <p class="text-sm text-red-600 mt-1">{{ $message }}</p> @enderror
+                    </div>
+                    @endif
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Price *</label>

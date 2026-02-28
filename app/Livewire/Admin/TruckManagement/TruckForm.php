@@ -353,6 +353,16 @@ class TruckForm extends Component
             // Force entity_id to user's entity_id (prevent tampering)
             $this->entity_id = $user->entity_id;
         }
+
+        $entity = $this->entity_id ? Entity::with('pricingPlan')->find($this->entity_id) : null;
+        if ($entity && !$this->editMode) {
+            if (!$entity->canAddTruck()) {
+                $max = $entity->max_allowed_trucks;
+                $current = $entity->trucksCountExcludingSold();
+                $this->showError('Listing limit reached', "Your package allows up to {$max} truck listing(s) (excluding sold). You currently have {$current}. Please upgrade your plan from the pricing page to add more.");
+                return;
+            }
+        }
         
         try {
         $this->validate();

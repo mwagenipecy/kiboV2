@@ -78,10 +78,14 @@
 
                 {{-- Car Info --}}
                 <div class="bg-white rounded-xl p-6 shadow-sm">
-                    @if($vehicle->entity)
                     <p class="text-sm text-gray-600 mb-2">From</p>
-                    <p class="text-sm text-gray-700 mb-4">{{ $vehicle->entity->name }}</p>
-                    @endif
+                    <p class="text-sm text-gray-700 mb-4">
+                        @if($vehicle->entity && $vehicle->entity->pricing_plan_id !== null && $vehicle->entity->pricing_plan_id !== '')
+                            {{ $vehicle->entity->name }}
+                        @else
+                            KiboAuto
+                        @endif
+                    </p>
                     
                     <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ $vehicle->make->name ?? '' }} {{ $vehicle->model->name ?? '' }}</h1>
                     @if($vehicle->variant)
@@ -307,11 +311,12 @@
                 <div class="bg-white rounded-xl p-6 shadow-sm">
                     <h2 class="text-2xl font-bold text-gray-900 mb-4">Expert reviews for the {{ $vehicle->make->name ?? '' }} {{ $vehicle->model->name ?? '' }}</h2>
                     
-                    <div class="flex items-baseline gap-2 mb-2">
-                        <span class="text-5xl font-bold text-gray-900">3.7</span>
-                        <svg class="w-8 h-8 fill-orange-400 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
+                    <div class="flex items-center gap-1 mb-2">
+                        @foreach(range(1, 5) as $i)
+                        <svg class="w-8 h-8 {{ $i <= 4 ? 'fill-amber-400 text-amber-400' : 'fill-gray-200 text-gray-200' }}" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
                         </svg>
+                        @endforeach
                     </div>
 
                     <p class="text-gray-600 mb-6">
@@ -436,14 +441,22 @@
 
                     <div class="bg-white rounded-xl p-6 shadow-sm">
                         <h3 class="text-xl font-bold text-gray-900 mb-4">Contact seller</h3>
-                        
-                        @if($vehicle->entity)
+                        @php
+                            $hasPaidPlan = $vehicle->entity && $vehicle->entity->pricing_plan_id !== null && $vehicle->entity->pricing_plan_id !== '';
+                            $showDealerContact = $hasPaidPlan;
+                            $kibo = array_merge([
+                                'email' => 'info@kiboauto.co.tz',
+                                'phone' => '0794 777772',
+                                'location' => 'Sinza kwa Remi, Tan House 9th Floor',
+                            ], config('kibo.contact', []));
+                        @endphp
+
+                        @if($showDealerContact)
+                        {{-- Paid plan: show dealer contact --}}
                         <div class="bg-gray-50 px-3 py-1 rounded inline-block mb-4">
-                            <span class="text-sm font-medium text-gray-700">{{ $vehicle->entity->type ?? 'Dealer' }}</span>
+                            <span class="text-sm font-medium text-gray-700">{{ $vehicle->entity->type->label() ?? 'Dealer' }}</span>
                         </div>
-
                         <p class="text-gray-700 mb-6">{{ $vehicle->entity->name }}</p>
-
                         @if($vehicle->entity->phone)
                         <a href="tel:{{ $vehicle->entity->phone }}" class="w-full bg-white border-2 py-3 px-6 rounded-full font-semibold hover:bg-green-50 transition-colors flex items-center justify-center gap-2 mb-4" style="border-color: #009866; color: #009866;">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -452,7 +465,6 @@
                             {{ $vehicle->entity->phone }}
                         </a>
                         @endif
-
                         @if($vehicle->entity->email)
                         <a href="mailto:{{ $vehicle->entity->email }}" class="w-full text-white py-3 px-6 rounded-full font-semibold transition-colors flex items-center justify-center gap-2" style="background-color: #009866;">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -462,7 +474,30 @@
                         </a>
                         @endif
                         @else
-                        <p class="text-gray-600">Contact information not available</p>
+                        {{-- Free / no paid plan: show KiboAuto contact --}}
+                        <div class="bg-gray-50 px-3 py-1 rounded inline-block mb-4">
+                            <span class="text-sm font-medium text-gray-700">KiboAuto</span>
+                        </div>
+                        <p class="text-gray-700 mb-6">Contact us for this listing</p>
+                        @if(!empty($kibo['phone']))
+                        <a href="tel:{{ $kibo['phone'] }}" class="w-full bg-white border-2 py-3 px-6 rounded-full font-semibold hover:bg-green-50 transition-colors flex items-center justify-center gap-2 mb-4" style="border-color: #009866; color: #009866;">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                            </svg>
+                            {{ $kibo['phone'] }}
+                        </a>
+                        @endif
+                        @if(!empty($kibo['email']))
+                        <a href="mailto:{{ $kibo['email'] }}" class="w-full text-white py-3 px-6 rounded-full font-semibold transition-colors flex items-center justify-center gap-2 mb-4" style="background-color: #009866;">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                            </svg>
+                            {{ $kibo['email'] }}
+                        </a>
+                        @endif
+                        @if(!empty($kibo['location']))
+                        <p class="text-sm text-gray-600 mt-2">{{ $kibo['location'] }}</p>
+                        @endif
                         @endif
                     </div>
                 </div>
@@ -470,9 +505,9 @@
         </div>
     </div>
 
-    {{-- Image Lightbox Modal --}}
+    {{-- Image Lightbox Modal (same z as other side modals) --}}
     @if($showImageModal && $currentImage !== null && isset($allImages[$currentImage]))
-    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-95 animate-fadeIn" wire:click="closeImageModal">
+    <div class="fixed inset-0 z-[110] flex items-center justify-center bg-black bg-opacity-95 animate-fadeIn" wire:click="closeImageModal">
         {{-- Close Button --}}
         <button wire:click="closeImageModal" class="absolute top-4 right-4 w-12 h-12 flex items-center justify-center bg-white bg-opacity-20 hover:bg-opacity-30 rounded-full transition-colors z-10">
        
@@ -552,13 +587,12 @@
     </style>
     @endif
 
-    {{-- Info Side Modal --}}
+    {{-- Info Side Modal (same pattern as filter / login) --}}
     @if($showInfoModal)
-    <div class="fixed inset-0 z-50">
+    <div class="fixed inset-0 z-[110]" aria-modal="true" role="dialog">
         {{-- Backdrop --}}
-        <div wire:click="closeInfoModal" class="fixed inset-0 bg-black/50 bg-opacity-50 animate-fadeIn"></div>
-        
-        {{-- Modal Panel --}}
+        <div wire:click="closeInfoModal" class="fixed inset-0 bg-black/50 animate-fadeIn"></div>
+        {{-- Panel --}}
         <div class="fixed right-0 top-0 h-full w-full max-w-lg bg-white shadow-2xl overflow-y-auto animate-slideInRight">
             {{-- Header --}}
             <div class="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between z-10">
@@ -705,18 +739,15 @@
                     </div>
 
                 @elseif($modalContent === 'review')
-                    {{-- Expert Review Content --}}
+                    {{-- Expert Review Content (stars only, no numbers) --}}
                     <div class="mb-6">
                         <div class="flex items-center gap-4 mb-6">
-                            <div class="text-center">
-                                <div class="text-5xl font-bold text-gray-900 mb-2">3.7</div>
-                                <div class="flex justify-center">
-                                    @for($i = 0; $i < 5; $i++)
-                                        <svg class="w-6 h-6 {{ $i < 4 ? 'fill-orange-400 text-orange-400' : 'text-gray-300' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
-                                        </svg>
-                                    @endfor
-                                </div>
+                            <div class="flex items-center gap-1">
+                                @foreach(range(1, 5) as $i)
+                                <svg class="w-10 h-10 {{ $i <= 4 ? 'fill-amber-400 text-amber-400' : 'fill-gray-200 text-gray-200' }}" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+                                </svg>
+                                @endforeach
                             </div>
                         </div>
 
@@ -725,7 +756,9 @@
                             <div>
                                 <div class="flex justify-between text-sm mb-1">
                                     <span class="font-medium text-gray-700">Running Costs</span>
-                                    <span class="text-gray-600">4.0</span>
+                                    <div class="flex gap-0.5">
+                                        @foreach(range(1, 5) as $i) <svg class="w-4 h-4 {{ $i <= 4 ? 'fill-amber-400' : 'fill-gray-200' }}" viewBox="0 0 24 24"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg> @endforeach
+                                    </div>
                                 </div>
                                 <div class="w-full bg-gray-200 rounded-full h-2">
                                     <div class="kibo-bg h-2 rounded-full" style="width: 80%"></div>
@@ -734,7 +767,9 @@
                             <div>
                                 <div class="flex justify-between text-sm mb-1">
                                     <span class="font-medium text-gray-700">Reliability</span>
-                                    <span class="text-gray-600">3.5</span>
+                                    <div class="flex gap-0.5">
+                                        @foreach(range(1, 5) as $i) <svg class="w-4 h-4 {{ $i <= 3 ? 'fill-amber-400' : 'fill-gray-200' }}" viewBox="0 0 24 24"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg> @endforeach
+                                    </div>
                                 </div>
                                 <div class="w-full bg-gray-200 rounded-full h-2">
                                     <div class="kibo-bg h-2 rounded-full" style="width: 70%"></div>
@@ -743,7 +778,9 @@
                             <div>
                                 <div class="flex justify-between text-sm mb-1">
                                     <span class="font-medium text-gray-700">Safety</span>
-                                    <span class="text-gray-600">4.2</span>
+                                    <div class="flex gap-0.5">
+                                        @foreach(range(1, 5) as $i) <svg class="w-4 h-4 {{ $i <= 4 ? 'fill-amber-400' : 'fill-gray-200' }}" viewBox="0 0 24 24"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg> @endforeach
+                                    </div>
                                 </div>
                                 <div class="w-full bg-gray-200 rounded-full h-2">
                                     <div class="kibo-bg h-2 rounded-full" style="width: 84%"></div>
@@ -752,7 +789,9 @@
                             <div>
                                 <div class="flex justify-between text-sm mb-1">
                                     <span class="font-medium text-gray-700">Comfort</span>
-                                    <span class="text-gray-600">3.8</span>
+                                    <div class="flex gap-0.5">
+                                        @foreach(range(1, 5) as $i) <svg class="w-4 h-4 {{ $i <= 4 ? 'fill-amber-400' : 'fill-gray-200' }}" viewBox="0 0 24 24"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg> @endforeach
+                                    </div>
                                 </div>
                                 <div class="w-full bg-gray-200 rounded-full h-2">
                                     <div class="kibo-bg h-2 rounded-full" style="width: 76%"></div>
@@ -761,7 +800,9 @@
                             <div>
                                 <div class="flex justify-between text-sm mb-1">
                                     <span class="font-medium text-gray-700">Features</span>
-                                    <span class="text-gray-600">3.5</span>
+                                    <div class="flex gap-0.5">
+                                        @foreach(range(1, 5) as $i) <svg class="w-4 h-4 {{ $i <= 3 ? 'fill-amber-400' : 'fill-gray-200' }}" viewBox="0 0 24 24"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg> @endforeach
+                                    </div>
                                 </div>
                                 <div class="w-full bg-gray-200 rounded-full h-2">
                                     <div class="kibo-bg h-2 rounded-full" style="width: 70%"></div>
@@ -770,7 +811,9 @@
                             <div>
                                 <div class="flex justify-between text-sm mb-1">
                                     <span class="font-medium text-gray-700">Power</span>
-                                    <span class="text-gray-600">3.5</span>
+                                    <div class="flex gap-0.5">
+                                        @foreach(range(1, 5) as $i) <svg class="w-4 h-4 {{ $i <= 3 ? 'fill-amber-400' : 'fill-gray-200' }}" viewBox="0 0 24 24"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg> @endforeach
+                                    </div>
                                 </div>
                                 <div class="w-full bg-gray-200 rounded-full h-2">
                                     <div class="kibo-bg h-2 rounded-full" style="width: 70%"></div>

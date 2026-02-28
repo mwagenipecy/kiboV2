@@ -25,6 +25,8 @@ class SparePartOrderView extends Component
     public $quotedPrice = '';
     public $quotationNotes = '';
     public $currency = 'TZS';
+    /** When admin submits a quote from order detail page */
+    public $selectedAgentId = null;
     
     // Delivery Modal
     public $showDeliveryModal = false;
@@ -103,6 +105,10 @@ class SparePartOrderView extends Component
     // Quote Methods
     public function openQuoteModal()
     {
+        if (Auth::user()->role === 'admin') {
+            $first = Agent::where('agent_type', 'spare_part')->where('status', 'active')->orderBy('name')->first();
+            $this->selectedAgentId = $first?->id;
+        }
         $this->showQuoteModal = true;
     }
 
@@ -113,11 +119,15 @@ class SparePartOrderView extends Component
 
     public function submitQuote()
     {
-        $this->validate([
+        $rules = [
             'quotedPrice' => 'required|numeric|min:0',
             'quotationNotes' => 'nullable|string|max:2000',
             'currency' => 'required|in:TZS,USD,EUR,KES',
-        ]);
+        ];
+        if (Auth::user()->role === 'admin') {
+            $rules['selectedAgentId'] = 'required|exists:agents,id';
+        }
+        $this->validate($rules);
 
         if (!$this->canManage) {
             $this->errorMessage = 'You do not have permission to quote this order.';
@@ -125,11 +135,18 @@ class SparePartOrderView extends Component
             return;
         }
 
-        // Assign agent if not already assigned
+        $user = Auth::user();
         $agentId = $this->order->agent_id;
-        if (!$agentId && Auth::user()->role === 'agent') {
-            $agent = Agent::where('user_id', Auth::id())->first();
+        if ($user->role === 'agent') {
+            $agent = Agent::where('user_id', $user->id)->first();
             $agentId = $agent?->id;
+        } elseif ($user->role === 'admin' && $this->selectedAgentId) {
+            $agentId = (int) $this->selectedAgentId;
+        }
+        if (!$agentId) {
+            $this->errorMessage = 'Please select an agent to submit the quotation on behalf of.';
+            $this->showErrorModal = true;
+            return;
         }
 
         $this->order->update([
@@ -373,7 +390,12 @@ class SparePartOrderView extends Component
 
     public function render()
     {
-        return view('livewire.admin.spare-part-order-view');
+        $isAdmin = Auth::user()->role === 'admin';
+        $sparePartAgents = $isAdmin ? Agent::where('agent_type', 'spare_part')->where('status', 'active')->orderBy('name')->get() : collect();
+        return view('livewire.admin.spare-part-order-view', [
+            'sparePartAgents' => $sparePartAgents,
+            'isAdmin' => $isAdmin,
+        ]);
     }
 }
 

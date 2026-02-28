@@ -200,6 +200,42 @@
                 </div>
             </div>
 
+            <!-- Subscription Bundle Card -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                    <h2 class="text-lg font-semibold text-gray-900">Subscription bundle</h2>
+                    <p class="text-sm text-gray-500 mt-1">Choose a plan to set how many active car listings this dealer can have</p>
+                </div>
+                <div class="px-6 py-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="col-span-2">
+                            <label for="pricing_plan_id" class="block text-sm font-medium text-gray-700 mb-2">
+                                Subscription bundle (start)
+                            </label>
+                            <select id="pricing_plan_id" wire:model="pricing_plan_id"
+                                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors @error('pricing_plan_id') border-red-500 @enderror">
+                                <option value="">— No bundle / select later —</option>
+                                @foreach($subscriptionBundles as $bundle)
+                                    <option value="{{ $bundle->id }}">
+                                        {{ $bundle->name }} — {{ $bundle->currency }} {{ number_format($bundle->price, 2) }}
+                                        @if($bundle->duration_days)
+                                            / {{ $bundle->duration_days }} days
+                                        @else
+                                            (one-time)
+                                        @endif
+                                        — {{ $bundle->max_listings }} active {{ $bundle->max_listings === 1 ? 'car' : 'cars' }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('pricing_plan_id')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                            <p class="mt-1 text-sm text-gray-500">The dealer will be able to post up to this many cars as active listings. You can change this later from the dealer edit page.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Primary User Information Card -->
             <div class="bg-white rounded-lg shadow-sm border border-gray-200">
                 <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">

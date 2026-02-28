@@ -57,15 +57,11 @@
             transform: rotate(180deg);
         }
         
-        /* Mobile: always full width or hidden */
+        /* Small screens: same sidebar width, main content keeps margin */
         @media (max-width: 1024px) {
             .sidebar-expanded,
             .sidebar-collapsed {
                 width: 16rem;
-            }
-            .main-content.expanded,
-            .main-content.collapsed {
-                margin-left: 0;
             }
         }
         
@@ -99,7 +95,7 @@
     <x-lender.sidebar />
 
     <!-- Main Content Area -->
-    <div class="lg:ml-64 main-content main-content-expanded">
+    <div class="ml-64 main-content main-content-expanded">
         <!-- Navbar Component -->
         <x-lender.navbar />
 
@@ -116,23 +112,7 @@
         // Sidebar state
         let sidebarCollapsed = false;
         
-        // Mobile Sidebar Toggle
-        document.getElementById('openSidebar').addEventListener('click', function() {
-            document.getElementById('sidebar').classList.remove('-translate-x-full');
-            document.getElementById('sidebarOverlay').classList.remove('hidden');
-        });
-
-        document.getElementById('closeSidebar').addEventListener('click', function() {
-            document.getElementById('sidebar').classList.add('-translate-x-full');
-            document.getElementById('sidebarOverlay').classList.add('hidden');
-        });
-
-        document.getElementById('sidebarOverlay').addEventListener('click', function() {
-            document.getElementById('sidebar').classList.add('-translate-x-full');
-            document.getElementById('sidebarOverlay').classList.add('hidden');
-        });
-        
-        // Desktop Sidebar Collapse/Expand Toggle
+        // Sidebar Collapse/Expand Toggle (all screen sizes)
         document.getElementById('toggleSidebar').addEventListener('click', function() {
             const sidebar = document.getElementById('sidebar');
             const mainContent = document.querySelector('.main-content');

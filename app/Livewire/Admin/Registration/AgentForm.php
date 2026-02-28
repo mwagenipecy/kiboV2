@@ -20,6 +20,7 @@ class AgentForm extends Component
     public $vehicleMakes = [];
     public $services = [];
     public $sparePartDetails = '';
+    public $supportLogistics = false;
     public $licenseNumber = '';
     public $address = '';
     public $latitude = '';
@@ -66,6 +67,7 @@ class AgentForm extends Component
             $this->vehicleMakes = array_map('strval', $vehicleMakes);
             $this->services = $agent->services ?? [];
             $this->sparePartDetails = $agent->spare_part_details ?? '';
+            $this->supportLogistics = (bool) ($agent->support_logistics ?? false);
             $this->licenseNumber = $agent->license_number ?? '';
             $this->address = $agent->address ?? '';
             $this->latitude = $agent->latitude ?? '';
@@ -81,6 +83,7 @@ class AgentForm extends Component
         $this->vehicleMakes = [];
         $this->services = [];
         $this->sparePartDetails = '';
+        $this->supportLogistics = false;
     }
 
     public function save()
@@ -160,6 +163,7 @@ class AgentForm extends Component
                 'vehicle_makes' => $vehicleMakes,
                 'services' => $this->agentType === 'garage_owner' ? $this->services : null,
                 'spare_part_details' => $this->agentType === 'spare_part' ? $this->sparePartDetails : null,
+                'support_logistics' => $this->agentType === 'spare_part' ? $this->supportLogistics : false,
                 'license_number' => $this->licenseNumber,
                 'address' => $this->address,
                 'latitude' => $this->latitude ? (float) $this->latitude : null,

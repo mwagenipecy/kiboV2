@@ -281,6 +281,17 @@ class LeaseForm extends Component
             // Force entity_id to user's entity_id (prevent tampering)
             $this->entity_id = $user->entity_id;
         }
+
+        // Check package limit when creating a new lease
+        $entity = $this->entity_id ? Entity::with('pricingPlan')->find($this->entity_id) : null;
+        if ($entity && !$this->leaseId) {
+            if (!$entity->canAddLease()) {
+                $max = $entity->max_allowed_leases;
+                $current = $entity->leasesCount();
+                $this->showError('Listing limit reached', "Your package allows up to {$max} lease listing(s). You currently have {$current}. Please upgrade your plan from the pricing page to add more.");
+                return;
+            }
+        }
         
         try {
             $this->validate([

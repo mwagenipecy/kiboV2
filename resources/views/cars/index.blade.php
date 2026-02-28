@@ -9,28 +9,31 @@
 @endpush
 
 @section('content')
-    <!-- Hero Section with Search -->
-    <section class="relative bg-white mb-20">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Hero Section with Search - responsive: extra space on small devices so filter doesn't overlap content below -->
+    <section class="relative bg-white mb-12 sm:mb-16 md:mb-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
             <div class="relative">
                 <!-- Hero Image -->
-                <div class="relative h-80 rounded-2xl overflow-hidden">
+                <div class="relative h-56 sm:h-64 md:h-80 rounded-2xl overflow-hidden">
                     <img src="https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?auto=format&fit=crop&w=2000&q=80" 
                          alt="Person with dog and car" 
                          class="w-full h-full object-cover">
                 </div>
 
-                <!-- Search Form Overlay -->
-                <div class="absolute bottom-0 left-0 right-0 transform translate-y-1/2 px-4">
-                    <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-6">
+                <!-- Search Form Overlay: on small screens sit below hero with margin so no overlap -->
+                <div class="relative mt-6 sm:mt-0 sm:absolute sm:bottom-0 sm:left-0 sm:right-0 sm:transform sm:translate-y-1/2 px-4">
+                    <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-4 sm:p-6">
                         @livewire('customer.vehicle-search-form', ['vehicleType' => 'cars'])
                     </div>
                 </div>
             </div>
+            <!-- Spacer on small screens so next section is not covered by overlay -->
+            <div class="block sm:hidden h-4" aria-hidden="true"></div>
         </div>
     </section>
 
-
+    <!-- Cars List Section (2 rows + View more) - right after search -->
+    <x-customer.cars-list-preview />
 
     <!-- Discovery Component -->
     <x-customer.discovery />

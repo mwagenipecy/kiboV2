@@ -15,6 +15,9 @@ class PricingPlan extends Model
         'price',
         'currency',
         'duration_days',
+        'max_listings',
+        'max_trucks',
+        'max_leases',
         'features',
         'is_featured',
         'is_popular',
@@ -29,6 +32,9 @@ class PricingPlan extends Model
         'is_popular' => 'boolean',
         'is_active' => 'boolean',
         'duration_days' => 'integer',
+        'max_listings' => 'integer',
+        'max_trucks' => 'integer',
+        'max_leases' => 'integer',
         'sort_order' => 'integer',
     ];
 

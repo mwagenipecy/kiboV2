@@ -165,7 +165,7 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Vehicle Class *</label>
-                                    <select wire:model="vehicleClass" class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-gray-500 focus:border-gray-500 text-lg">
+                                    <select wire:model.live="vehicleClass" class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-gray-500 focus:border-gray-500 text-lg">
                                         <option value="">-- Select Vehicle Class --</option>
                                         @foreach($vehicleClasses as $key => $class)
                                             <option value="{{ $key }}">{{ $class }}</option>

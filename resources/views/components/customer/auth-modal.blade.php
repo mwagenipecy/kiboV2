@@ -1,14 +1,10 @@
-<!-- Auth Side Modal -->
-<div id="authModal" class="fixed inset-0 z-50 hidden">
+<!-- Auth Side Modal (Sign in / Register - same pattern as filter modal) -->
+<div id="authModal" class="fixed inset-0 z-[110] hidden" aria-hidden="true">
     <!-- Backdrop -->
-    <div id="authBackdrop" 
-    class="absolute inset-0 bg-black/50  transition-opacity">
+    <div id="authBackdrop" class="absolute inset-0 bg-black/50 transition-opacity duration-300"></div>
 
-</div>
-    
-    
     <!-- Modal Panel -->
-    <div id="authPanel" class="absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-xl transform translate-x-full transition-transform duration-300 ease-in-out overflow-y-auto">
+    <div id="authPanel" class="absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-2xl transform translate-x-full transition-transform duration-300 ease-in-out overflow-y-auto">
         <div class="p-6">
             <!-- Close Button -->
             <button id="closeAuthModal" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">

@@ -4,23 +4,17 @@
     .kibo-badge { color: #007a52 !important; background-color: rgba(0, 152, 102, 0.15) !important; }
 </style>
 <!-- Sidebar -->
-<aside id="sidebar" class="fixed left-0 top-0 z-40 h-screen transition-all duration-300 -translate-x-full lg:translate-x-0 bg-white border-r border-gray-200 shadow-sm sidebar-expanded">
+<aside id="sidebar" class="fixed left-0 top-0 z-40 h-screen transition-all duration-300 translate-x-0 bg-white border-r border-gray-200 shadow-sm sidebar-expanded">
     <div class="flex flex-col h-full">
         <!-- Logo -->
         <div class="flex items-center justify-between h-16 px-6 border-b border-gray-200">
             <a href="{{ route('admin.dashboard') }}" class="flex items-center sidebar-logo">
                 <img src="{{ asset('logo/green.png') }}" alt="Logo" class="h-8 w-auto transition-opacity duration-300">
             </a>
-            <!-- Desktop Collapse Button -->
-            <button id="toggleSidebar" class="hidden lg:block text-gray-500 hover:text-gray-700 transition-transform duration-300">
+            <!-- Collapse Button (all screen sizes) -->
+            <button id="toggleSidebar" class="text-gray-500 hover:text-gray-700 transition-transform duration-300">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>
-                </svg>
-            </button>
-            <!-- Mobile Close Button -->
-            <button id="closeSidebar" class="lg:hidden text-gray-500 hover:text-gray-700">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
             </button>
         </div>
@@ -589,6 +583,16 @@
                 </a>
                 @endif
 
+                <!-- Promotion (Admin only) -->
+                @if($userRole === 'admin')
+                <a href="{{ route('admin.promotion') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('admin.promotion') ? 'text-white kibo-sidebar-active shadow-sm' : 'text-gray-700 kibo-sidebar-hover' }} transition-colors group">
+                    <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                    </svg>
+                    <span class="menu-text whitespace-nowrap">Promotion</span>
+                </a>
+                @endif
+
                 <!-- Reports (Admin only) -->
                 @if($userRole === 'admin')
                 <a href="{{ route('admin.reports') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('admin.reports') ? 'text-white kibo-sidebar-active shadow-sm' : 'text-gray-700 kibo-sidebar-hover' }} transition-colors group">
@@ -637,7 +641,4 @@
         <x-admin.user-profile />
     </div>
 </aside>
-
-<!-- Mobile Sidebar Overlay -->
-<div id="sidebarOverlay" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-30 lg:hidden hidden"></div>
 

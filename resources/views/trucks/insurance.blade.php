@@ -20,7 +20,7 @@
 
     <!-- Insurance Calculator -->
     <div class="bg-gray-50 py-8">
-        @livewire('customer.vehicle-insurance-calculator', ['vehicleId' => request('truck_id'), 'vehicleType' => 'truck'])
+        @livewire('customer.vehicle-insurance-calculator', ['vehicleId' => null, 'vehicleType' => 'truck'])
     </div>
 @endsection
 

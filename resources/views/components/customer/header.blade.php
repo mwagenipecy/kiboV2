@@ -1,30 +1,32 @@
 @props(['vehicleType' => 'cars'])
 
-<!-- Top Category Navigation -->
-<nav class="bg-white border-b border-gray-200 hidden md:block">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-start space-x-4 h-12">
-            <a href="{{ route('cars.index') }}" class="text-sm font-medium {{ $vehicleType === 'cars' || request()->routeIs('cars.*') ? 'text-gray-900 font-semibold border-b-2 border-green-600 pb-1' : 'text-gray-600' }} hover:text-green-700 transition-colors">{{ __('vehicles.cars') }}</a>
-            <a href="{{ route('trucks.index') }}" class="text-sm font-medium {{ $vehicleType === 'trucks' || request()->routeIs('trucks.*') ? 'text-gray-900 font-semibold border-b-2 border-green-600 pb-1' : 'text-gray-600' }} hover:text-green-700 transition-colors">{{ __('vehicles.trucks') }}</a>
-            <a href="{{ route('spare-parts.index') }}" class="text-sm font-medium {{ $vehicleType === 'spare-parts' || request()->routeIs('spare-parts.*') ? 'text-gray-900 font-semibold border-b-2 border-green-600 pb-1' : 'text-gray-600' }} hover:text-green-700 transition-colors">Spare Parts</a>
-            <a href="{{ route('garage.index') }}" class="text-sm font-medium {{ $vehicleType === 'garage' || request()->routeIs('garage.*') ? 'text-gray-900 font-semibold border-b-2 border-green-600 pb-1' : 'text-gray-600' }} hover:text-green-700 transition-colors">Garage</a>
-            <a href="{{ route('loan-calculator.index') }}" class="text-sm font-medium {{ $vehicleType === 'loan-calculator' || request()->routeIs('loan-calculator.*') ? 'text-gray-900 font-semibold border-b-2 border-green-600 pb-1' : 'text-gray-600' }} hover:text-green-700 transition-colors">Loan Calculator</a>
-            <a href="{{ route('import-financing.index') }}" class="text-sm font-medium {{ $vehicleType === 'import-financing' || request()->routeIs('import-financing.*') ? 'text-gray-900 font-semibold border-b-2 border-green-600 pb-1' : 'text-gray-600' }} hover:text-green-700 transition-colors">Import Financing</a>
-            <a href="{{ route('car-exchange.index') }}" class="text-sm font-medium {{ $vehicleType === 'car-exchange' || request()->routeIs('car-exchange.*') ? 'text-gray-900 font-semibold border-b-2 border-green-600 pb-1' : 'text-gray-600' }} hover:text-green-700 transition-colors">Car Exchange</a>
-            {{-- Hidden menus --}}
-            {{-- <a href="{{ route('vans.index') }}" class="text-sm font-medium {{ $vehicleType === 'vans' ? 'text-gray-900' : 'text-gray-600' }} hover:text-green-700">{{ __('vehicles.vans') }}</a> --}}
-            {{-- <a href="{{ route('bikes.index') }}" class="text-sm font-medium {{ $vehicleType === 'bikes' ? 'text-gray-900' : 'text-gray-600' }} hover:text-green-700">{{ __('vehicles.bikes') }}</a> --}}
-            {{-- <a href="{{ route('motorhomes.index') }}" class="text-sm font-medium {{ $vehicleType === 'motorhomes' ? 'text-gray-900' : 'text-gray-600' }} hover:text-green-700">{{ __('vehicles.motorhomes') }}</a> --}}
-            {{-- <a href="{{ route('caravans.index') }}" class="text-sm font-medium {{ $vehicleType === 'caravans' ? 'text-gray-900' : 'text-gray-600' }} hover:text-green-700">{{ __('vehicles.caravans') }}</a> --}}
-            {{-- <a href="{{ route('farm.index') }}" class="text-sm font-medium {{ $vehicleType === 'farm' ? 'text-gray-900' : 'text-gray-600' }} hover:text-green-700">{{ __('vehicles.farm') }}</a> --}}
-            {{-- <a href="{{ route('plant.index') }}" class="text-sm font-medium {{ $vehicleType === 'plant' ? 'text-gray-900' : 'text-gray-600' }} hover:text-green-700">{{ __('vehicles.plant') }}</a> --}}
-            {{-- <a href="{{ route('electric-bikes.index') }}" class="text-sm font-medium {{ $vehicleType === 'electric-bikes' ? 'text-gray-900' : 'text-gray-600' }} hover:text-green-700">{{ __('vehicles.electric_bikes') }}</a> --}}
+{{-- Sticky wrapper so both category nav and main header stay visible on scroll (e.g. cars/search) --}}
+<div class="sticky top-0 z-[100] bg-white shadow-sm">
+    <!-- Top Category Navigation -->
+    <nav class="bg-white border-b border-gray-200 hidden md:block">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-start space-x-4 h-12">
+                <a href="{{ route('cars.index') }}" class="text-sm font-medium {{ $vehicleType === 'cars' || request()->routeIs('cars.*') ? 'text-gray-900 font-semibold border-b-2 border-green-600 pb-1' : 'text-gray-600' }} hover:text-green-700 transition-colors">{{ __('vehicles.cars') }}</a>
+                <a href="{{ route('trucks.index') }}" class="text-sm font-medium {{ $vehicleType === 'trucks' || request()->routeIs('trucks.*') ? 'text-gray-900 font-semibold border-b-2 border-green-600 pb-1' : 'text-gray-600' }} hover:text-green-700 transition-colors">{{ __('vehicles.trucks') }}</a>
+                <a href="{{ route('spare-parts.index') }}" class="text-sm font-medium {{ $vehicleType === 'spare-parts' || request()->routeIs('spare-parts.*') ? 'text-gray-900 font-semibold border-b-2 border-green-600 pb-1' : 'text-gray-600' }} hover:text-green-700 transition-colors">Spare Parts</a>
+                <a href="{{ route('garage.index') }}" class="text-sm font-medium {{ $vehicleType === 'garage' || request()->routeIs('garage.*') ? 'text-gray-900 font-semibold border-b-2 border-green-600 pb-1' : 'text-gray-600' }} hover:text-green-700 transition-colors">Garage</a>
+                <a href="{{ route('loan-calculator.index') }}" class="text-sm font-medium {{ $vehicleType === 'loan-calculator' || request()->routeIs('loan-calculator.*') ? 'text-gray-900 font-semibold border-b-2 border-green-600 pb-1' : 'text-gray-600' }} hover:text-green-700 transition-colors">Loan Calculator</a>
+                <a href="{{ route('import-financing.index') }}" class="text-sm font-medium {{ $vehicleType === 'import-financing' || request()->routeIs('import-financing.*') ? 'text-gray-900 font-semibold border-b-2 border-green-600 pb-1' : 'text-gray-600' }} hover:text-green-700 transition-colors">Import Financing</a>
+                <a href="{{ route('car-exchange.index') }}" class="text-sm font-medium {{ $vehicleType === 'car-exchange' || request()->routeIs('car-exchange.*') ? 'text-gray-900 font-semibold border-b-2 border-green-600 pb-1' : 'text-gray-600' }} hover:text-green-700 transition-colors">Car Exchange</a>
+                {{-- Hidden menus --}}
+                {{-- <a href="{{ route('vans.index') }}" class="text-sm font-medium {{ $vehicleType === 'vans' ? 'text-gray-900' : 'text-gray-600' }} hover:text-green-700">{{ __('vehicles.vans') }}</a> --}}
+                {{-- <a href="{{ route('bikes.index') }}" class="text-sm font-medium {{ $vehicleType === 'bikes' ? 'text-gray-900' : 'text-gray-600' }} hover:text-green-700">{{ __('vehicles.bikes') }}</a> --}}
+                {{-- <a href="{{ route('motorhomes.index') }}" class="text-sm font-medium {{ $vehicleType === 'motorhomes' ? 'text-gray-900' : 'text-gray-600' }} hover:text-green-700">{{ __('vehicles.motorhomes') }}</a> --}}
+                {{-- <a href="{{ route('caravans.index') }}" class="text-sm font-medium {{ $vehicleType === 'caravans' ? 'text-gray-900' : 'text-gray-600' }} hover:text-green-700">{{ __('vehicles.caravans') }}</a> --}}
+                {{-- <a href="{{ route('farm.index') }}" class="text-sm font-medium {{ $vehicleType === 'farm' ? 'text-gray-900' : 'text-gray-600' }} hover:text-green-700">{{ __('vehicles.farm') }}</a> --}}
+                {{-- <a href="{{ route('plant.index') }}" class="text-sm font-medium {{ $vehicleType === 'plant' ? 'text-gray-900' : 'text-gray-600' }} hover:text-green-700">{{ __('vehicles.plant') }}</a> --}}
+                {{-- <a href="{{ route('electric-bikes.index') }}" class="text-sm font-medium {{ $vehicleType === 'electric-bikes' ? 'text-gray-900' : 'text-gray-600' }} hover:text-green-700">{{ __('vehicles.electric_bikes') }}</a> --}}
+            </div>
         </div>
-    </div>
-</nav>
+    </nav>
 
-<!-- Main Navigation -->
-<header class="bg-white shadow-sm sticky top-0 z-50" x-data="{ mobileMenuOpen: false }">
+    <!-- Main Navigation -->
+    <header class="bg-white" x-data="{ mobileMenuOpen: false }">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16">
             <!-- Logo and Mobile Menu Button -->
@@ -96,7 +98,9 @@
         <div class="flex flex-col h-full">
             <!-- Mobile Menu Header -->
             <div class="flex items-center justify-between px-4 py-4 border-b border-gray-200">
-                <img src="{{ asset('logo/green.png') }}" alt="Logo" class="h-8 w-auto">
+                <a href="{{ route('cars.index') }}" @click="mobileMenuOpen = false" class="flex items-center">
+                    <img src="{{ asset('logo/green.png') }}" alt="Logo" class="h-8 w-auto">
+                </a>
                 <button @click="mobileMenuOpen = false" class="p-2 text-gray-600 hover:text-gray-900">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -193,6 +197,7 @@
         </div>
     </div>
 </header>
+</div>
 
 <!-- Auth Modal Component -->
 <x-customer.auth-modal />
