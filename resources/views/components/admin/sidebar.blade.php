@@ -593,6 +593,30 @@
                 </a>
                 @endif
 
+                <!-- Payment Links - Expandable (Admin only) -->
+                @if($userRole === 'admin')
+                <div x-data="{ open: {{ request()->is('admin/payment-links*') ? 'true' : 'false' }} }">
+                    <button @click="open = !open" class="w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-lg {{ request()->is('admin/payment-links*') ? 'text-white kibo-sidebar-active shadow-sm' : 'text-gray-700 kibo-sidebar-hover' }} transition-colors group">
+                        <div class="flex items-center min-w-0">
+                            <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+                            </svg>
+                            <span class="menu-text whitespace-nowrap">Payment Links</span>
+                        </div>
+                        <svg class="w-4 h-4 transition-transform menu-text flex-shrink-0" :class="open ? 'rotate-90' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </button>
+                    <div x-show="open" x-transition class="ml-8 mt-1 space-y-1 submenu">
+                        <a href="{{ route('admin.payment-links.overview') }}" class="block px-3 py-2 text-sm text-gray-600 rounded-lg kibo-sidebar-hover transition-colors {{ request()->routeIs('admin.payment-links.overview') ? 'text-[#009866] font-medium' : '' }}">Overview</a>
+                        <a href="{{ route('admin.payment-links.create') }}" class="block px-3 py-2 text-sm text-gray-600 rounded-lg kibo-sidebar-hover transition-colors {{ request()->routeIs('admin.payment-links.create') ? 'text-[#009866] font-medium' : '' }}">Manual bill / Generate</a>
+                        <a href="{{ route('admin.payment-links.transactions') }}" class="block px-3 py-2 text-sm text-gray-600 rounded-lg kibo-sidebar-hover transition-colors {{ request()->routeIs('admin.payment-links.transactions') ? 'text-[#009866] font-medium' : '' }}">Transactions</a>
+                        <a href="{{ route('admin.payment-links.links') }}" class="block px-3 py-2 text-sm text-gray-600 rounded-lg kibo-sidebar-hover transition-colors {{ request()->routeIs('admin.payment-links.links') ? 'text-[#009866] font-medium' : '' }}">Links</a>
+                        <a href="{{ route('admin.payment-links.log') }}" class="block px-3 py-2 text-sm text-gray-600 rounded-lg kibo-sidebar-hover transition-colors {{ request()->routeIs('admin.payment-links.log') ? 'text-[#009866] font-medium' : '' }}">Generation log</a>
+                    </div>
+                </div>
+                @endif
+
                 <!-- Reports (Admin only) -->
                 @if($userRole === 'admin')
                 <a href="{{ route('admin.reports') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('admin.reports') ? 'text-white kibo-sidebar-active shadow-sm' : 'text-gray-700 kibo-sidebar-hover' }} transition-colors group">

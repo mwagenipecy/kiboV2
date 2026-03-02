@@ -52,4 +52,11 @@ return [
         'menu_template_sid' => env('TWILIO_MENU_TEMPLATE_SID', null),
     ],
 
+    'universal_payment_link' => [
+        'base_url' => env('PAYMENT_LINK_BASE_URL', 'http://197.250.35.61:8085'),
+        'api_key' => env('PAYMENT_LINK_API_KEY'),
+        'api_secret' => env('PAYMENT_LINK_API_SECRET'),
+        'generate_universal_path' => '/api/payment-links/generate-universal',
+    ],
+
 ];

@@ -697,6 +697,39 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'otp.ver
 
     // Promotion – send branded emails to agents, CFC, dealers, lenders, etc. (Admin only)
     Route::get('/promotion', \App\Livewire\Admin\PromotionMail::class)->name('promotion');
+
+    // Payment Links – bills created via universal payment link API (Admin only)
+    Route::prefix('payment-links')->name('payment-links.')->group(function () {
+        Route::get('/overview', function () {
+            if (!auth()->user()->isAdmin()) abort(403);
+            return view('admin.payment-links.index', ['section' => 'overview']);
+        })->name('overview');
+        Route::get('/create', function () {
+            if (!auth()->user()->isAdmin()) abort(403);
+            return view('admin.payment-links.create');
+        })->name('create');
+        Route::get('/transactions', function () {
+            if (!auth()->user()->isAdmin()) abort(403);
+            return view('admin.payment-links.index', ['section' => 'transactions']);
+        })->name('transactions');
+        Route::get('/links', function () {
+            if (!auth()->user()->isAdmin()) abort(403);
+            return view('admin.payment-links.index', ['section' => 'links']);
+        })->name('links');
+        Route::get('/log', function () {
+            if (!auth()->user()->isAdmin()) abort(403);
+            return view('admin.payment-links.index', ['section' => 'log']);
+        })->name('log');
+        Route::get('/', function () {
+            if (!auth()->user()->isAdmin()) abort(403);
+            return redirect()->route('admin.payment-links.overview');
+        })->name('index');
+        Route::get('/{id}', function ($id) {
+            if (!auth()->user()->isAdmin()) abort(403);
+            $paymentLink = \App\Models\PaymentLink::with(['items', 'transactions'])->findOrFail($id);
+            return view('admin.payment-links.show', ['paymentLink' => $paymentLink]);
+        })->name('show');
+    });
     
     // Profile & Settings (Common to all roles)
     Route::get('/profile', function () {
