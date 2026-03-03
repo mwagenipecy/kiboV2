@@ -28,13 +28,13 @@ try {
 "
 
 # Test 3: Server IP
-echo "3. Testing 40.127.10.196..."
+echo "3. Testing 197.250.35.61..."
 docker-compose exec -T app php -r "
 try {
-    \$pdo = new PDO('mysql:host=40.127.10.196;port=3306', 'Kiboauto_2025_admin', 'kiboAuto_2025');
-    echo '✅ 40.127.10.196 works\n';
+    \$pdo = new PDO('mysql:host=197.250.35.61;port=3306', 'Kiboauto_2025_admin', 'kiboAuto_2025');
+    echo '✅ 197.250.35.61 works\n';
 } catch (Exception \$e) {
-    echo '❌ 40.127.10.196 failed: ' . \$e->getMessage() . '\n';
+    echo '❌ 197.250.35.61 failed: ' . \$e->getMessage() . '\n';
 }
 "
 
@@ -46,7 +46,7 @@ echo "  sudo netstat -tlnp | grep 3306"
 echo "  or"
 echo "  sudo ss -tlnp | grep 3306"
 echo ""
-echo "MySQL should be bound to 0.0.0.0:3306 or 40.127.10.196:3306"
+echo "MySQL should be bound to 0.0.0.0:3306 or 197.250.35.61:3306 (or use Docker db on 3307)"
 echo "If it's only bound to 127.0.0.1:3306, you need to update MySQL config:"
 echo "  Edit /etc/mysql/mysql.conf.d/mysqld.cnf"
 echo "  Change bind-address = 127.0.0.1 to bind-address = 0.0.0.0"

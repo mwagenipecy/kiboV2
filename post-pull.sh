@@ -9,6 +9,9 @@ set -e
 echo "🚀 Post-Pull Deployment Script"
 echo "================================"
 echo ""
+echo "This script expects Docker with MySQL (db), app, nginx, redis, node, and queue."
+echo "First time on server? Run: ./docker-setup.sh  then  ./post-pull.sh"
+echo ""
 
 # Colors for output
 RED='\033[0;31m'
@@ -71,6 +74,26 @@ if $DOCKER_COMPOSE exec -T node npm install --silent; then
     echo -e "${GREEN}✅ Node dependencies updated${NC}"
 else
     echo -e "${YELLOW}⚠️  NPM install had some issues (check logs)${NC}"
+fi
+echo ""
+
+# Step 3.5: Wait for MySQL to be ready (when using Docker DB)
+echo "Step 3.5: Waiting for MySQL to be ready..."
+echo "-------------------------------------------"
+if $DOCKER_COMPOSE ps db 2>/dev/null | grep -q "Up"; then
+    echo "Docker MySQL (db) detected, waiting for it to accept connections..."
+    for i in $(seq 1 30); do
+        if $DOCKER_COMPOSE exec -T app php artisan db:show 2>/dev/null; then
+            echo -e "${GREEN}✅ MySQL is ready${NC}"
+            break
+        fi
+        if [ "$i" -eq 30 ]; then
+            echo -e "${YELLOW}⚠️  MySQL may still be starting; migrations will be attempted anyway${NC}"
+        fi
+        sleep 2
+    done
+else
+    echo "Using external database; skipping MySQL wait."
 fi
 echo ""
 
@@ -139,13 +162,12 @@ echo ""
 echo -e "${GREEN}✅ Post-pull deployment completed successfully!${NC}"
 echo ""
 echo "🌐 Your application is available at:"
-echo "   - http://40.127.10.196:8084 (Primary - IP access)"
+echo "   - http://197.250.35.61:8084 (IP access)"
+echo "   - http://kiboauto.co.tz (when DNS points to 197.250.35.61)"
 echo ""
-echo "📝 Domain Configuration:"
-echo "   - Domain: http://stage.kiboauto.co.tz (when DNS is configured)"
-echo "   - WWW: http://www.stage.kiboauto.co.tz (redirects to non-www)"
+echo "📝 Domain: http://kiboauto.co.tz  |  WWW: http://www.kiboauto.co.tz"
 echo ""
-echo "⚠️  Note: Currently using IP access. Update APP_URL in .env to domain once DNS is working."
+echo "⚠️  Set APP_URL in .env to http://kiboauto.co.tz (or https:// when SSL is configured)."
 echo ""
 echo "📋 Quick commands:"
 echo "   - View logs: $DOCKER_COMPOSE logs -f"

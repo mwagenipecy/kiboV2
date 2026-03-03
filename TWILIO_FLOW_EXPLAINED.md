@@ -65,7 +65,7 @@ Here's the complete flow:
 - Message goes to Twilio's WhatsApp service
 
 ### Step 2: Twilio Sends Webhook to Your Platform
-- Twilio makes HTTP POST request to: `http://40.127.10.196:8084/api/webhook/twilio/incoming`
+- Twilio makes HTTP POST request to: `http://kiboauto.co.tz/api/webhook/twilio/incoming` (or `http://197.250.35.61:8084/...` by IP)
 - Your platform receives the webhook
 - Controller processes the message
 - Creates/updates conversation in database

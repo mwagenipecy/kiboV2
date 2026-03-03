@@ -60,7 +60,7 @@ if [ ! -f .env ]; then
         echo "APP_ENV=production" >> .env
         echo "APP_KEY=" >> .env
         echo "APP_DEBUG=false" >> .env
-        echo "APP_URL=http://40.127.10.196:8084" >> .env
+        echo "APP_URL=http://kiboauto.co.tz" >> .env
         echo "" >> .env
         echo "DB_CONNECTION=mysql" >> .env
         echo "DB_HOST=127.0.0.1" >> .env
@@ -124,9 +124,9 @@ else
 fi
 
 if grep -q "^APP_URL=" .env; then
-    sed -i.bak 's|^APP_URL=.*|APP_URL=http://40.127.10.196:8084|' .env 2>/dev/null || sed -i '' 's|^APP_URL=.*|APP_URL=http://40.127.10.196:8084|' .env
+    sed -i.bak 's|^APP_URL=.*|APP_URL=http://kiboauto.co.tz|' .env 2>/dev/null || sed -i '' 's|^APP_URL=.*|APP_URL=http://kiboauto.co.tz|' .env
 else
-    echo "APP_URL=http://40.127.10.196:8084" >> .env
+    echo "APP_URL=http://kiboauto.co.tz" >> .env
 fi
 
 if grep -q "^APP_ENV=" .env; then
@@ -203,13 +203,12 @@ echo ""
 echo -e "${GREEN}✅ Deployment complete!${NC}"
 echo ""
 echo "🌐 Application is available at:"
-echo "   - http://40.127.10.196:8084 (Primary - IP access)"
+echo "   - http://197.250.35.61:8084 (IP access)"
+echo "   - http://kiboauto.co.tz (when DNS points to 197.250.35.61)"
 echo ""
-echo "📝 Domain Configuration:"
-echo "   - Domain: http://stage.kiboauto.co.tz (when DNS is configured)"
-echo "   - WWW: http://www.stage.kiboauto.co.tz (redirects to non-www)"
+echo "📝 Domain: http://kiboauto.co.tz  |  WWW: http://www.kiboauto.co.tz"
 echo ""
-echo "⚠️  Note: Currently using IP access. Update APP_URL to domain once DNS is working."
+echo "⚠️  Set APP_URL in .env to http://kiboauto.co.tz (or https:// when SSL is configured)."
 echo ""
 echo "Database Credentials:"
 echo "  - Username: Kiboauto_2025_admin"

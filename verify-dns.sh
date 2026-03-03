@@ -7,9 +7,9 @@ echo "🔍 DNS Configuration Verification"
 echo "=================================="
 echo ""
 
-DOMAIN="stage.kiboauto.co.tz"
-WWW_DOMAIN="www.stage.kiboauto.co.tz"
-EXPECTED_IP="40.127.10.196"
+DOMAIN="kiboauto.co.tz"
+WWW_DOMAIN="www.kiboauto.co.tz"
+EXPECTED_IP="197.250.35.61"
 
 # Colors
 RED='\033[0;31m'
