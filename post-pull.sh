@@ -10,7 +10,7 @@ echo "🚀 Post-Pull Deployment Script"
 echo "================================"
 echo ""
 echo "This script expects Docker with MySQL (db), app, nginx, redis, node, and queue."
-echo "First time on server? Run: ./docker-setup.sh  then  ./post-pull.sh"
+echo "First time on server? Run: ./run-on-server.sh  then use ./post-pull.sh after git pull."
 echo ""
 
 # Colors for output

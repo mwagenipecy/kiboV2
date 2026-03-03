@@ -15,10 +15,9 @@ services:
     healthcheck:
       test: ["CMD", "sh", "-c", "mysqladmin ping -h localhost -u root -p$$MYSQL_ROOT_PASSWORD"]
       interval: 5s
-      timeout: 5s
+      timeout: 10s
       retries: 30
-      start_period: 10s
-    # Expose 3307 on host only if you need external DB access (e.g. phpMyAdmin)
+      start_period: 30s
     ports:
       - "3307:3306"
 
@@ -29,6 +28,7 @@ services:
     container_name: kibo_app
     restart: unless-stopped
     working_dir: /var/www/html
+    env_file: .env
     volumes:
       - ./:/var/www/html
       - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
@@ -91,6 +91,7 @@ services:
     container_name: kibo_queue
     restart: unless-stopped
     working_dir: /var/www/html
+    env_file: .env
     volumes:
       - ./:/var/www/html
       - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
