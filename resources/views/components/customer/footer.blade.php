@@ -169,13 +169,19 @@
                         </a>
                     </p>
                     <div class="mt-4 space-y-1">
-                        <p class="font-medium text-gray-700">Registered office and headquarters</p>
-                        <p>Kibo Auto Limited</p>
-                        <p>123 Business Street</p>
-                        <p>City Center</p>
-                        <p>Postal Code</p>
-                        <p>Country</p>
-                        <p>Registered number: 12345678</p>
+                        <p class="font-medium text-gray-700">Contact us</p>
+                        <p>
+                            <span class="text-gray-600">Email:</span>
+                            <a href="mailto:info@kiboauto.co.tz" class="text-green-700 hover:underline">info@kiboauto.co.tz</a>
+                        </p>
+                        <p>
+                            <span class="text-gray-600">Phone:</span>
+                            <a href="tel:+255794777772" class="text-green-700 hover:underline">0794 777772</a>
+                        </p>
+                        <p class="text-gray-700">
+                            <span class="text-gray-600">Location:</span><br>
+                            Sinza kwa Remi, Tan House, 9th Floor
+                        </p>
                     </div>
                 </div>
             </div>
