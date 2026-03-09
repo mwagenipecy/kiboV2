@@ -44,12 +44,13 @@
             transition: margin-left 0.3s ease;
         }
         
-        .main-content.expanded {
-            margin-left: 16rem; /* 256px */
-        }
-        
-        .main-content.collapsed {
-            margin-left: 5rem; /* 80px */
+        @media (min-width: 1024px) {
+            .main-content.expanded {
+                margin-left: 16rem; /* 256px */
+            }
+            .main-content.collapsed {
+                margin-left: 5rem; /* 80px */
+            }
         }
         
         /* Rotate toggle button when collapsed */
@@ -57,11 +58,34 @@
             transform: rotate(180deg);
         }
         
-        /* Small screens: same sidebar width, main content keeps margin */
-        @media (max-width: 1024px) {
-            .sidebar-expanded,
-            .sidebar-collapsed {
-                width: 16rem;
+        /* Small screens: sidebar as overlay drawer using LEFT (not transform) so it's not overridden by Tailwind */
+        @media (max-width: 1023px) {
+            .main-content {
+                margin-left: 0 !important;
+            }
+            #sidebar {
+                left: -16rem !important;
+                transform: none !important;
+                width: 16rem !important;
+                transition: left 0.3s ease;
+                box-shadow: 0 0 0 1px rgba(0,0,0,0.05), 4px 0 24px rgba(0,0,0,0.15);
+                z-index: 9999;
+                background-color: #fff !important;
+            }
+            #sidebar.sidebar-mobile-open {
+                left: 0 !important;
+            }
+            #sidebar .sidebar-collapse-btn {
+                display: none;
+            }
+        }
+        @media (min-width: 1024px) {
+            #sidebar {
+                z-index: 40;
+                left: 0;
+            }
+            #sidebar.sidebar-mobile-open {
+                left: 0;
             }
         }
         
@@ -94,13 +118,16 @@
     <!-- Sidebar Component -->
     <x-admin.sidebar />
 
+    <!-- Mobile sidebar overlay (below sidebar, above content) -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 hidden lg:hidden" style="z-index: 9998;" aria-hidden="true"></div>
+
     <!-- Main Content Area -->
-    <div class="ml-64 main-content main-content-expanded">
+    <div class="main-content expanded transition-[margin] duration-300">
         <!-- Navbar Component -->
         <x-admin.navbar />
 
         <!-- Page Content -->
-        <main class="p-4 sm:p-6 lg:p-8">
+        <main class="p-3 sm:p-6 lg:p-8 min-w-0 overflow-x-auto">
             @yield('content')
             {{ $slot ?? '' }}
         </main>
@@ -110,36 +137,59 @@
     </div>
 
     <script>
-        // Sidebar state
-        let sidebarCollapsed = false;
-        
-        // Sidebar Collapse/Expand Toggle (all screen sizes)
-        document.getElementById('toggleSidebar').addEventListener('click', function() {
-            const sidebar = document.getElementById('sidebar');
-            const mainContent = document.querySelector('.main-content');
-            
-            sidebarCollapsed = !sidebarCollapsed;
-            
-            if (sidebarCollapsed) {
-                sidebar.classList.remove('sidebar-expanded');
-                sidebar.classList.add('sidebar-collapsed');
-                mainContent.classList.remove('expanded');
-                mainContent.classList.add('collapsed');
-                localStorage.setItem('sidebarCollapsed', 'true');
-            } else {
-                sidebar.classList.remove('sidebar-collapsed');
-                sidebar.classList.add('sidebar-expanded');
-                mainContent.classList.remove('collapsed');
-                mainContent.classList.add('expanded');
-                localStorage.setItem('sidebarCollapsed', 'false');
+        document.addEventListener('DOMContentLoaded', function() {
+            var sidebar = document.getElementById('sidebar');
+            var mainContent = document.querySelector('.main-content');
+            var overlay = document.getElementById('sidebar-overlay');
+            var toggleBtn = document.getElementById('toggleSidebar');
+            var mobileToggleBtn = document.getElementById('toggleMobileSidebar');
+            var sidebarCloseBtn = document.getElementById('sidebarClose');
+
+            function closeMobileSidebar() {
+                if (sidebar) sidebar.classList.remove('sidebar-mobile-open');
+                if (overlay) overlay.classList.add('hidden');
+                document.body.style.overflow = '';
             }
-        });
-        
-        // Restore sidebar state from localStorage
-        window.addEventListener('DOMContentLoaded', function() {
-            const savedState = localStorage.getItem('sidebarCollapsed');
-            if (savedState === 'true') {
-                document.getElementById('toggleSidebar').click();
+            function openMobileSidebar() {
+                if (sidebar) sidebar.classList.add('sidebar-mobile-open');
+                if (overlay) overlay.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            }
+            function isMobile() { return window.innerWidth < 1024; }
+
+            // Desktop: collapse/expand
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', function() {
+                    if (!isMobile()) {
+                        sidebar.classList.toggle('sidebar-expanded');
+                        sidebar.classList.toggle('sidebar-collapsed');
+                        mainContent.classList.toggle('expanded');
+                        mainContent.classList.toggle('collapsed');
+                        localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('sidebar-collapsed'));
+                    } else {
+                        closeMobileSidebar();
+                    }
+                });
+            }
+            // Mobile: hamburger opens sidebar
+            if (mobileToggleBtn) {
+                mobileToggleBtn.addEventListener('click', function() {
+                    if (isMobile()) {
+                        if (sidebar.classList.contains('sidebar-mobile-open')) closeMobileSidebar();
+                        else openMobileSidebar();
+                    }
+                });
+            }
+            if (sidebarCloseBtn) sidebarCloseBtn.addEventListener('click', closeMobileSidebar);
+            if (overlay) overlay.addEventListener('click', closeMobileSidebar);
+
+            window.addEventListener('resize', function() {
+                if (!isMobile()) closeMobileSidebar();
+            });
+
+            // Restore desktop sidebar state
+            if (!isMobile() && localStorage.getItem('sidebarCollapsed') === 'true' && toggleBtn) {
+                toggleBtn.click();
             }
         });
     </script>

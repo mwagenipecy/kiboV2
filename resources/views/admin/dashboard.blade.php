@@ -3,6 +3,7 @@
 @section('title', 'Admin Dashboard')
 
 @section('content')
+<div class="min-w-0">
 @php
     use App\Models\Vehicle;
     use App\Models\Order;
@@ -177,5 +178,6 @@
         @include('admin.dashboard.admin')
         @break
 @endswitch
+</div>
 @endsection
 

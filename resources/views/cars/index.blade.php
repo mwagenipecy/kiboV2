@@ -50,6 +50,27 @@
     <!-- FAQ Accordion Component -->
     <x-customer.faq-accordion />
 
+    <!-- Complaints & Feedback CTA -->
+    <section class="bg-white py-12 sm:py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="rounded-2xl border border-gray-200 bg-white p-8 sm:p-10 text-center shadow-sm">
+                <div class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-[#009866]/10 text-[#009866] mb-6">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                <h2 class="text-xl sm:text-2xl font-bold text-gray-900">Complaints &amp; Feedback</h2>
+                <p class="mt-2 text-gray-600 max-w-xl mx-auto">Submit a complaint or track an existing one using your tracking number.</p>
+                <a href="{{ route('cars.complaints') }}" class="mt-6 inline-flex items-center px-6 py-3 rounded-xl bg-[#009866] text-white font-semibold hover:bg-[#007a52] transition-colors shadow-sm">
+                    Manage complaints
+                    <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </section>
+
     <!-- Additional Features Section -->
     <section class="bg-white py-16">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

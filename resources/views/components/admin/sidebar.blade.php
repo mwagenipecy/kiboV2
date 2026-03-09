@@ -4,19 +4,27 @@
     .kibo-badge { color: #007a52 !important; background-color: rgba(0, 152, 102, 0.15) !important; }
 </style>
 <!-- Sidebar -->
-<aside id="sidebar" class="fixed left-0 top-0 z-40 h-screen transition-all duration-300 translate-x-0 bg-white border-r border-gray-200 shadow-sm sidebar-expanded">
+<aside id="sidebar" class="fixed left-0 top-0 z-40 h-screen w-64 bg-white border-r border-gray-200 shadow-sm sidebar-expanded">
     <div class="flex flex-col h-full">
-        <!-- Logo -->
-        <div class="flex items-center justify-between h-16 px-6 border-b border-gray-200">
-            <a href="{{ route('admin.dashboard') }}" class="flex items-center sidebar-logo">
+        <!-- Logo and buttons -->
+        <div class="flex items-center justify-between h-16 px-4 sm:px-6 border-b border-gray-200 flex-shrink-0">
+            <a href="{{ route('admin.dashboard') }}" class="flex items-center sidebar-logo min-w-0">
                 <img src="{{ asset('logo/green.png') }}" alt="Logo" class="h-8 w-auto transition-opacity duration-300">
             </a>
-            <!-- Collapse Button (all screen sizes) -->
-            <button id="toggleSidebar" class="text-gray-500 hover:text-gray-700 transition-transform duration-300">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>
-                </svg>
-            </button>
+            <div class="flex items-center gap-1">
+                <!-- Close button (mobile only) -->
+                <button id="sidebarClose" type="button" class="lg:hidden p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg" aria-label="Close menu">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+                <!-- Collapse Button (desktop only) -->
+                <button id="toggleSidebar" class="sidebar-collapse-btn hidden lg:block p-2 text-gray-500 hover:text-gray-700 transition-transform duration-300 rounded-lg hover:bg-gray-100" aria-label="Toggle sidebar">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>
+                    </svg>
+                </button>
+            </div>
         </div>
 
         <!-- Navigation -->
@@ -427,6 +435,24 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h8M8 11h8M8 15h5M5 4h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z"/>
                     </svg>
                     <span class="menu-text whitespace-nowrap">Car Requests</span>
+                </a>
+                @endif
+
+                <!-- Complaints (Admin only) -->
+                @if($userRole === 'admin')
+                <a href="{{ route('admin.complaints') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('admin.complaints*') ? 'text-white kibo-sidebar-active shadow-sm' : 'text-gray-700 kibo-sidebar-hover' }} transition-colors group">
+                    <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <span class="menu-text whitespace-nowrap">Complaints</span>
+                    @php
+                        $complaintsPendingCount = $userRole === 'admin'
+                            ? \App\Models\Complaint::where('status', 'pending')->count()
+                            : \App\Models\Complaint::assignedTo(auth()->id())->whereIn('status', ['pending', 'in_progress'])->count();
+                    @endphp
+                    @if($complaintsPendingCount > 0)
+                    <span class="ml-2 px-2 py-0.5 text-xs font-semibold text-amber-700 bg-amber-100 rounded-full whitespace-nowrap flex-shrink-0">{{ $complaintsPendingCount }}</span>
+                    @endif
                 </a>
                 @endif
 

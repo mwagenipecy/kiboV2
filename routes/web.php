@@ -72,6 +72,10 @@ Route::prefix('cars')->name('cars.')->group(function () {
     Route::get('/find-me-a-car', \App\Livewire\Customer\FindMeACar::class)
         ->name('find');
 
+    Route::get('/complaints', function () {
+        return view('cars.complaints', ['vehicleType' => 'cars']);
+    })->name('complaints');
+
     Route::get('/value', function () {
         return view('cars.value', ['vehicleType' => 'cars']);
     })->name('value');
@@ -850,7 +854,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'otp.ver
     // Find-me-a-car requests
     Route::get('/car-requests', \App\Livewire\Admin\CarRequests::class)->name('car-requests');
     Route::get('/car-requests/{id}', \App\Livewire\Admin\CarRequestDetail::class)->name('car-requests.view');
-    
+
+    // Complaints
+    Route::get('/complaints', \App\Livewire\Admin\Complaints::class)->name('complaints');
+    Route::get('/complaints/{id}', \App\Livewire\Admin\ComplaintDetail::class)->name('complaints.view');
+
     // Exchange Requests
     Route::prefix('exchange-requests')->name('exchange-requests.')->group(function () {
         Route::get('/', \App\Livewire\Admin\ExchangeRequests::class)->name('index');
