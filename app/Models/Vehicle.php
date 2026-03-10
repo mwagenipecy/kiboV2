@@ -131,6 +131,14 @@ class Vehicle extends Model
     }
 
     /**
+     * Get all visitation requests for this vehicle
+     */
+    public function visitationRequests()
+    {
+        return $this->hasMany(CarVisitationRequest::class);
+    }
+
+    /**
      * Get unique users who viewed this vehicle
      */
     public function viewers()

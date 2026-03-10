@@ -84,7 +84,7 @@ Here's the complete flow:
 $message = $this->twilio->messages->create(
     $to,  // whatsapp:+255767582837
     [
-        'from' => $from,  // whatsapp:+14155238886
+        'from' => $from,  // whatsapp:+255794777772
         'body' => $body,  // "👋 Welcome to Kibo Auto! 🚗"
     ]
 );

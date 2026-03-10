@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Customer;
 
+use App\Jobs\SendVisitationRequestReceivedEmail;
+use App\Models\CarVisitationRequest;
 use App\Models\LendingCriteria;
 use App\Models\Vehicle;
 use Livewire\Component;
@@ -18,6 +20,14 @@ class VehicleDetail extends Component
     public $showInfoModal = false;
     public $modalContent = null;
     public $matchingLenders = [];
+
+    /** @var bool Visitation request bottom sheet */
+    public $showVisitationSheet = false;
+    public $visitationName = '';
+    public $visitationEmail = '';
+    public $visitationPhone = '';
+    public $visitationReason = '';
+    public $visitationSubmitted = false;
 
     public function mount($id)
     {
@@ -155,6 +165,55 @@ class VehicleDetail extends Component
     public function openCashPurchaseModal($vehicleId)
     {
         $this->dispatch('open-cash-purchase-modal', vehicleId: $vehicleId);
+    }
+
+    public function openVisitationSheet()
+    {
+        $this->showVisitationSheet = true;
+        $this->visitationSubmitted = false;
+        $this->visitationName = auth()->user()?->name ?? '';
+        $this->visitationEmail = auth()->user()?->email ?? '';
+        $this->visitationPhone = '';
+        $this->visitationReason = '';
+    }
+
+    public function closeVisitationSheet()
+    {
+        $this->showVisitationSheet = false;
+        $this->resetValidation();
+    }
+
+    public function submitVisitationRequest()
+    {
+        $this->validate([
+            'visitationName' => 'required|string|max:255',
+            'visitationEmail' => 'required|email',
+            'visitationPhone' => 'nullable|string|max:50',
+            'visitationReason' => 'nullable|string|max:1000',
+        ], [], [
+            'visitationName' => 'name',
+            'visitationEmail' => 'email',
+            'visitationPhone' => 'phone',
+            'visitationReason' => 'visit reason',
+        ]);
+
+        $visitation = CarVisitationRequest::create([
+            'vehicle_id' => $this->vehicleId,
+            'user_id' => auth()->id(),
+            'name' => $this->visitationName,
+            'email' => $this->visitationEmail,
+            'phone' => $this->visitationPhone ?: null,
+            'visit_reason' => $this->visitationReason ?: null,
+            'status' => 'pending',
+        ]);
+
+        SendVisitationRequestReceivedEmail::dispatch($visitation->id);
+
+        $this->visitationSubmitted = true;
+        $this->visitationName = '';
+        $this->visitationEmail = '';
+        $this->visitationPhone = '';
+        $this->visitationReason = '';
     }
 
     public function render()

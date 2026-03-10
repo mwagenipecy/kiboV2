@@ -430,11 +430,27 @@
 
                 <!-- Car Requests (Admin and Dealer) -->
                 @if($userRole === 'admin' || $userRole === 'dealer')
-                <a href="{{ route('admin.car-requests') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('admin.car-requests') ? 'text-white kibo-sidebar-active shadow-sm' : 'text-gray-700 kibo-sidebar-hover' }} transition-colors group">
+                <a href="{{ route('admin.car-requests') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('admin.car-requests*') && !request()->routeIs('admin.visitations*') ? 'text-white kibo-sidebar-active shadow-sm' : 'text-gray-700 kibo-sidebar-hover' }} transition-colors group">
                     <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h8M8 11h8M8 15h5M5 4h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z"/>
                     </svg>
                     <span class="menu-text whitespace-nowrap">Car Requests</span>
+                </a>
+                @endif
+
+                <!-- Car Visitations (Admin and Dealer) -->
+                @if($userRole === 'admin' || $userRole === 'dealer')
+                <a href="{{ route('admin.visitations') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('admin.visitations*') ? 'text-white kibo-sidebar-active shadow-sm' : 'text-gray-700 kibo-sidebar-hover' }} transition-colors group">
+                    <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                    <span class="menu-text whitespace-nowrap">Car Visitations</span>
+                    @php
+                        $visitationPendingCount = \App\Models\CarVisitationRequest::where('status', 'pending')->count();
+                    @endphp
+                    @if($visitationPendingCount > 0)
+                    <span class="ml-2 px-2 py-0.5 text-xs font-semibold text-amber-700 bg-amber-100 rounded-full whitespace-nowrap flex-shrink-0">{{ $visitationPendingCount }}</span>
+                    @endif
                 </a>
                 @endif
 

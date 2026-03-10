@@ -403,6 +403,17 @@
                                     <div class="text-xs text-gray-500">Direct purchase</div>
                                 </div>
                             </button>
+
+                            {{-- Request visitation --}}
+                            <button wire:click="openVisitationSheet" class="w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors flex items-start gap-3 border border-gray-200 rounded-lg">
+                                <svg class="w-6 h-6 kibo-text flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                </svg>
+                                <div class="flex-1">
+                                    <div class="font-semibold text-gray-900">Request visitation</div>
+                                    <div class="text-xs text-gray-500">Arrange a visit to see this car</div>
+                                </div>
+                            </button>
                         </div>
                     </div>
                     @else
@@ -437,6 +448,18 @@
                             </svg>
                             Request Insurance Quote
                         </a>
+                    </div>
+
+                    {{-- Request visitation (for guests too) --}}
+                    <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                        <h3 class="text-lg font-bold text-gray-900 mb-2">Want to see this car?</h3>
+                        <p class="text-sm text-gray-600 mb-4">Request a visitation and we’ll contact you to schedule a viewing.</p>
+                        <button wire:click="openVisitationSheet" class="w-full text-white py-3 px-6 rounded-full font-semibold transition-colors flex items-center justify-center gap-2" style="background-color: #009866;">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                            Request visitation
+                        </button>
                     </div>
 
                     <div class="bg-white rounded-xl p-6 shadow-sm">
@@ -890,6 +913,72 @@
         .animate-slideInRight {
             animation: slideInRight 0.3s ease-out;
         }
+    </style>
+    @endif
+
+    {{-- Visitation request bottom sheet --}}
+    @if($showVisitationSheet)
+    <div class="fixed inset-0 z-[110]" aria-modal="true" role="dialog">
+        <div wire:click="closeVisitationSheet" class="fixed inset-0 bg-black/50 animate-fadeIn"></div>
+        <div class="fixed bottom-0 left-0 right-0 bg-white rounded-t-2xl shadow-2xl max-h-[90vh] overflow-y-auto animate-slideUp">
+            <div class="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between z-10">
+                <h2 class="text-xl font-bold text-gray-900">Request car visitation</h2>
+                <button wire:click="closeVisitationSheet" type="button" class="w-10 h-10 flex items-center justify-center hover:bg-gray-100 rounded-full transition-colors">
+                    <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="px-6 py-6">
+                @if($visitationSubmitted)
+                    <div class="text-center py-8">
+                        <div class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style="background-color: #009866;">
+                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-900 mb-2">Request received</h3>
+                        <p class="text-gray-600 mb-6">We’ve sent a confirmation to your email. Our team will contact you shortly to schedule your visit.</p>
+                        <button wire:click="closeVisitationSheet" type="button" class="px-6 py-3 rounded-full font-semibold text-white transition-colors" style="background-color: #009866;">Done</button>
+                    </div>
+                @else
+                    <p class="text-gray-600 mb-6">Leave your contact details and reason for the visit. We’ll get in touch to arrange a viewing.</p>
+                    <form wire:submit="submitVisitationRequest" class="space-y-4">
+                        <div>
+                            <label for="visitation_name" class="block text-sm font-medium text-gray-700 mb-1">Name <span class="text-red-500">*</span></label>
+                            <input wire:model="visitationName" type="text" id="visitation_name" required class="w-full rounded-lg border border-gray-300 px-4 py-2.5 focus:ring-2 focus:ring-green-500 focus:border-green-500" placeholder="Your name">
+                            @error('visitationName') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                        </div>
+                        <div>
+                            <label for="visitation_email" class="block text-sm font-medium text-gray-700 mb-1">Email <span class="text-red-500">*</span></label>
+                            <input wire:model="visitationEmail" type="email" id="visitation_email" required class="w-full rounded-lg border border-gray-300 px-4 py-2.5 focus:ring-2 focus:ring-green-500 focus:border-green-500" placeholder="your@email.com">
+                            @error('visitationEmail') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                        </div>
+                        <div>
+                            <label for="visitation_phone" class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                            <input wire:model="visitationPhone" type="tel" id="visitation_phone" class="w-full rounded-lg border border-gray-300 px-4 py-2.5 focus:ring-2 focus:ring-green-500 focus:border-green-500" placeholder="+255...">
+                            @error('visitationPhone') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                        </div>
+                        <div>
+                            <label for="visitation_reason" class="block text-sm font-medium text-gray-700 mb-1">Reason for visit</label>
+                            <textarea wire:model="visitationReason" id="visitation_reason" rows="3" class="w-full rounded-lg border border-gray-300 px-4 py-2.5 focus:ring-2 focus:ring-green-500 focus:border-green-500" placeholder="e.g. Test drive, inspect condition..."></textarea>
+                            @error('visitationReason') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                        </div>
+                        <div class="flex gap-3 pt-2">
+                            <button type="button" wire:click="closeVisitationSheet" class="flex-1 px-4 py-3 rounded-full font-semibold border-2 border-gray-300 text-gray-700 hover:bg-gray-50">Cancel</button>
+                            <button type="submit" class="flex-1 px-4 py-3 rounded-full font-semibold text-white transition-colors" style="background-color: #009866;">Submit request</button>
+                        </div>
+                    </form>
+                @endif
+            </div>
+        </div>
+    </div>
+    <style>
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+        .animate-slideUp { animation: slideUp 0.3s ease-out; }
     </style>
     @endif
 

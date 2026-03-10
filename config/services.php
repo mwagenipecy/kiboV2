@@ -45,7 +45,7 @@ return [
     'twilio' => [
         'sid' => env('TWILIO_ACCOUNT_SID'),
         'token' => env('TWILIO_AUTH_TOKEN'),
-        'whatsapp_from' => env('TWILIO_WHATSAPP_FROM', 'whatsapp:+14155238886'),
+        'whatsapp_from' => env('TWILIO_WHATSAPP_FROM', 'whatsapp:+255794777772'),
         // WhatsApp Content Template SIDs (optional – use for consistent UI)
         'language_selection_template_sid' => env('TWILIO_LANGUAGE_SELECTION_TEMPLATE_SID', null),
         'main_menu_template_sid' => env('TWILIO_MAIN_MENU_TEMPLATE_SID', null),

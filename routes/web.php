@@ -855,6 +855,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'otp.ver
     Route::get('/car-requests', \App\Livewire\Admin\CarRequests::class)->name('car-requests');
     Route::get('/car-requests/{id}', \App\Livewire\Admin\CarRequestDetail::class)->name('car-requests.view');
 
+    // Car visitation requests
+    Route::get('/visitations', \App\Livewire\Admin\VisitationRequests::class)->name('visitations');
+    Route::get('/visitations/calendar', \App\Livewire\Admin\VisitationCalendar::class)->name('visitations.calendar');
+    Route::get('/visitations/{id}', \App\Livewire\Admin\VisitationDetail::class)->name('visitations.view');
+
     // Complaints
     Route::get('/complaints', \App\Livewire\Admin\Complaints::class)->name('complaints');
     Route::get('/complaints/{id}', \App\Livewire\Admin\ComplaintDetail::class)->name('complaints.view');
