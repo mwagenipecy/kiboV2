@@ -303,7 +303,7 @@
                         <label class="flex items-start">
                             <input type="checkbox" required class="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500 mt-1">
                             <span class="ml-2 text-sm text-gray-600">
-                                {!! __('auth.terms_agreement', ['terms' => '<a href="' . route('terms') . '" target="_blank" rel="noopener noreferrer" class="text-green-700 hover:underline font-medium">' . __('auth.terms_of_service') . '</a>', 'privacy' => '<a href="#" class="text-green-700 hover:underline font-medium">' . __('auth.privacy_policy') . '</a>']) !!}
+                                {!! __('auth.terms_agreement', ['terms' => '<a href="' . route('terms') . '" target="_blank" rel="noopener noreferrer" class="text-green-700 hover:underline font-medium">' . __('auth.terms_of_service') . '</a>', 'privacy' => '<a href="' . route('data-protection') . '" target="_blank" rel="noopener noreferrer" class="text-green-700 hover:underline font-medium">' . __('auth.privacy_policy') . '</a>']) !!}
                             </span>
                         </label>
                     </div>

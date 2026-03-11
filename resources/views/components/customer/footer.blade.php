@@ -12,8 +12,8 @@
                 <a href="#" class="block text-gray-700 hover:text-gray-900 text-sm">About Kibo Auto</a>
                 <a href="#" class="block text-gray-700 hover:text-gray-900 text-sm italic">Careers</a>
                 <a href="#" class="block text-gray-700 hover:text-gray-900 text-sm">Investor information</a>
-                <a href="#" class="block text-gray-700 hover:text-gray-900 text-sm">Privacy policies and terms</a>
-                <a href="#" class="block text-gray-700 hover:text-gray-900 text-sm">Terms & conditions</a>
+                <a href="{{ route('data-protection') }}" class="block text-gray-700 hover:text-gray-900 text-sm">Data protection &amp; privacy</a>
+                <a href="{{ route('terms') }}" class="block text-gray-700 hover:text-gray-900 text-sm">Terms &amp; conditions</a>
                 <a href="#" class="block text-gray-700 hover:text-gray-900 text-sm">External wellbeing support</a>
                 <button class="text-gray-700 hover:text-gray-900 text-sm mt-6">Manage cookies</button>
             </div>

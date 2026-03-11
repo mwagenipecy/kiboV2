@@ -1323,6 +1323,10 @@ Route::get('/terms', function () {
     return view('terms', ['vehicleType' => 'cars']);
 })->name('terms');
 
+Route::get('/data-protection', function () {
+    return view('data-protection', ['vehicleType' => 'cars']);
+})->name('data-protection');
+
 // ============================================
 // CHATBOT API ROUTE
 // ============================================
