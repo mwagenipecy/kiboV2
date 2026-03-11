@@ -15,7 +15,7 @@ class TwilioService
     {
         $sid = config('services.twilio.sid');
         $token = config('services.twilio.token');
-        $this->fromNumber = config('services.twilio.whatsapp_from');
+        $this->fromNumber = trim((string) config('services.twilio.whatsapp_from', ''));
 
         if (!$sid || !$token || !$this->fromNumber) {
             \Log::error('Twilio credentials missing', [
@@ -139,13 +139,16 @@ class TwilioService
      */
     protected function formatWhatsAppNumber(string $number): string
     {
+        $number = trim($number);
         // Remove any existing whatsapp: prefix
         $number = str_replace('whatsapp:', '', $number);
-
-        // Add whatsapp: prefix if not present
-        if (!str_starts_with($number, 'whatsapp:')) {
-            $number = 'whatsapp:' . $number;
+        $number = trim($number);
+        // Ensure E.164: must start with +
+        if ($number !== '' && !str_starts_with($number, '+')) {
+            $number = '+' . $number;
         }
+        // Add whatsapp: prefix
+        $number = 'whatsapp:' . $number;
 
         return $number;
     }
