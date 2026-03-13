@@ -21,6 +21,17 @@ class PendingVehicles extends Component
     public $showApprovalModal = false;
     public $approvalNotes = '';
 
+    /** Confirm Approve */
+    public $showConfirmApproveModal = false;
+    public $vehicleToApprove = null;
+
+    /** Confirm Hold */
+    public $showConfirmHoldModal = false;
+    public $vehicleToHold = null;
+
+    /** Confirm Reject (after they clicked Reject in the reason modal) */
+    public $showConfirmRejectModal = false;
+
     protected $queryString = [
         'search' => ['except' => ''],
         'filterOrigin' => ['except' => ''],
@@ -54,44 +65,100 @@ class PendingVehicles extends Component
         $this->approvalNotes = '';
     }
 
+    public function openConfirmApproveModal($vehicleId)
+    {
+        $this->vehicleToApprove = Vehicle::findOrFail($vehicleId);
+        $this->showConfirmApproveModal = true;
+    }
+
+    public function closeConfirmApproveModal()
+    {
+        $this->showConfirmApproveModal = false;
+        $this->vehicleToApprove = null;
+    }
+
+    public function confirmApproveVehicle()
+    {
+        if (!$this->vehicleToApprove) {
+            $this->closeConfirmApproveModal();
+            return;
+        }
+        $this->approveVehicle($this->vehicleToApprove->id);
+        session()->flash('success', 'Vehicle approved successfully!');
+        $this->closeConfirmApproveModal();
+    }
+
     public function approveVehicle($vehicleId)
     {
         $vehicle = Vehicle::findOrFail($vehicleId);
-        
         $vehicle->update([
             'status' => VehicleStatus::APPROVED,
             'approved_at' => now(),
             'approved_by' => Auth::id(),
         ]);
-
-        session()->flash('success', 'Vehicle approved successfully!');
     }
 
-    public function rejectVehicle()
+    public function openConfirmHoldModal($vehicleId)
     {
-        if (!$this->selectedVehicle) {
+        $this->vehicleToHold = Vehicle::findOrFail($vehicleId);
+        $this->showConfirmHoldModal = true;
+    }
+
+    public function closeConfirmHoldModal()
+    {
+        $this->showConfirmHoldModal = false;
+        $this->vehicleToHold = null;
+    }
+
+    public function confirmHoldVehicle()
+    {
+        if (!$this->vehicleToHold) {
+            $this->closeConfirmHoldModal();
             return;
         }
-
-        $this->selectedVehicle->update([
-            'status' => VehicleStatus::REMOVED,
-            'notes' => $this->approvalNotes,
-        ]);
-
-        session()->flash('success', 'Vehicle rejected successfully!');
-        
-        $this->closeApprovalModal();
+        $this->holdVehicle($this->vehicleToHold->id);
+        session()->flash('success', 'Vehicle put on hold!');
+        $this->closeConfirmHoldModal();
     }
 
     public function holdVehicle($vehicleId)
     {
         $vehicle = Vehicle::findOrFail($vehicleId);
-        
         $vehicle->update([
             'status' => VehicleStatus::HOLD,
         ]);
+    }
 
-        session()->flash('success', 'Vehicle put on hold!');
+    public function openConfirmRejectModal()
+    {
+        $this->showConfirmRejectModal = true;
+    }
+
+    public function closeConfirmRejectModal()
+    {
+        $this->showConfirmRejectModal = false;
+    }
+
+    public function confirmRejectVehicle()
+    {
+        if (!$this->selectedVehicle) {
+            $this->closeConfirmRejectModal();
+            $this->closeApprovalModal();
+            return;
+        }
+        $this->selectedVehicle->update([
+            'status' => VehicleStatus::REMOVED,
+            'notes' => $this->approvalNotes,
+        ]);
+        session()->flash('success', 'Vehicle rejected successfully!');
+        $this->showConfirmRejectModal = false;
+        $this->closeApprovalModal();
+    }
+
+    public function rejectVehicle()
+    {
+        // Show final confirmation before rejecting
+        $this->openConfirmRejectModal();
     }
 
     public function render()

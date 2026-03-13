@@ -23,6 +23,11 @@ class VehicleList extends Component
     public $showStatusModal = false;
     public $newStatus = '';
 
+    public $showDeleteModal = false;
+    public $vehicleToDeleteId = null;
+    /** @var Vehicle|null */
+    public $vehicleToDelete = null;
+
     protected $queryString = [
         'search' => ['except' => ''],
         'filterStatus' => ['except' => ''],
@@ -93,11 +98,53 @@ class VehicleList extends Component
         $this->closeStatusModal();
     }
 
+    public function openDeleteModal($vehicleId)
+    {
+        $vehicle = Vehicle::find($vehicleId);
+        if (!$vehicle) {
+            return;
+        }
+        if (in_array($vehicle->status->value, [VehicleStatus::APPROVED->value, VehicleStatus::HOLD->value], true)) {
+            session()->flash('error', 'Cannot delete a vehicle that is Approved or On Hold.');
+            return;
+        }
+        $this->vehicleToDeleteId = $vehicleId;
+        $this->vehicleToDelete = $vehicle;
+        $this->showDeleteModal = true;
+    }
+
+    public function closeDeleteModal()
+    {
+        $this->showDeleteModal = false;
+        $this->vehicleToDeleteId = null;
+        $this->vehicleToDelete = null;
+    }
+
+    public function confirmDeleteVehicle()
+    {
+        if (!$this->vehicleToDeleteId) {
+            $this->closeDeleteModal();
+            return;
+        }
+        $vehicle = Vehicle::findOrFail($this->vehicleToDeleteId);
+        if (in_array($vehicle->status->value, [VehicleStatus::APPROVED->value, VehicleStatus::HOLD->value], true)) {
+            session()->flash('error', 'Cannot delete a vehicle that is Approved or On Hold.');
+            $this->closeDeleteModal();
+            return;
+        }
+        $vehicle->delete();
+        session()->flash('success', 'Vehicle deleted successfully!');
+        $this->closeDeleteModal();
+    }
+
     public function deleteVehicle($vehicleId)
     {
         $vehicle = Vehicle::findOrFail($vehicleId);
+        if (in_array($vehicle->status->value, [VehicleStatus::APPROVED->value, VehicleStatus::HOLD->value], true)) {
+            session()->flash('error', 'Cannot delete a vehicle that is Approved or On Hold.');
+            return;
+        }
         $vehicle->delete();
-
         session()->flash('success', 'Vehicle deleted successfully!');
     }
 

@@ -150,7 +150,7 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                             </svg>
                                         </a>
-                                        <button wire:click="toggleStatus({{ $lease->id }})" 
+                                        <button wire:click="openConfirmToggleStatusModal({{ $lease->id }})" 
                                                 class="p-2 text-purple-600 hover:text-purple-900 hover:bg-purple-50 rounded-lg transition-colors" 
                                                 title="{{ $lease->status === 'active' ? 'Deactivate' : 'Activate' }}">
                                             @if($lease->status === 'active')
@@ -163,7 +163,7 @@
                                                 </svg>
                                             @endif
                                         </button>
-                                        <button wire:click="toggleFeatured({{ $lease->id }})" 
+                                        <button wire:click="openConfirmToggleFeaturedModal({{ $lease->id }})" 
                                                 class="p-2 text-yellow-600 hover:text-yellow-900 hover:bg-yellow-50 rounded-lg transition-colors" 
                                                 title="{{ $lease->is_featured ? 'Unfeature' : 'Feature' }}">
                                             @if($lease->is_featured)
@@ -176,8 +176,7 @@
                                                 </svg>
                                             @endif
                                         </button>
-                                        <button wire:click="deleteLease({{ $lease->id }})" 
-                                                wire:confirm="Are you sure you want to delete this lease?" 
+                                        <button wire:click="openConfirmDeleteModal({{ $lease->id }})" 
                                                 class="p-2 text-red-600 hover:text-red-900 hover:bg-red-50 rounded-lg transition-colors" 
                                                 title="Delete">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -211,6 +210,100 @@
                     </svg>
                     Create New Lease
                 </a>
+            </div>
+        </div>
+    @endif
+
+    <!-- Confirm Toggle Status Modal -->
+    @if($showConfirmToggleStatusModal && $leaseToToggleStatus)
+        <div class="fixed inset-0 z-50 overflow-y-auto" style="z-index: 9999;">
+            <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:p-0">
+                <div class="fixed inset-0 bg-black/50 bg-opacity-75 transition-opacity" wire:click="closeConfirmToggleStatusModal"></div>
+                <div class="relative z-10 inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full">
+                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6">
+                        <div class="sm:flex sm:items-start">
+                            <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-purple-100 sm:mx-0 sm:h-10 sm:w-10">
+                                <svg class="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    @if($leaseToToggleStatus->status === 'active')
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
+                                    @else
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    @endif
+                                </svg>
+                            </div>
+                            <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left flex-1">
+                                <h3 class="text-lg font-medium text-gray-900">{{ $leaseToToggleStatus->status === 'active' ? 'Deactivate lease?' : 'Activate lease?' }}</h3>
+                                <p class="mt-2 text-sm text-gray-500">
+                                    Are you sure you want to {{ $leaseToToggleStatus->status === 'active' ? 'deactivate' : 'activate' }} <span class="font-semibold text-gray-900">{{ $leaseToToggleStatus->lease_title }}</span>? {{ $leaseToToggleStatus->status === 'active' ? 'It will no longer be visible to customers.' : 'It will be visible to customers.' }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 px-4 py-3 sm:px-6 flex justify-end gap-2">
+                        <button type="button" wire:click="closeConfirmToggleStatusModal" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium">Cancel</button>
+                        <button type="button" wire:click="confirmToggleStatus" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-medium">{{ $leaseToToggleStatus->status === 'active' ? 'Deactivate' : 'Activate' }}</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    <!-- Confirm Toggle Featured Modal -->
+    @if($showConfirmToggleFeaturedModal && $leaseToToggleFeatured)
+        <div class="fixed inset-0 z-50 overflow-y-auto" style="z-index: 9999;">
+            <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:p-0">
+                <div class="fixed inset-0 bg-black/50 bg-opacity-75 transition-opacity" wire:click="closeConfirmToggleFeaturedModal"></div>
+                <div class="relative z-10 inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full">
+                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6">
+                        <div class="sm:flex sm:items-start">
+                            <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100 sm:mx-0 sm:h-10 sm:w-10">
+                                <svg class="h-6 w-6 text-yellow-600" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                </svg>
+                            </div>
+                            <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left flex-1">
+                                <h3 class="text-lg font-medium text-gray-900">{{ $leaseToToggleFeatured->is_featured ? 'Remove from featured?' : 'Feature this lease?' }}</h3>
+                                <p class="mt-2 text-sm text-gray-500">
+                                    Are you sure you want to {{ $leaseToToggleFeatured->is_featured ? 'remove' : 'feature' }} <span class="font-semibold text-gray-900">{{ $leaseToToggleFeatured->lease_title }}</span>? {{ $leaseToToggleFeatured->is_featured ? 'It will no longer appear as featured.' : 'It will be highlighted as featured to customers.' }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 px-4 py-3 sm:px-6 flex justify-end gap-2">
+                        <button type="button" wire:click="closeConfirmToggleFeaturedModal" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium">Cancel</button>
+                        <button type="button" wire:click="confirmToggleFeatured" class="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 font-medium">{{ $leaseToToggleFeatured->is_featured ? 'Unfeature' : 'Feature' }}</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    <!-- Confirm Delete Modal -->
+    @if($showConfirmDeleteModal && $leaseToDelete)
+        <div class="fixed inset-0 z-50 overflow-y-auto" style="z-index: 9999;">
+            <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:p-0">
+                <div class="fixed inset-0 bg-black/50 bg-opacity-75 transition-opacity" wire:click="closeConfirmDeleteModal"></div>
+                <div class="relative z-10 inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full">
+                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6">
+                        <div class="sm:flex sm:items-start">
+                            <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                                <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                </svg>
+                            </div>
+                            <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left flex-1">
+                                <h3 class="text-lg font-medium text-gray-900">Delete lease?</h3>
+                                <p class="mt-2 text-sm text-gray-500">
+                                    Are you sure you want to delete <span class="font-semibold text-gray-900">{{ $leaseToDelete->lease_title }}</span> ({{ $leaseToDelete->vehicle_title }})? This action cannot be undone.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 px-4 py-3 sm:px-6 flex justify-end gap-2">
+                        <button type="button" wire:click="closeConfirmDeleteModal" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium">Cancel</button>
+                        <button type="button" wire:click="confirmDeleteLease" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium">Delete</button>
+                    </div>
+                </div>
             </div>
         </div>
     @endif

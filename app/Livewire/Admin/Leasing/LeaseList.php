@@ -18,6 +18,14 @@ class LeaseList extends Component
     public $sortBy = 'created_at';
     public $sortDirection = 'desc';
 
+    /** Confirm modals */
+    public $showConfirmToggleStatusModal = false;
+    public $leaseToToggleStatus = null;
+    public $showConfirmToggleFeaturedModal = false;
+    public $leaseToToggleFeatured = null;
+    public $showConfirmDeleteModal = false;
+    public $leaseToDelete = null;
+
     protected $queryString = ['search', 'filterStatus', 'filterEntity'];
 
     public function updatingSearch()
@@ -45,14 +53,63 @@ class LeaseList extends Component
         }
     }
 
+    public function openConfirmToggleStatusModal($leaseId)
+    {
+        $this->leaseToToggleStatus = VehicleLease::findOrFail($leaseId);
+        $this->showConfirmToggleStatusModal = true;
+    }
+
+    public function closeConfirmToggleStatusModal()
+    {
+        $this->showConfirmToggleStatusModal = false;
+        $this->leaseToToggleStatus = null;
+    }
+
+    public function confirmToggleStatus()
+    {
+        if (!$this->leaseToToggleStatus) {
+            $this->closeConfirmToggleStatusModal();
+            return;
+        }
+        $this->leaseToToggleStatus->update([
+            'status' => $this->leaseToToggleStatus->status === 'active' ? 'inactive' : 'active',
+        ]);
+        session()->flash('success', 'Lease status updated successfully.');
+        $this->closeConfirmToggleStatusModal();
+    }
+
     public function toggleStatus($leaseId)
     {
         $lease = VehicleLease::findOrFail($leaseId);
         $lease->update([
             'status' => $lease->status === 'active' ? 'inactive' : 'active',
         ]);
-
         session()->flash('success', 'Lease status updated successfully.');
+    }
+
+    public function openConfirmToggleFeaturedModal($leaseId)
+    {
+        $this->leaseToToggleFeatured = VehicleLease::findOrFail($leaseId);
+        $this->showConfirmToggleFeaturedModal = true;
+    }
+
+    public function closeConfirmToggleFeaturedModal()
+    {
+        $this->showConfirmToggleFeaturedModal = false;
+        $this->leaseToToggleFeatured = null;
+    }
+
+    public function confirmToggleFeatured()
+    {
+        if (!$this->leaseToToggleFeatured) {
+            $this->closeConfirmToggleFeaturedModal();
+            return;
+        }
+        $this->leaseToToggleFeatured->update([
+            'is_featured' => !$this->leaseToToggleFeatured->is_featured,
+        ]);
+        session()->flash('success', 'Featured status updated successfully.');
+        $this->closeConfirmToggleFeaturedModal();
     }
 
     public function toggleFeatured($leaseId)
@@ -61,8 +118,30 @@ class LeaseList extends Component
         $lease->update([
             'is_featured' => !$lease->is_featured,
         ]);
-
         session()->flash('success', 'Featured status updated successfully.');
+    }
+
+    public function openConfirmDeleteModal($leaseId)
+    {
+        $this->leaseToDelete = VehicleLease::findOrFail($leaseId);
+        $this->showConfirmDeleteModal = true;
+    }
+
+    public function closeConfirmDeleteModal()
+    {
+        $this->showConfirmDeleteModal = false;
+        $this->leaseToDelete = null;
+    }
+
+    public function confirmDeleteLease()
+    {
+        if (!$this->leaseToDelete) {
+            $this->closeConfirmDeleteModal();
+            return;
+        }
+        $this->leaseToDelete->delete();
+        session()->flash('success', 'Lease deleted successfully.');
+        $this->closeConfirmDeleteModal();
     }
 
     public function deleteLease($leaseId)
