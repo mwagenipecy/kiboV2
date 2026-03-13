@@ -10,3 +10,6 @@ Artisan::command('inspire', function () {
 
 // Spare part orders: auto-cancel no quotation (24h) and no next step after quote (48h)
 Schedule::command('spare-part-orders:auto-cancel')->hourly();
+
+// Auctions: after end date, accept highest offer and complete auction
+Schedule::command('auctions:complete-expired')->hourly();

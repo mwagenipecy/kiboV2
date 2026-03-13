@@ -5,10 +5,8 @@ namespace App\Providers;
 use App\Actions\Fortify\CreateNewUser;
 use App\Actions\Fortify\ResetUserPassword;
 use App\Jobs\SendLoginOtp;
-use App\Mail\LoginOtpMail;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
@@ -40,12 +38,8 @@ class FortifyServiceProvider extends ServiceProvider
                     'otp_expires_at' => now()->addMinutes(5),
                 ]);
                 
-                // Send OTP email immediately (synchronously)
-                try {
-                    Mail::to($user->email)->send(new LoginOtpMail($user, $otpCode));
-                } catch (\Exception $e) {
-                    \Log::error('Failed to send OTP email: ' . $e->getMessage());
-                }
+                // Send OTP email asynchronously so user is not blocked
+                SendLoginOtp::dispatch($user->email, $user->name ?? 'User', $otpCode);
                 
                 // Store intended URL in session for after OTP verification
                 // If user is not a customer and has a role, redirect to admin dashboard

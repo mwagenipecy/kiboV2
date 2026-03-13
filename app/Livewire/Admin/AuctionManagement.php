@@ -24,8 +24,13 @@ class AuctionManagement extends Component
     public $showDetailModal = false;
     public $showOffersModal = false;
     public $showOfferFormModal = false;
+    public $showApproveModal = false;
+    public $approveAuctionId = null;
     public $selectedAuction = null;
     public $adminNotes = '';
+
+    /** Number of days the auction runs; after this, highest offer is auto-accepted. */
+    public $auctionDurationDays = 7;
     
     // Offer form fields
     public $offerAmount;
@@ -58,6 +63,7 @@ class AuctionManagement extends Component
     {
         $this->selectedAuction = AuctionVehicle::with(['user', 'make', 'model', 'offers.dealer'])->findOrFail($auctionId);
         $this->adminNotes = $this->selectedAuction->admin_notes;
+        $this->auctionDurationDays = 7;
         $this->showDetailModal = true;
     }
 
@@ -168,8 +174,46 @@ class AuctionManagement extends Component
         $this->closeOfferFormModal();
     }
 
+    public function openApproveModal($auctionId)
+    {
+        $this->approveAuctionId = $auctionId;
+        $this->auctionDurationDays = 7;
+        $this->showApproveModal = true;
+    }
+
+    public function closeApproveModal()
+    {
+        $this->showApproveModal = false;
+        $this->approveAuctionId = null;
+        $this->auctionDurationDays = 7;
+    }
+
+    public function confirmApprove()
+    {
+        if (!$this->approveAuctionId) {
+            return;
+        }
+        $this->validate([
+            'auctionDurationDays' => 'required|integer|min:1|max:365',
+        ], [
+            'auctionDurationDays.min' => 'Duration must be at least 1 day.',
+            'auctionDurationDays.max' => 'Duration cannot exceed 365 days.',
+        ]);
+        $this->approve($this->approveAuctionId);
+        $this->closeApproveModal();
+    }
+
     public function approve($auctionId)
     {
+        $days = (int) $this->auctionDurationDays;
+        if ($days < 1) {
+            $days = 7;
+        }
+        if ($days > 365) {
+            $days = 365;
+        }
+        $this->auctionDurationDays = $days;
+
         $auction = AuctionVehicle::findOrFail($auctionId);
         $auction->update([
             'admin_approved' => true,
@@ -177,9 +221,10 @@ class AuctionManagement extends Component
             'approved_by' => Auth::id(),
             'status' => 'active',
             'auction_start' => now(),
+            'auction_end' => now()->addDays($days),
         ]);
 
-        session()->flash('success', 'Auction approved and is now live for dealers.');
+        session()->flash('success', "Auction approved and is now live for {$days} day(s). After that, the highest offer will be automatically accepted.");
     }
 
     public function reject($auctionId)

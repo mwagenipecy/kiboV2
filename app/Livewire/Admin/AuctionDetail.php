@@ -14,6 +14,9 @@ class AuctionDetail extends Component
     public $auctionId;
     public $auction;
     public $adminNotes = '';
+
+    /** Number of days the auction runs; after this, highest offer is auto-accepted. */
+    public $auctionDurationDays = 7;
     
     // Offer form fields
     public $offerAmount;
@@ -60,16 +63,25 @@ class AuctionDetail extends Component
 
     public function approve()
     {
+        $days = (int) $this->auctionDurationDays;
+        if ($days < 1) {
+            $days = 7;
+        }
+        if ($days > 365) {
+            $days = 365;
+        }
+
         $this->auction->update([
             'admin_approved' => true,
             'approved_at' => now(),
             'approved_by' => Auth::id(),
             'status' => 'active',
             'auction_start' => now(),
+            'auction_end' => now()->addDays($days),
         ]);
         
         $this->loadAuction();
-        session()->flash('success', 'Auction approved and is now live for dealers.');
+        session()->flash('success', "Auction approved and is now live for {$days} day(s). After that, the highest offer will be automatically accepted.");
     }
 
     public function reject()

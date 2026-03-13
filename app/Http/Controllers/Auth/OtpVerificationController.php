@@ -4,10 +4,8 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Jobs\SendLoginOtp;
-use App\Mail\LoginOtpMail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
 
 class OtpVerificationController extends Controller
@@ -37,12 +35,8 @@ class OtpVerificationController extends Controller
                 'otp_expires_at' => now()->addMinutes(5),
             ]);
             
-            // Send OTP email immediately (synchronously)
-            try {
-                Mail::to($user->email)->send(new LoginOtpMail($user, $otpCode));
-            } catch (\Exception $e) {
-                \Log::error('Failed to send OTP email: ' . $e->getMessage());
-            }
+            // Send OTP email asynchronously so user is not blocked
+            SendLoginOtp::dispatch($user->email, $user->name ?? 'User', $otpCode);
         }
 
         return view('auth.verify-otp');
@@ -112,12 +106,8 @@ class OtpVerificationController extends Controller
             'otp_expires_at' => now()->addMinutes(5),
         ]);
         
-        // Send OTP email immediately (synchronously)
-        try {
-            \Mail::to($user->email)->send(new \App\Mail\LoginOtpMail($user, $otpCode));
-        } catch (\Exception $e) {
-            \Log::error('Failed to send OTP email: ' . $e->getMessage());
-        }
+        // Send OTP email asynchronously so user is not blocked
+        SendLoginOtp::dispatch($user->email, $user->name ?? 'User', $otpCode);
 
         // Determine redirect based on user role
         $redirectRoute = $user->isAdmin() ? route('admin.dashboard') : route('cars.index');

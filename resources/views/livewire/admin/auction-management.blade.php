@@ -143,6 +143,9 @@
                                         @endif">
                                         {{ ucfirst($auction->status) }}
                                     </span>
+                                    @if($auction->status === 'active' && $auction->auction_end)
+                                        <span class="text-xs text-gray-500">Ends {{ $auction->auction_end->format('M j') }}</span>
+                                    @endif
                                     @if(!$auction->admin_approved && $auction->status === 'pending')
                                         <span class="px-2 py-0.5 text-xs font-medium rounded-full bg-orange-100 text-orange-800">
                                             Needs Approval
@@ -163,7 +166,7 @@
                                     @endif
                                     
                                     @if(!$auction->admin_approved && $auction->status === 'pending')
-                                        <button wire:click="approve({{ $auction->id }})" class="text-green-600 hover:text-green-900">Approve</button>
+                                        <button wire:click="openApproveModal({{ $auction->id }})" class="text-green-600 hover:text-green-900">Approve</button>
                                     @endif
                                     
                                     @if($auction->status === 'active')
@@ -250,6 +253,11 @@
                                 <p class="text-sm text-green-600 font-semibold">{{ $selectedAuction->highest_offer ? $selectedAuction->currency . ' ' . number_format($selectedAuction->highest_offer, 0) : '-' }}</p>
                             </div>
                         </div>
+                        @if($selectedAuction->status === 'active' && $selectedAuction->auction_end)
+                            <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                                <p class="text-sm text-blue-800">Auction ends <span class="font-semibold">{{ $selectedAuction->auction_end->format('l, M j, Y') }}</span>. Highest offer will be auto-accepted after that.</p>
+                            </div>
+                        @endif
 
                         @if($selectedAuction->description)
                             <div class="mb-4">
@@ -276,15 +284,21 @@
                         </div>
                     </div>
 
-                    <div class="bg-gray-50 px-4 py-3 sm:px-6 flex justify-between">
+                    <div class="bg-gray-50 px-4 py-3 sm:px-6 flex justify-between items-center flex-wrap gap-3">
                         @if(!$selectedAuction->admin_approved && $selectedAuction->status === 'pending')
-                            <div class="flex gap-2">
-                                <button wire:click="approve({{ $selectedAuction->id }})" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium">
-                                    Approve
-                                </button>
-                                <button wire:click="reject({{ $selectedAuction->id }})" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium">
-                                    Reject
-                                </button>
+                            <div class="flex items-center gap-3 flex-wrap">
+                                <div class="flex items-center gap-2">
+                                    <label for="detail_auction_days" class="text-sm font-medium text-gray-700 whitespace-nowrap">Run for (days):</label>
+                                    <input id="detail_auction_days" type="number" wire:model="auctionDurationDays" min="1" max="365" class="w-20 px-2 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500">
+                                </div>
+                                <div class="flex gap-2">
+                                    <button wire:click="approve({{ $selectedAuction->id }})" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium">
+                                        Approve
+                                    </button>
+                                    <button wire:click="reject({{ $selectedAuction->id }})" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium">
+                                        Reject
+                                    </button>
+                                </div>
                             </div>
                         @else
                             <div></div>
@@ -485,6 +499,30 @@
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    <!-- Approve auction modal (specify duration in days) -->
+    @if($showApproveModal)
+        <div class="fixed inset-0 z-50 overflow-y-auto" style="z-index: 9999;">
+            <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:p-0">
+                <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" wire:click="closeApproveModal"></div>
+                <div class="relative z-10 inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full">
+                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">Approve auction</h3>
+                        <p class="text-sm text-gray-600 mb-4">Set how many days the auction will run. After that, the highest offer will be automatically accepted and the auction completed.</p>
+                        <div>
+                            <label for="approve_auction_days" class="block text-sm font-medium text-gray-700 mb-1">Run auction for (days)</label>
+                            <input id="approve_auction_days" type="number" wire:model="auctionDurationDays" min="1" max="365" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                            @error('auctionDurationDays') <span class="text-red-500 text-sm mt-1">{{ $message }}</span> @enderror
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 px-4 py-3 sm:px-6 flex justify-end gap-2">
+                        <button type="button" wire:click="closeApproveModal" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-medium">Cancel</button>
+                        <button type="button" wire:click="confirmApprove" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium">Confirm & approve</button>
                     </div>
                 </div>
             </div>
