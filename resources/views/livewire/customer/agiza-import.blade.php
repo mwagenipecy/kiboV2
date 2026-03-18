@@ -15,7 +15,7 @@
         <h3 class="mb-2 text-xl font-bold text-gray-900" style="font-family: 'Syne', sans-serif;">Please sign in</h3>
         <p class="mb-6 text-sm text-gray-600">Login is required to submit an import request.</p>
         <div class="flex flex-col gap-3 sm:flex-row sm:justify-center">
-          <button type="button" class="rounded-xl bg-emerald-600 px-5 py-2.5 font-semibold text-white hover:bg-emerald-700" onclick="document.getElementById('openAuthModal')?.click();">Login</button>
+          <button type="button" id="agizaLoginBtn" class="rounded-xl bg-emerald-600 px-5 py-2.5 font-semibold text-white hover:bg-emerald-700">Login</button>
           <button type="button" onclick="window.history.back();" class="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-300 px-5 py-2.5 font-medium text-gray-700 hover:bg-gray-50">
             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
             Back
@@ -23,6 +23,29 @@
         </div>
       </div>
     </div>
+
+    @push('scripts')
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const agizaLoginBtn = document.getElementById('agizaLoginBtn');
+        const agizaLoginPrompt = document.getElementById('agizaLoginPrompt');
+        
+        if (agizaLoginBtn) {
+          agizaLoginBtn.addEventListener('click', function() {
+            // Hide the Agiza login prompt
+            if (agizaLoginPrompt) {
+              agizaLoginPrompt.style.display = 'none';
+            }
+            // Trigger the auth modal
+            const openAuthModalBtn = document.getElementById('openAuthModal');
+            if (openAuthModalBtn) {
+              openAuthModalBtn.click();
+            }
+          });
+        }
+      });
+    </script>
+    @endpush
   @endguest
 
   @auth
