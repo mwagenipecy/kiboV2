@@ -1,4 +1,69 @@
 <div class="max-w-4xl mx-auto px-4 py-8">
+    {{-- Guest: login prompt modal --}}
+    @guest
+        <div id="carExchangeLoginPrompt" role="dialog" aria-modal="true" class="fixed inset-0 z-[9999] grid place-items-center bg-black/50 p-4">
+            <div class="w-full max-w-md rounded-2xl bg-white p-8 text-center shadow-2xl">
+                <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50">
+                    <svg class="h-7 w-7 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0-.53.21-1.04.586-1.414A2 2 0 0114 9a2 2 0 110 4m-2 8a9 9 0 110-18 9 9 0 010 18z"/>
+                    </svg>
+                </div>
+                <h3 class="mb-2 text-xl font-bold text-gray-900">Please sign in</h3>
+                <p class="mb-6 text-sm text-gray-600">Login is required to submit a car exchange request.</p>
+                <div class="flex flex-col gap-3 sm:flex-row sm:justify-center">
+                    <button type="button" id="carExchangeLoginBtn" class="rounded-xl bg-emerald-600 px-5 py-2.5 font-semibold text-white hover:bg-emerald-700">Login</button>
+                    <button type="button" onclick="window.history.back();" class="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-300 px-5 py-2.5 font-medium text-gray-700 hover:bg-gray-50">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                        Back
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        @push('scripts')
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const carExchangeLoginBtn = document.getElementById('carExchangeLoginBtn');
+                const carExchangeLoginPrompt = document.getElementById('carExchangeLoginPrompt');
+                const authModal = document.getElementById('authModal');
+                
+                if (carExchangeLoginBtn) {
+                    carExchangeLoginBtn.addEventListener('click', function() {
+                        // Hide the car exchange login prompt
+                        if (carExchangeLoginPrompt) {
+                            carExchangeLoginPrompt.style.display = 'none';
+                        }
+                        // Trigger the auth modal
+                        const openAuthModalBtn = document.getElementById('openAuthModal');
+                        if (openAuthModalBtn) {
+                            openAuthModalBtn.click();
+                        }
+                    });
+                }
+
+                // Watch for auth modal closing - if user is still not logged in, show the prompt again
+                if (authModal) {
+                    const observer = new MutationObserver(function(mutations) {
+                        mutations.forEach(function(mutation) {
+                            if (mutation.attributeName === 'class') {
+                                const isHidden = authModal.classList.contains('hidden');
+                                // If auth modal is closed and user is still a guest, show the login prompt
+                                if (isHidden && carExchangeLoginPrompt && !document.body.hasAttribute('data-user-authenticated')) {
+                                    setTimeout(function() {
+                                        carExchangeLoginPrompt.style.display = 'grid';
+                                    }, 350);
+                                }
+                            }
+                        });
+                    });
+                    
+                    observer.observe(authModal, { attributes: true });
+                }
+            });
+        </script>
+        @endpush
+    @endguest
+
     <!-- Header -->
     <div class="text-center mb-8">
         <h1 class="text-3xl font-bold text-gray-900 mb-2">Exchange Your Car</h1>
@@ -12,26 +77,10 @@
         </div>
     @endif
 
+    @auth
     <!-- Main Form -->
     <form wire:submit.prevent="submit" class="bg-white rounded-2xl shadow-lg p-8 space-y-8">
         
-        <!-- Auth Notice -->
-        @guest
-            <div class="bg-blue-50 border-l-4 border-blue-500 px-4 py-3 rounded">
-                <p class="text-sm text-blue-800">
-                    <button type="button" onclick="document.getElementById('openAuthModal')?.click()" class="font-semibold underline">
-                        Sign in
-                    </button> to submit your exchange request
-                </p>
-            </div>
-        @endguest
-
-        @error('auth')
-            <div class="bg-amber-50 border-l-4 border-amber-500 px-4 py-3 rounded">
-                <p class="text-sm text-amber-800">{{ $message }}</p>
-            </div>
-        @enderror
-
         <!-- Section 1: Current Vehicle -->
         <div class="space-y-5">
             <h2 class="text-lg font-semibold text-gray-900 pb-2 border-b">Your Current Vehicle</h2>
@@ -299,4 +348,5 @@
             </button>
         </div>
     </form>
+    @endauth
 </div>

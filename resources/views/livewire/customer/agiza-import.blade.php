@@ -29,6 +29,7 @@
       document.addEventListener('DOMContentLoaded', function() {
         const agizaLoginBtn = document.getElementById('agizaLoginBtn');
         const agizaLoginPrompt = document.getElementById('agizaLoginPrompt');
+        const authModal = document.getElementById('authModal');
         
         if (agizaLoginBtn) {
           agizaLoginBtn.addEventListener('click', function() {
@@ -42,6 +43,25 @@
               openAuthModalBtn.click();
             }
           });
+        }
+
+        // Watch for auth modal closing - if user is still not logged in, show the prompt again
+        if (authModal) {
+          const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+              if (mutation.attributeName === 'class') {
+                const isHidden = authModal.classList.contains('hidden');
+                // If auth modal is closed and user is still a guest, show the login prompt
+                if (isHidden && agizaLoginPrompt && !document.body.hasAttribute('data-user-authenticated')) {
+                  setTimeout(function() {
+                    agizaLoginPrompt.style.display = 'grid';
+                  }, 350);
+                }
+              }
+            });
+          });
+          
+          observer.observe(authModal, { attributes: true });
         }
       });
     </script>
