@@ -2,20 +2,14 @@
 <footer class="bg-white border-t border-gray-200">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            <!-- Left Column - Logo & Links -->
+            <!-- Left Column - Logo & Links (only real links) -->
             <div class="lg:col-span-3 space-y-3">
                 <div class="mb-6">
                     <img src="{{ asset('logo/green.png') }}" alt="Kibo Auto Logo" class="h-10 w-auto">
                 </div>
-                <a href="#" class="block text-gray-700 hover:text-gray-900 text-sm">Security advice</a>
-                <a href="#" class="block text-gray-700 hover:text-gray-900 text-sm">Contact us</a>
-                <a href="#" class="block text-gray-700 hover:text-gray-900 text-sm">About Kibo Auto</a>
-                <a href="#" class="block text-gray-700 hover:text-gray-900 text-sm italic">Careers</a>
-                <a href="#" class="block text-gray-700 hover:text-gray-900 text-sm">Investor information</a>
+                <a href="mailto:info@kiboauto.co.tz" class="block text-gray-700 hover:text-gray-900 text-sm">Contact us</a>
                 <a href="{{ route('data-protection') }}" class="block text-gray-700 hover:text-gray-900 text-sm">Data protection &amp; privacy</a>
                 <a href="{{ route('terms') }}" class="block text-gray-700 hover:text-gray-900 text-sm">Terms &amp; conditions</a>
-                <a href="#" class="block text-gray-700 hover:text-gray-900 text-sm">External wellbeing support</a>
-                <button class="text-gray-700 hover:text-gray-900 text-sm mt-6">Manage cookies</button>
             </div>
 
             <!-- Middle Column - Expandable Sections -->
@@ -29,10 +23,8 @@
                         </svg>
                     </button>
                     <div id="products-content" class="hidden pb-4 space-y-2">
-                        <a href="#" class="block text-gray-700 hover:text-gray-900 text-sm">Vehicle financing</a>
-                        <a href="#" class="block text-gray-700 hover:text-gray-900 text-sm">Vehicle insurance</a>
-                        <a href="#" class="block text-gray-700 hover:text-gray-900 text-sm">Extended warranties</a>
-                        <a href="#" class="block text-gray-700 hover:text-gray-900 text-sm">Vehicle inspection</a>
+                        <a href="{{ route('import-financing.index') }}" class="block text-gray-700 hover:text-gray-900 text-sm">Vehicle financing</a>
+                        <a href="{{ route('cars.insurance') }}" class="block text-gray-700 hover:text-gray-900 text-sm">Vehicle insurance</a>
                     </div>
                 </div>
 
@@ -45,10 +37,8 @@
                         </svg>
                     </button>
                     <div id="buying-content" class="hidden pb-4 space-y-2">
-                        <a href="#" class="block text-gray-700 hover:text-gray-900 text-sm">Buying guide</a>
-                        <a href="#" class="block text-gray-700 hover:text-gray-900 text-sm">How to buy a car</a>
-                        <a href="#" class="block text-gray-700 hover:text-gray-900 text-sm">Vehicle checklist</a>
-                        <a href="#" class="block text-gray-700 hover:text-gray-900 text-sm">Finance options</a>
+                        <a href="{{ route('loan-calculator.index') }}" class="block text-gray-700 hover:text-gray-900 text-sm">Finance options</a>
+                        <a href="{{ route('cars.value') }}" class="block text-gray-700 hover:text-gray-900 text-sm">Value your car</a>
                     </div>
                 </div>
 
@@ -64,13 +54,9 @@
                         </svg>
                     </button>
                     <div id="quickSearch-content" class="pb-4 space-y-2">
-                        <a href="#" class="block text-gray-700 hover:text-gray-900 text-sm">Car brands</a>
-                        <a href="#" class="block text-gray-700 hover:text-gray-900 text-sm">All locations</a>
-                        <a href="#" class="block text-gray-700 hover:text-gray-900 text-sm">Find a dealer</a>
-                        <a href="#" class="block text-gray-700 hover:text-gray-900 text-sm">Electric car leasing</a>
-                        <a href="#" class="block text-gray-700 hover:text-gray-900 text-sm">Classic cars</a>
-                        <a href="#" class="block text-gray-700 hover:text-gray-900 text-sm">Budget cars</a>
-                        <a href="#" class="block text-gray-700 hover:text-gray-900 text-sm">New car deals</a>
+                        <a href="{{ route('cars.search') }}" class="block text-gray-700 hover:text-gray-900 text-sm">Search cars</a>
+                        <a href="{{ route('garage.by-location') }}" class="block text-gray-700 hover:text-gray-900 text-sm">Garage by location</a>
+                        <a href="{{ route('cars.lease.index') }}" class="block text-gray-700 hover:text-gray-900 text-sm">Leasing</a>
                     </div>
                 </div>
 
@@ -83,9 +69,9 @@
                         </svg>
                     </button>
                     <div id="dealers-content" class="hidden pb-4 space-y-2">
-                        <a href="#" class="block text-gray-700 hover:text-gray-900 text-sm">List your vehicle</a>
-                        <a href="#" class="block text-gray-700 hover:text-gray-900 text-sm">Dealer portal</a>
-                        <a href="#" class="block text-gray-700 hover:text-gray-900 text-sm">Pricing plans</a>
+                        <a href="{{ route('cars.list-vehicle') }}" class="block text-gray-700 hover:text-gray-900 text-sm">List your vehicle</a>
+                        <a href="{{ route('dealer.dashboard') }}" class="block text-gray-700 hover:text-gray-900 text-sm">Dealer portal</a>
+                        <a href="{{ route('cars.pricing') }}" class="block text-gray-700 hover:text-gray-900 text-sm">Pricing plans</a>
                     </div>
                 </div>
             </div>
@@ -93,9 +79,9 @@
             <!-- Right Column - Feedback & Social -->
             <div class="lg:col-span-4">
                 <div class="text-sm text-gray-700 mb-4">Help us improve our website</div>
-                <button class="border-2 border-green-700 text-green-700 px-6 py-2 rounded-full hover:bg-green-50 transition-colors font-medium mb-6">
+                <a href="{{ route('cars.complaints') }}" class="inline-block border-2 border-green-700 text-green-700 px-6 py-2 rounded-full hover:bg-green-50 transition-colors font-medium mb-6">
                     Send feedback
-                </button>
+                </a>
 
                 <!-- Social Icons -->
                 <div class="flex gap-4 mb-6">
@@ -161,12 +147,7 @@
                 <div class="text-xs text-gray-600 space-y-2">
                     <p>Copyright © Kibo Auto Limited {{ date('Y') }}.</p>
                     <p>
-                        Kibo Auto Limited is authorised and regulated by the Financial Conduct Authority. 
-                        Our FCA authorisation includes credit broking and insurance introductions. 
-                        We are not a lender.{' '}
-                        <a href="#" class="text-green-700 hover:underline">
-                            Read more about our role and about fees and commissions
-                        </a>
+                        Kibo Auto Limited operates in Tanzania. We help you buy and sell vehicles and may introduce third-party finance or insurance providers where available.
                     </p>
                     <div class="mt-4 space-y-1">
                         <p class="font-medium text-gray-700">Contact us</p>

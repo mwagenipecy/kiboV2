@@ -7,7 +7,7 @@ use App\Models\ImportFinancingRequest;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
-#[Layout('layouts.customer', ['vehicleType' => 'import-financing'])]
+#[Layout('layouts.customer', ['vehicleType' => 'financing'])]
 class ImportFinancingRequestDetail extends Component
 {
     public ImportFinancingRequest $request;

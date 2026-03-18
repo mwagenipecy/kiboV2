@@ -2,13 +2,13 @@
 
 namespace App\Livewire\Customer;
 
-use App\Models\ImportFinancingRequest;
+use App\Models\AgizaImportRequest;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-#[Layout('layouts.customer', ['vehicleType' => 'financing'])]
-class ImportFinancingRequests extends Component
+#[Layout('layouts.customer', ['vehicleType' => 'agiza-import'])]
+class AgizaImportRequests extends Component
 {
     use WithPagination;
 
@@ -27,10 +27,10 @@ class ImportFinancingRequests extends Component
 
     public function render()
     {
-        $requests = ImportFinancingRequest::where('user_id', auth()->id())
+        $requests = AgizaImportRequest::where('user_id', auth()->id())
             ->when($this->search, function ($query) {
                 $query->where(function ($q) {
-                    $q->where('reference_number', 'like', '%' . $this->search . '%')
+                    $q->where('request_number', 'like', '%' . $this->search . '%')
                       ->orWhere('vehicle_make', 'like', '%' . $this->search . '%')
                       ->orWhere('vehicle_model', 'like', '%' . $this->search . '%');
                 });
@@ -41,9 +41,15 @@ class ImportFinancingRequests extends Component
             ->latest()
             ->paginate(10);
 
-        return view('livewire.customer.import-financing-requests', [
+        $notifications = \App\Models\AgizaImportNotification::where('user_id', auth()->id())
+            ->where('is_read', false)
+            ->latest()
+            ->take(5)
+            ->get();
+
+        return view('livewire.customer.agiza-import-requests', [
             'requests' => $requests,
+            'notifications' => $notifications,
         ]);
     }
 }
-

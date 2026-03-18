@@ -550,6 +550,17 @@ Route::prefix('car-exchange')->name('car-exchange.')->group(function () {
 });
 
 // ============================================
+// AGIZA/IMPORT ROUTES
+// ============================================
+Route::prefix('agiza-import')->name('agiza-import.')->group(function () {
+    Route::get('/', \App\Livewire\Customer\AgizaImport::class)->name('index');
+    
+    Route::middleware(['auth', 'otp.verified'])->group(function () {
+        Route::get('/requests', \App\Livewire\Customer\AgizaImportRequests::class)->name('requests');
+    });
+});
+
+// ============================================
 // PRICING CHECKOUT (cars subscription – auth required)
 // ============================================
 Route::get('/pricing/cars/checkout/{plan}', \App\Livewire\Customer\SubscriptionCheckout::class)
@@ -877,6 +888,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'otp.ver
     // Import Financing Requests
     Route::get('/import-financing', \App\Livewire\Admin\ImportFinancingRequests::class)->name('import-financing');
     Route::get('/import-financing/{id}', \App\Livewire\Admin\ImportFinancingRequestDetail::class)->name('import-financing.detail');
+    
+    // Agiza/Import Requests
+    Route::get('/agiza-import', \App\Livewire\Admin\AgizaImportRequests::class)->name('agiza-import');
+    Route::get('/agiza-import/{id}', \App\Livewire\Admin\AgizaImportRequestDetail::class)->name('agiza-import.show');
     
     // Orders
     Route::prefix('orders')->name('orders.')->group(function () {

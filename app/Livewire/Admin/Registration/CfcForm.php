@@ -17,6 +17,13 @@ class CfcForm extends Component
     public $contactPerson = '';
     public $status = 'active';
 
+    public function updated($propertyName)
+    {
+        if ($propertyName === 'email') {
+            $this->validateOnly($propertyName);
+        }
+    }
+
     public function mount($id = null)
     {
         if ($id) {
@@ -41,9 +48,24 @@ class CfcForm extends Component
                 'required',
                 'email',
                 'max:255',
-                $this->cfcId 
-                    ? 'unique:cfcs,email,' . $this->cfcId 
-                    : 'unique:cfcs,email'
+                function ($attribute, $value, $fail) {
+                    if ($this->cfcId) {
+                        $existingCfc = Cfc::where('email', $value)->where('id', '!=', $this->cfcId)->exists();
+                        if ($existingCfc) {
+                            $fail('This email is already registered in the CFCs table.');
+                        }
+                    } else {
+                        if (Cfc::where('email', $value)->exists()) {
+                            $fail('This email is already registered in the CFCs table.');
+                        }
+                    }
+                    if (\App\Models\User::where('email', $value)->exists()) {
+                        $fail('This email is already registered in the users table.');
+                    }
+                    if (\App\Models\Entity::where('email', $value)->exists()) {
+                        $fail('This email is already registered in the entities table.');
+                    }
+                },
             ],
             'phoneNumber' => 'required|string|max:20',
             'registrationNumber' => [

@@ -58,7 +58,7 @@
                             <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
                                 Email Address <span class="text-red-500">*</span>
                             </label>
-                            <input type="email" id="email" wire:model="email" 
+                            <input type="email" id="email" wire:model.blur="email" 
                                 class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors @error('email') border-red-500 @enderror"
                                 placeholder="contact@dealer.com">
                             @error('email') 
@@ -262,7 +262,7 @@
                             <label for="user_email" class="block text-sm font-medium text-gray-700 mb-2">
                                 Email Address <span class="text-red-500">*</span>
                             </label>
-                            <input type="email" id="user_email" wire:model="user_email" 
+                            <input type="email" id="user_email" wire:model.blur="user_email" 
                                 class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors @error('user_email') border-red-500 @enderror"
                                 placeholder="john@dealer.com">
                             @error('user_email') 

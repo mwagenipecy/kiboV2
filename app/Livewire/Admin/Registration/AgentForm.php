@@ -50,6 +50,13 @@ class AgentForm extends Component
     // Vehicle makes for dropdown
     public $vehicleMakesList = [];
 
+    public function updated($propertyName)
+    {
+        if ($propertyName === 'email') {
+            $this->validateOnly($propertyName);
+        }
+    }
+
     public function mount($id = null)
     {
         // Load vehicle makes for dropdown
@@ -94,9 +101,24 @@ class AgentForm extends Component
                 'required',
                 'email',
                 'max:255',
-                $this->agentId 
-                    ? 'unique:agents,email,' . $this->agentId 
-                    : 'unique:agents,email',
+                function ($attribute, $value, $fail) {
+                    if ($this->agentId) {
+                        $existingAgent = Agent::where('email', $value)->where('id', '!=', $this->agentId)->exists();
+                        if ($existingAgent) {
+                            $fail('This email is already registered in the agents table.');
+                        }
+                    } else {
+                        if (Agent::where('email', $value)->exists()) {
+                            $fail('This email is already registered in the agents table.');
+                        }
+                    }
+                    if (User::where('email', $value)->exists()) {
+                        $fail('This email is already registered in the users table.');
+                    }
+                    if (\App\Models\Entity::where('email', $value)->exists()) {
+                        $fail('This email is already registered in the entities table.');
+                    }
+                },
             ],
             'phoneNumber' => 'required|string|max:20',
             'agentType' => 'required|string|in:garage_owner,lubricant_shop,spare_part',

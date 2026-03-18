@@ -10,8 +10,8 @@
                 <a href="{{ route('trucks.index') }}" class="text-sm font-medium {{ $vehicleType === 'trucks' || request()->routeIs('trucks.*') ? 'text-gray-900 font-semibold border-b-2 border-green-600 pb-1' : 'text-gray-600' }} hover:text-green-700 transition-colors">{{ __('vehicles.trucks') }}</a>
                 <a href="{{ route('spare-parts.index') }}" class="text-sm font-medium {{ $vehicleType === 'spare-parts' || request()->routeIs('spare-parts.*') ? 'text-gray-900 font-semibold border-b-2 border-green-600 pb-1' : 'text-gray-600' }} hover:text-green-700 transition-colors">Spare Parts</a>
                 <a href="{{ route('garage.index') }}" class="text-sm font-medium {{ $vehicleType === 'garage' || request()->routeIs('garage.*') ? 'text-gray-900 font-semibold border-b-2 border-green-600 pb-1' : 'text-gray-600' }} hover:text-green-700 transition-colors">Garage</a>
-                <a href="{{ route('loan-calculator.index') }}" class="text-sm font-medium {{ $vehicleType === 'loan-calculator' || request()->routeIs('loan-calculator.*') ? 'text-gray-900 font-semibold border-b-2 border-green-600 pb-1' : 'text-gray-600' }} hover:text-green-700 transition-colors">Loan Calculator</a>
-                <a href="{{ route('import-financing.index') }}" class="text-sm font-medium {{ $vehicleType === 'import-financing' || request()->routeIs('import-financing.*') ? 'text-gray-900 font-semibold border-b-2 border-green-600 pb-1' : 'text-gray-600' }} hover:text-green-700 transition-colors">Import Financing</a>
+                <a href="{{ route('import-financing.index') }}" class="text-sm font-medium {{ $vehicleType === 'financing' || request()->routeIs('loan-calculator.*') || request()->routeIs('import-financing.*') ? 'text-gray-900 font-semibold border-b-2 border-green-600 pb-1' : 'text-gray-600' }} hover:text-green-700 transition-colors">Financing</a>
+                <a href="{{ route('agiza-import.index') }}" class="text-sm font-medium {{ $vehicleType === 'agiza-import' || request()->routeIs('agiza-import.*') ? 'text-gray-900 font-semibold border-b-2 border-green-600 pb-1' : 'text-gray-600' }} hover:text-green-700 transition-colors">Agiza/Import</a>
                 <a href="{{ route('car-exchange.index') }}" class="text-sm font-medium {{ $vehicleType === 'car-exchange' || request()->routeIs('car-exchange.*') ? 'text-gray-900 font-semibold border-b-2 border-green-600 pb-1' : 'text-gray-600' }} hover:text-green-700 transition-colors">Car Exchange</a>
                 <a href="{{ route('cars.complaints') }}" class="ml-auto px-4 py-1.5 rounded-lg text-sm font-semibold text-white hover:opacity-90 transition-opacity" style="background-color: #009866;">Complaints</a>
                 {{-- Hidden menus --}}
@@ -125,11 +125,11 @@
                     <a href="{{ route('garage.index') }}" @click="mobileMenuOpen = false" class="block px-3 py-2 rounded-lg text-sm font-medium {{ $vehicleType === 'garage' || request()->routeIs('garage.*') ? 'bg-green-50 text-green-700' : 'text-gray-700 hover:bg-gray-50' }} transition-colors">
                         Garage
                     </a>
-                    <a href="{{ route('loan-calculator.index') }}" @click="mobileMenuOpen = false" class="block px-3 py-2 rounded-lg text-sm font-medium {{ $vehicleType === 'loan-calculator' || request()->routeIs('loan-calculator.*') ? 'bg-green-50 text-green-700' : 'text-gray-700 hover:bg-gray-50' }} transition-colors">
-                        Loan Calculator
+                    <a href="{{ route('import-financing.index') }}" @click="mobileMenuOpen = false" class="block px-3 py-2 rounded-lg text-sm font-medium {{ $vehicleType === 'financing' || request()->routeIs('loan-calculator.*') || request()->routeIs('import-financing.*') ? 'bg-green-50 text-green-700' : 'text-gray-700 hover:bg-gray-50' }} transition-colors">
+                        Financing
                     </a>
-                    <a href="{{ route('import-financing.index') }}" @click="mobileMenuOpen = false" class="block px-3 py-2 rounded-lg text-sm font-medium {{ $vehicleType === 'import-financing' || request()->routeIs('import-financing.*') ? 'bg-green-50 text-green-700' : 'text-gray-700 hover:bg-gray-50' }} transition-colors">
-                        Import Financing
+                    <a href="{{ route('agiza-import.index') }}" @click="mobileMenuOpen = false" class="block px-3 py-2 rounded-lg text-sm font-medium {{ $vehicleType === 'agiza-import' || request()->routeIs('agiza-import.*') ? 'bg-green-50 text-green-700' : 'text-gray-700 hover:bg-gray-50' }} transition-colors">
+                        Agiza/Import
                     </a>
                     <a href="{{ route('car-exchange.index') }}" @click="mobileMenuOpen = false" class="block px-3 py-2 rounded-lg text-sm font-medium {{ $vehicleType === 'car-exchange' || request()->routeIs('car-exchange.*') ? 'bg-green-50 text-green-700' : 'text-gray-700 hover:bg-gray-50' }} transition-colors">
                         Car Exchange
@@ -165,11 +165,17 @@
                     @elseif($vehicleType === 'garage')
                         <a href="{{ route('garage.index') }}" @click="mobileMenuOpen = false" class="block px-3 py-2 rounded-lg text-sm font-medium {{ request()->routeIs('garage.index') ? 'bg-green-50 text-green-700' : 'text-gray-700 hover:bg-gray-50' }} transition-colors">Find a Garage</a>
                         <a href="{{ route('garage.services') }}" @click="mobileMenuOpen = false" class="block px-3 py-2 rounded-lg text-sm font-medium {{ request()->routeIs('garage.services') ? 'bg-green-50 text-green-700' : 'text-gray-700 hover:bg-gray-50' }} transition-colors">Services</a>
-                    @elseif($vehicleType === 'loan-calculator')
-                        <a href="{{ route('loan-calculator.index') }}" @click="mobileMenuOpen = false" class="block px-3 py-2 rounded-lg text-sm font-medium {{ request()->routeIs('loan-calculator.*') ? 'bg-green-50 text-green-700' : 'text-gray-700 hover:bg-gray-50' }} transition-colors">Loan Calculator</a>
-                    @elseif($vehicleType === 'import-financing')
-                        <a href="{{ route('import-financing.index') }}" @click="mobileMenuOpen = false" class="block px-3 py-2 rounded-lg text-sm font-medium {{ request()->routeIs('import-financing.*') ? 'bg-green-50 text-green-700' : 'text-gray-700 hover:bg-gray-50' }} transition-colors">Apply for Financing</a>
+                    @elseif($vehicleType === 'financing')
+                        <a href="{{ route('import-financing.index') }}" @click="mobileMenuOpen = false" class="block px-3 py-2 rounded-lg text-sm font-medium {{ request()->routeIs('import-financing.index') ? 'bg-green-50 text-green-700' : 'text-gray-700 hover:bg-gray-50' }} transition-colors">Apply for Financing</a>
+                        @auth
                         <a href="{{ route('import-financing.requests') }}" @click="mobileMenuOpen = false" class="block px-3 py-2 rounded-lg text-sm font-medium {{ request()->routeIs('import-financing.requests') ? 'bg-green-50 text-green-700' : 'text-gray-700 hover:bg-gray-50' }} transition-colors">My Requests</a>
+                        @endauth
+                        <a href="{{ route('loan-calculator.index') }}" @click="mobileMenuOpen = false" class="block px-3 py-2 rounded-lg text-sm font-medium {{ request()->routeIs('loan-calculator.*') ? 'bg-green-50 text-green-700' : 'text-gray-700 hover:bg-gray-50' }} transition-colors">Loan Calculator</a>
+                    @elseif($vehicleType === 'agiza-import')
+                        <a href="{{ route('agiza-import.index') }}" @click="mobileMenuOpen = false" class="block px-3 py-2 rounded-lg text-sm font-medium {{ request()->routeIs('agiza-import.index') ? 'bg-green-50 text-green-700' : 'text-gray-700 hover:bg-gray-50' }} transition-colors">Submit Import Request</a>
+                        @auth
+                        <a href="{{ route('agiza-import.requests') }}" @click="mobileMenuOpen = false" class="block px-3 py-2 rounded-lg text-sm font-medium {{ request()->routeIs('agiza-import.requests') ? 'bg-green-50 text-green-700' : 'text-gray-700 hover:bg-gray-50' }} transition-colors">My Import Requests</a>
+                        @endauth
                     @endif
                 </div>
             </div>

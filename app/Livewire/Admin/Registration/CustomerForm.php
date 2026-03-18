@@ -15,6 +15,13 @@ class CustomerForm extends Component
     public $address = '';
     public $status = 'active';
 
+    public function updated($propertyName)
+    {
+        if ($propertyName === 'email') {
+            $this->validateOnly($propertyName);
+        }
+    }
+
     public function mount($id = null)
     {
         if ($id) {
@@ -37,9 +44,24 @@ class CustomerForm extends Component
                 'required',
                 'email',
                 'max:255',
-                $this->customerId 
-                    ? 'unique:customers,email,' . $this->customerId 
-                    : 'unique:customers,email'
+                function ($attribute, $value, $fail) {
+                    if ($this->customerId) {
+                        $existingCustomer = Customer::where('email', $value)->where('id', '!=', $this->customerId)->exists();
+                        if ($existingCustomer) {
+                            $fail('This email is already registered in the customers table.');
+                        }
+                    } else {
+                        if (Customer::where('email', $value)->exists()) {
+                            $fail('This email is already registered in the customers table.');
+                        }
+                    }
+                    if (User::where('email', $value)->exists()) {
+                        $fail('This email is already registered in the users table.');
+                    }
+                    if (\App\Models\Entity::where('email', $value)->exists()) {
+                        $fail('This email is already registered in the entities table.');
+                    }
+                },
             ],
             'phoneNumber' => 'required|string|max:20',
             'nidaNumber' => [

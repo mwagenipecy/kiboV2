@@ -6,7 +6,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
-#[Layout('layouts.customer', ['vehicleType' => 'loan-calculator'])]
+#[Layout('layouts.customer', ['vehicleType' => 'financing'])]
 class LoanCalculator extends Component
 {
     // Loan Details

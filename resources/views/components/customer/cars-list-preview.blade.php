@@ -2,10 +2,15 @@
     .kibo-text { color: #009866 !important; }
 </style>
 <!-- Cars List Preview Section (2 rows + View more) -->
+@php
+    $searchUrl = isset($condition) && in_array($condition, ['used', 'new'], true)
+        ? route('cars.search', ['condition' => $condition])
+        : route('cars.search');
+@endphp
 <section class="bg-white py-16 px-4 sm:px-6 lg:px-8">
     <div class="max-w-7xl mx-auto">
         <h2 class="text-3xl md:text-4xl font-bold text-gray-900 text-center mb-12">
-            Browse cars for sale
+            {{ $title }}
         </h2>
 
         @if($vehicles->count() > 0)
@@ -59,7 +64,7 @@
 
         <div class="text-center mt-8">
             <a
-                href="{{ route('cars.search') }}"
+                href="{{ $searchUrl }}"
                 class="inline-flex items-center gap-2 text-gray-900 font-semibold hover:gap-3 transition-all duration-200 group"
             >
                 <span class="border-b-2 border-gray-900">View more cars</span>
@@ -71,7 +76,7 @@
         @else
         <div class="text-center py-12">
             <p class="text-gray-600">No cars available at the moment.</p>
-            <a href="{{ route('cars.search') }}" class="inline-block mt-4 font-semibold kibo-text">
+            <a href="{{ $searchUrl }}" class="inline-block mt-4 font-semibold kibo-text">
                 Browse all cars →
             </a>
         </div>

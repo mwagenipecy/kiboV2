@@ -33,7 +33,20 @@ class EditLender extends Component
     {
         return [
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:entities,email,' . $this->entityId,
+            'email' => [
+                'required',
+                'email',
+                'max:255',
+                function ($attribute, $value, $fail) {
+                    $existingEntity = Entity::where('email', $value)->where('id', '!=', $this->entityId)->exists();
+                    if ($existingEntity) {
+                        $fail('This email is already registered in the entities table.');
+                    }
+                    if (\App\Models\User::where('email', $value)->exists()) {
+                        $fail('This email is already registered in the users table.');
+                    }
+                },
+            ],
             'phone' => 'nullable|string|max:20',
             'address' => 'nullable|string',
             'city' => 'nullable|string|max:100',
@@ -53,11 +66,17 @@ class EditLender extends Component
         'name.required' => 'Lender name is required',
         'email.required' => 'Email is required',
         'email.email' => 'Please enter a valid email address',
-        'email.unique' => 'This email is already registered',
         'user_name.required' => 'Primary user name is required',
         'user_email.required' => 'Primary user email is required',
         'user_email.email' => 'Please enter a valid email address',
     ];
+
+    public function updated($propertyName)
+    {
+        if ($propertyName === 'email') {
+            $this->validateOnly($propertyName);
+        }
+    }
 
     public function mount($id)
     {

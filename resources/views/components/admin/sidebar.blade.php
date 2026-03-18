@@ -508,6 +508,38 @@
                 </div>
                 @endif
 
+                <!-- Agiza/Import Requests (Admin only) -->
+                @if($userRole === 'admin')
+                <a href="{{ route('admin.agiza-import') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('admin.agiza-import*') ? 'text-white kibo-sidebar-active shadow-sm' : 'text-gray-700 kibo-sidebar-hover' }} transition-colors group">
+                    <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <span class="menu-text whitespace-nowrap">Agiza/Import Requests</span>
+                    @php
+                        $agizaPendingCount = \App\Models\AgizaImportRequest::where('status', 'pending')->count();
+                    @endphp
+                    @if($agizaPendingCount > 0)
+                    <span class="ml-2 px-2 py-0.5 text-xs font-semibold text-yellow-700 bg-yellow-100 rounded-full whitespace-nowrap flex-shrink-0">{{ $agizaPendingCount }}</span>
+                    @endif
+                </a>
+                @endif
+
+                <!-- Import Financing Requests (Admin and Lender) -->
+                @if($userRole === 'admin' || $userRole === 'lender')
+                <a href="{{ route('admin.import-financing') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('admin.import-financing*') ? 'text-white kibo-sidebar-active shadow-sm' : 'text-gray-700 kibo-sidebar-hover' }} transition-colors group">
+                    <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+                    </svg>
+                    <span class="menu-text whitespace-nowrap">Import Financing</span>
+                    @php
+                        $importFinancingPendingCount = \App\Models\ImportFinancingRequest::where('status', 'pending')->count();
+                    @endphp
+                    @if($importFinancingPendingCount > 0)
+                    <span class="ml-2 px-2 py-0.5 text-xs font-semibold text-blue-700 bg-blue-100 rounded-full whitespace-nowrap flex-shrink-0">{{ $importFinancingPendingCount }}</span>
+                    @endif
+                </a>
+                @endif
+
                 <!-- Customers - Expandable (Admin only) -->
                 @if($userRole === 'admin')
                 <div x-data="{ open: {{ request()->is('admin/customers*') ? 'true' : 'false' }} }">

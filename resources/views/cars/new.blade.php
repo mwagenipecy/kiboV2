@@ -22,11 +22,13 @@
                     </div>
                 </div>
             </div>
+            <!-- Spacer so next section is not covered by search overlay -->
+            <div class="block h-4 sm:h-8" aria-hidden="true"></div>
         </div>
     </section>
 
-
-
+    <!-- Browse new cars (same design as /cars "Browse cars for sale") -->
+    <x-customer.cars-list-preview :condition="'new'" />
 
      <!-- Reserve Online Component -->
      <x-customer.reserve-online />

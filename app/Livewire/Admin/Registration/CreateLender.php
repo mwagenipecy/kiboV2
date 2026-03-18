@@ -37,37 +37,70 @@ class CreateLender extends Component
     public $errorTitle = 'Error';
     public $errorMessage = '';
 
-    protected $rules = [
-        'name' => 'required|string|max:255',
-        'email' => 'required|email|unique:entities,email',
-        'phone' => 'nullable|string|max:20',
-        'address' => 'nullable|string',
-        'city' => 'nullable|string|max:100',
-        'state' => 'nullable|string|max:100',
-        'zip_code' => 'nullable|string|max:20',
-        'country' => 'required|string|max:100',
-        'registration_number' => 'nullable|string|unique:entities,registration_number',
-        'tax_id' => 'nullable|string|max:50',
-        'website' => 'nullable|url|max:255',
-        'description' => 'nullable|string',
-        'user_name' => 'required|string|max:255',
-        'user_email' => 'required|email|unique:users,email',
-    ];
+    protected function rules()
+    {
+        return [
+            'name' => 'required|string|max:255',
+            'email' => [
+                'required',
+                'email',
+                'max:255',
+                function ($attribute, $value, $fail) {
+                    if (Entity::where('email', $value)->exists()) {
+                        $fail('This email is already registered in the entities table.');
+                    }
+                    if (User::where('email', $value)->exists()) {
+                        $fail('This email is already registered in the users table.');
+                    }
+                },
+            ],
+            'phone' => 'nullable|string|max:20',
+            'address' => 'nullable|string',
+            'city' => 'nullable|string|max:100',
+            'state' => 'nullable|string|max:100',
+            'zip_code' => 'nullable|string|max:20',
+            'country' => 'required|string|max:100',
+            'registration_number' => 'nullable|string|unique:entities,registration_number',
+            'tax_id' => 'nullable|string|max:50',
+            'website' => 'nullable|url|max:255',
+            'description' => 'nullable|string',
+            'user_name' => 'required|string|max:255',
+            'user_email' => [
+                'required',
+                'email',
+                'max:255',
+                function ($attribute, $value, $fail) {
+                    if (User::where('email', $value)->exists()) {
+                        $fail('This email is already registered in the users table.');
+                    }
+                    if (Entity::where('email', $value)->exists()) {
+                        $fail('This email is already registered in the entities table.');
+                    }
+                },
+            ],
+            'pricing_plan_id' => 'nullable|exists:advertising_pricing,id',
+        ];
+    }
 
     protected $messages = [
         'name.required' => 'Lender name is required',
         'email.required' => 'Email is required',
         'email.email' => 'Please enter a valid email address',
-        'email.unique' => 'This email is already registered',
         'user_name.required' => 'Primary user name is required',
         'user_email.required' => 'Primary user email is required',
         'user_email.email' => 'Please enter a valid email address',
-        'user_email.unique' => 'This email is already in use',
     ];
 
     public function mount()
     {
         $this->country = 'Kenya';
+    }
+
+    public function updated($propertyName)
+    {
+        if ($propertyName === 'email' || $propertyName === 'user_email') {
+            $this->validateOnly($propertyName);
+        }
     }
 
     public function save()

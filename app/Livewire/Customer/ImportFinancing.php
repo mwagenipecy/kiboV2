@@ -12,7 +12,7 @@ use Livewire\Attributes\Validate;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
-#[Layout('layouts.customer', ['vehicleType' => 'import-financing'])]
+#[Layout('layouts.customer', ['vehicleType' => 'financing'])]
 class ImportFinancing extends Component
 {
     use WithFileUploads;

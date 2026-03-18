@@ -15,11 +15,28 @@ class SparePartSourcing extends Component
 {
     use WithFileUploads;
 
-    // Order type: single or bulk
-    public $orderType = 'single';
+    /**
+     * Simple request model: we keep a single "order" with one item,
+     * and allow the user to describe what they need in notes.
+     */
+    // NOTE: Livewire deep-binding into array-of-arrays can be fragile in some setups.
+    // We keep part fields as parallel arrays to ensure reliable hydration.
+    public array $orderItems = [];
+    public array $orderItemIds = [];
+    public array $partNames = [];
+    public array $quantities = [];
+    public array $partNumbers = [];
+    public array $notes = [];
+    public array $conditions = [];
 
-    // Order items array (now includes make/model per item for bulk orders)
-    public $orderItems = [];
+    /**
+     * Livewire file uploads behave best as top-level properties.
+     * We keep per-item images here (indexed by the orderItems loop index).
+     */
+    public array $orderItemImages = [];
+    
+    // Track which items are expanded (by index)
+    public array $expandedItems = [];
     
     // Modal states
     public $showSuccessModal = false;
@@ -39,6 +56,7 @@ class SparePartSourcing extends Component
     public $vehicleModelId = '';
     public $vehicleYear = '';
     public $vehicleVin = '';
+    public $preferredCondition = 'any'; // any|new|used
 
     // Delivery information
     public $deliveryAddress = '';
@@ -47,32 +65,102 @@ class SparePartSourcing extends Component
     public $deliveryCountry = 'Tanzania';
     public $deliveryPostalCode = '';
 
+    public array $tanzaniaRegions = [];
+
     public $vehicleMakes = [];
     public $vehicleModels = [];
     public $submitted = false;
     public $isLoggedIn = false;
 
+    /** Optional images (global fallback; per-part images in orderItems.*.images) */
+    public $images = [];
+
+    public function addOrderItem()
+    {
+        $nextId = (int) (collect($this->orderItemIds)->max() ?? 0) + 1;
+        $newIndex = count($this->orderItemIds);
+        $this->orderItemIds[] = $nextId;
+        $this->partNames[] = '';
+        $this->quantities[] = 1;
+        $this->partNumbers[] = '';
+        $this->notes[] = '';
+        $this->conditions[] = 'any';
+        $this->orderItemImages[] = [];
+        $this->expandedItems[] = $newIndex;
+    }
+    
+    public function toggleItem($index)
+    {
+        if (in_array($index, $this->expandedItems)) {
+            $this->expandedItems = array_values(array_filter($this->expandedItems, fn($i) => $i !== $index));
+        } else {
+            $this->expandedItems[] = $index;
+        }
+    }
+
+    public function removeOrderItem($index)
+    {
+        if (count($this->orderItemIds) <= 1) return;
+        $i = (int) $index;
+        foreach (['orderItemIds','partNames','quantities','partNumbers','notes','conditions','orderItemImages'] as $prop) {
+            if (array_key_exists($i, $this->{$prop})) {
+                unset($this->{$prop}[$i]);
+                $this->{$prop} = array_values($this->{$prop});
+            }
+        }
+    }
+
     public function mount()
     {
         $this->isLoggedIn = Auth::check();
+
+        $this->tanzaniaRegions = [
+            'Arusha',
+            'Dar es Salaam',
+            'Dodoma',
+            'Geita',
+            'Iringa',
+            'Kagera',
+            'Katavi',
+            'Kigoma',
+            'Kilimanjaro',
+            'Lindi',
+            'Manyara',
+            'Mara',
+            'Mbeya',
+            'Morogoro',
+            'Mtwara',
+            'Mwanza',
+            'Njombe',
+            'Pemba North',
+            'Pemba South',
+            'Pwani (Coast)',
+            'Rukwa',
+            'Ruvuma',
+            'Shinyanga',
+            'Simiyu',
+            'Singida',
+            'Songwe',
+            'Tabora',
+            'Tanga',
+            'Unguja North',
+            'Unguja South',
+            'Unguja West',
+        ];
         
         $this->vehicleMakes = VehicleMake::where('status', 'active')
             ->orderBy('name')
             ->get();
         
-        // Initialize with one empty order item (with make/model for bulk)
-        $this->orderItems = [
-            [
-                'id' => 1,
-                'part_number' => '',
-                'part_name' => '',
-                'quantity' => 1,
-                'notes' => '',
-                'vehicle_make_id' => '',
-                'vehicle_model_id' => '',
-                'available_models' => [],
-            ]
-        ];
+        // Initialize with one empty order item
+        $this->orderItemIds = [1];
+        $this->partNames = [''];
+        $this->quantities = [1];
+        $this->partNumbers = [''];
+        $this->notes = [''];
+        $this->conditions = ['any'];
+        $this->orderItemImages = [[]];
+        $this->expandedItems = [0];
         
         // Pre-fill user information if logged in
         if ($this->isLoggedIn) {
@@ -94,135 +182,89 @@ class SparePartSourcing extends Component
         }
     }
 
-    public function updatedOrderType()
+    public function openAuthModal()
     {
-        // Reset to single item with appropriate fields
-        if ($this->orderType === 'single') {
-            $this->orderItems = [
-                [
-                    'id' => 1,
-                    'part_number' => '',
-                    'part_name' => '',
-                    'quantity' => 1,
-                    'notes' => '',
-                ]
-            ];
-        } else {
-            // Bulk mode - add make/model fields
-            $this->orderItems = [
-                [
-                    'id' => 1,
-                    'part_number' => '',
-                    'part_name' => '',
-                    'quantity' => 1,
-                    'notes' => '',
-                    'vehicle_make_id' => '',
-                    'vehicle_model_id' => '',
-                    'available_models' => [],
-                ]
-            ];
-        }
-    }
-
-    public function addOrderItem()
-    {
-        $this->orderItems[] = [
-            'id' => count($this->orderItems) + 1,
-            'part_number' => '',
-            'part_name' => '',
-            'quantity' => 1,
-            'notes' => '',
-            'vehicle_make_id' => '',
-            'vehicle_model_id' => '',
-            'available_models' => [],
-        ];
-    }
-    
-    public function updatedOrderItems($value, $key)
-    {
-        // Handle make/model updates for bulk orders
-        if (str_contains($key, 'vehicle_make_id')) {
-            $index = explode('.', $key)[0];
-            $this->orderItems[$index]['vehicle_model_id'] = '';
-            
-            if ($this->orderItems[$index]['vehicle_make_id']) {
-                $this->orderItems[$index]['available_models'] = VehicleModel::where('vehicle_make_id', $this->orderItems[$index]['vehicle_make_id'])
-                    ->where('status', 'active')
-                    ->orderBy('name')
-                    ->get()
-                    ->toArray();
-            } else {
-                $this->orderItems[$index]['available_models'] = [];
-            }
-        }
-    }
-
-    public function removeOrderItem($id)
-    {
-        if (count($this->orderItems) > 1) {
-            $this->orderItems = array_values(array_filter($this->orderItems, function($item) use ($id) {
-                return $item['id'] != $id;
-            }));
-        }
-    }
-
-    public function updateOrderItem($id, $field, $value)
-    {
-        foreach ($this->orderItems as $key => $item) {
-            if ($item['id'] == $id) {
-                $this->orderItems[$key][$field] = $value;
-                break;
-            }
-        }
+        $this->dispatch('open-auth-modal');
     }
 
     public function submitOrders()
     {
+
         // Check if user is logged in
         if (!Auth::check()) {
-            $this->errorMessage = 'Please login to submit your spare part order.';
-            $this->showErrorModal = true;
+            $this->openAuthModal();
             return;
         }
 
-        // Validate based on order type
+
+        // Ensure name/email are always taken from the logged-in user
+        $user = Auth::user();
+        $this->customerName = $user->name;
+        $this->customerEmail = $user->email;
+
+        // Normalize into the structure used for validation + persistence
+        $count = count($this->orderItemIds);
+        $this->orderItems = [];
+        for ($i = 0; $i < $count; $i++) {
+            $this->orderItems[] = [
+                'id' => $this->orderItemIds[$i] ?? null,
+                'part_name' => trim((string) ($this->partNames[$i] ?? '')),
+                'quantity' => (int) ($this->quantities[$i] ?? 1),
+                'part_number' => trim((string) ($this->partNumbers[$i] ?? '')),
+                'notes' => trim((string) ($this->notes[$i] ?? '')),
+                'condition' => in_array($this->conditions[$i] ?? '', ['any', 'new', 'used'], true) ? $this->conditions[$i] : 'any',
+                'images' => $this->orderItemImages[$i] ?? [],
+            ];
+        }
+
+        // Validate: one vehicle, one or more parts
         $rules = [
             'customerName' => 'required|string|max:255',
             'customerEmail' => 'required|email|max:255',
-            'customerPhone' => 'required|string|max:20',
+            'customerPhone' => ['required', 'regex:/^0\\d{9}$/'],
             'deliveryAddress' => 'required|string',
-            'orderItems' => 'required|array|min:1',
-            'orderItems.*.part_number' => 'required|string|max:255',
-            'orderItems.*.part_name' => 'required|string|max:255',
-            'orderItems.*.quantity' => 'required|integer|min:1',
+            'deliveryCity' => 'required|string|max:255',
+            'orderItemIds' => 'required|array|min:1',
+            'partNames' => 'required|array|min:1',
+            'partNames.*' => 'required|string|max:255',
+            'quantities' => 'required|array|min:1',
+            'quantities.*' => 'required|integer|min:1',
+            'partNumbers' => 'nullable|array',
+            'partNumbers.*' => 'nullable|string|max:255',
+            'notes' => 'required|array|min:1',
+            'notes.*' => 'required|string|max:2000',
+            'conditions' => 'required|array|min:1',
+            'conditions.*' => 'required|in:any,new,used',
+            'orderItemImages' => 'nullable|array',
+            'orderItemImages.*' => 'nullable|array|max:5',
+            'orderItemImages.*.*' => 'nullable|image|max:5120',
+            'vehicleMakeId' => 'required|exists:vehicle_makes,id',
+            'vehicleModelId' => 'required|exists:vehicle_models,id',
         ];
-        
-        // For single order, validate global make/model
-        if ($this->orderType === 'single') {
-            $rules['vehicleMakeId'] = 'required|exists:vehicle_makes,id';
-            $rules['vehicleModelId'] = 'required|exists:vehicle_models,id';
-        } else {
-            // For bulk order, validate make/model per item
-            $rules['orderItems.*.vehicle_make_id'] = 'required|exists:vehicle_makes,id';
-            $rules['orderItems.*.vehicle_model_id'] = 'required|exists:vehicle_models,id';
-        }
-        
+
         $this->validate($rules, [
             'vehicleMakeId.required' => 'Please select a vehicle make.',
             'vehicleModelId.required' => 'Please select a vehicle model.',
-            'orderItems.*.vehicle_make_id.required' => 'Please select a vehicle make for all items.',
-            'orderItems.*.vehicle_model_id.required' => 'Please select a vehicle model for all items.',
-            'orderItems.*.part_number.required' => 'Part number is required for all items.',
-            'orderItems.*.part_name.required' => 'Part name is required for all items.',
+            'partNames.*.required' => 'Part name is required.',
+            'notes.*.required' => 'Please add details to help us source the part.',
+            'customerPhone.regex' => 'Phone number must start with 0 and be 10 digits (e.g. 0712345678).',
         ]);
 
-        // Create orders - one order per item
         $createdOrders = [];
         foreach ($this->orderItems as $item) {
-            // Use item-specific make/model for bulk, or global for single
-            $makeId = $this->orderType === 'bulk' ? $item['vehicle_make_id'] : $this->vehicleMakeId;
-            $modelId = $this->orderType === 'bulk' ? $item['vehicle_model_id'] : $this->vehicleModelId;
-            
+            $condition = ($item['condition'] ?? 'any') === 'any' ? 'new' : $item['condition'];
+            $storedImages = [];
+            if (!empty($item['images']) && is_array($item['images'])) {
+                foreach ($item['images'] as $image) {
+                    if ($image) $storedImages[] = $image->store('spare-part-orders', 'public');
+                }
+            }
+            if (empty($storedImages) && is_array($this->images)) {
+                foreach ($this->images as $image) {
+                    if ($image) $storedImages[] = $image->store('spare-part-orders', 'public');
+                }
+            }
+
             $order = SparePartOrder::create([
                 'order_number' => SparePartOrder::generateOrderNumber(),
                 'order_channel' => 'portal',
@@ -230,15 +272,19 @@ class SparePartSourcing extends Component
                 'customer_name' => $this->customerName,
                 'customer_email' => $this->customerEmail,
                 'customer_phone' => $this->customerPhone,
-                'vehicle_make_id' => $makeId,
-                'vehicle_model_id' => $modelId,
-                'condition' => 'new', // Default to new
+                'vehicle_make_id' => $this->vehicleMakeId,
+                'vehicle_model_id' => $this->vehicleModelId,
+                'condition' => $condition,
                 'part_name' => $item['part_name'],
-                'description' => ($item['part_number'] ?? '') . ($item['notes'] ? ' - ' . $item['notes'] : ''),
-                'images' => [],
+                'description' => trim(
+                    ($item['part_number'] ? ('Part number: ' . $item['part_number'] . "\n") : '') .
+                    "Qty: " . ($item['quantity'] ?? 1) . "\n" .
+                    ($item['notes'] ?? '')
+                ),
+                'images' => $storedImages,
                 'delivery_address' => $this->deliveryAddress,
                 'delivery_city' => $this->deliveryCity,
-                'delivery_region' => $this->deliveryRegion,
+                'delivery_region' => null,
                 'delivery_country' => $this->deliveryCountry,
                 'delivery_postal_code' => $this->deliveryPostalCode,
                 'delivery_latitude' => null,
@@ -248,16 +294,15 @@ class SparePartSourcing extends Component
                 'contact_email' => $this->customerEmail,
                 'status' => 'pending',
             ]);
-            
             $createdOrders[] = $order;
         }
 
         $this->submitted = true;
         $this->createdOrderNumbers = array_column($createdOrders, 'order_number');
-        $this->successMessage = 'Your spare part order(s) have been submitted successfully!';
+        $this->successMessage = count($createdOrders) > 1
+            ? 'Your spare part requests have been submitted successfully!'
+            : 'Your spare part request has been submitted successfully!';
         $this->showSuccessModal = true;
-        
-        // Reset form after showing success
         $this->resetForm();
     }
     
@@ -276,33 +321,26 @@ class SparePartSourcing extends Component
 
     public function resetForm()
     {
-        // Keep customer info but reset order items
-        if ($this->orderType === 'single') {
-            $this->orderItems = [
-                [
-                    'id' => 1,
-                    'part_number' => '',
-                    'part_name' => '',
-                    'quantity' => 1,
-                    'notes' => '',
-                ]
-            ];
-        } else {
-            $this->orderItems = [
-                [
-                    'id' => 1,
-                    'part_number' => '',
-                    'part_name' => '',
-                    'quantity' => 1,
-                    'notes' => '',
-                    'vehicle_make_id' => '',
-                    'vehicle_model_id' => '',
-                    'available_models' => [],
-                ]
-            ];
-        }
-        
-        $this->reset(['vehicleMakeId', 'vehicleModelId', 'vehicleYear', 'vehicleVin', 'deliveryAddress', 'deliveryCity', 'deliveryRegion', 'deliveryPostalCode']);
+        $this->orderItemIds = [1];
+        $this->partNames = [''];
+        $this->quantities = [1];
+        $this->partNumbers = [''];
+        $this->notes = [''];
+        $this->conditions = ['any'];
+        $this->orderItems = [];
+        $this->expandedItems = [0];
+        $this->reset([
+            'vehicleMakeId',
+            'vehicleModelId',
+            'vehicleYear',
+            'vehicleVin',
+            'deliveryAddress',
+            'deliveryCity',
+            'deliveryPostalCode',
+            'images',
+            'orderItemImages',
+        ]);
+        $this->orderItemImages = [[]];
         $this->submitted = false;
         $this->vehicleModels = [];
         
