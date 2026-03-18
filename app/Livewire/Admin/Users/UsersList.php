@@ -2,7 +2,10 @@
 
 namespace App\Livewire\Admin\Users;
 
+use App\Jobs\SendPasswordResetEmail;
 use App\Models\User;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -12,6 +15,19 @@ class UsersList extends Component
 
     public $search = '';
     public $roleFilter = '';
+
+    public $showAddAdminModal = false;
+    public $adminName = '';
+    public $adminEmail = '';
+    
+    public $showResetPasswordModal = false;
+    public $resetUserId = null;
+    public $confirmPassword = '';
+    
+    public $showStatusModal = false;
+    public $statusUserId = null;
+    public $statusAction = '';
+    public $statusConfirmPassword = '';
 
     protected $queryString = ['search', 'roleFilter'];
 
@@ -25,21 +41,183 @@ class UsersList extends Component
         $this->resetPage();
     }
 
-    public function deleteUser($userId)
+    public function updated($propertyName)
     {
+        if ($propertyName === 'adminEmail') {
+            $this->validateOnly('adminEmail', [
+                'adminEmail' => [
+                    'required',
+                    'email',
+                    'max:255',
+                    function ($attribute, $value, $fail) {
+                        if (User::where('email', $value)->exists()) {
+                            $fail('This email is already registered.');
+                        }
+                    },
+                ],
+            ]);
+        }
+    }
+
+    public function openAddAdminModal()
+    {
+        $this->showAddAdminModal = true;
+        $this->adminName = '';
+        $this->adminEmail = '';
+    }
+
+    public function closeAddAdminModal()
+    {
+        $this->showAddAdminModal = false;
+        $this->adminName = '';
+        $this->adminEmail = '';
+        $this->resetValidation();
+    }
+
+    public function createAdmin()
+    {
+        $this->validate([
+            'adminName' => 'required|string|max:255',
+            'adminEmail' => [
+                'required',
+                'email',
+                'max:255',
+                function ($attribute, $value, $fail) {
+                    if (User::where('email', $value)->exists()) {
+                        $fail('This email is already registered.');
+                    }
+                },
+            ],
+        ]);
+
         try {
-            $user = User::findOrFail($userId);
+            $password = Str::random(12);
             
-            // Prevent deleting yourself
+            $user = User::create([
+                'name' => $this->adminName,
+                'email' => $this->adminEmail,
+                'password' => Hash::make($password),
+                'role' => 'admin',
+                'email_verified_at' => now(),
+            ]);
+
+            // Send credentials via email
+            Mail::send('emails.admin-credentials', [
+                'name' => $user->name,
+                'email' => $user->email,
+                'password' => $password,
+            ], function ($message) use ($user) {
+                $message->to($user->email)
+                    ->subject('Your Admin Account Credentials - Kibo');
+            });
+
+            session()->flash('message', 'Admin user created successfully! Credentials sent to ' . $user->email);
+            $this->closeAddAdminModal();
+        } catch (\Exception $e) {
+            session()->flash('error', 'Failed to create admin: ' . $e->getMessage());
+        }
+    }
+
+    public function openResetPasswordModal($userId)
+    {
+        $this->showResetPasswordModal = true;
+        $this->resetUserId = $userId;
+        $this->confirmPassword = '';
+    }
+
+    public function closeResetPasswordModal()
+    {
+        $this->showResetPasswordModal = false;
+        $this->resetUserId = null;
+        $this->confirmPassword = '';
+        $this->resetValidation();
+    }
+
+    public function resetUserPassword()
+    {
+        $this->validate([
+            'confirmPassword' => 'required|string|min:8',
+        ], [
+            'confirmPassword.required' => 'Please confirm your password to proceed.',
+        ]);
+
+        try {
+            if (!Hash::check($this->confirmPassword, auth()->user()->password)) {
+                $this->addError('confirmPassword', 'The password you entered is incorrect.');
+                return;
+            }
+
+            $user = User::findOrFail($this->resetUserId);
+            
+            $newPassword = Str::random(12);
+            
+            $user->update([
+                'password' => Hash::make($newPassword),
+            ]);
+
+            SendPasswordResetEmail::dispatch($user->name, $user->email, $newPassword);
+
+            session()->flash('message', 'Password reset successfully! New credentials will be sent to ' . $user->email);
+            $this->closeResetPasswordModal();
+        } catch (\Exception $e) {
+            session()->flash('error', 'Failed to reset password: ' . $e->getMessage());
+        }
+    }
+
+    public function openStatusModal($userId, $action)
+    {
+        $user = User::find($userId);
+        
+        if ($user && $user->id === auth()->id()) {
+            session()->flash('error', 'You cannot deactivate your own account.');
+            return;
+        }
+        
+        $this->showStatusModal = true;
+        $this->statusUserId = $userId;
+        $this->statusAction = $action;
+        $this->statusConfirmPassword = '';
+    }
+
+    public function closeStatusModal()
+    {
+        $this->showStatusModal = false;
+        $this->statusUserId = null;
+        $this->statusAction = '';
+        $this->statusConfirmPassword = '';
+        $this->resetValidation();
+    }
+
+    public function toggleUserStatus()
+    {
+        $this->validate([
+            'statusConfirmPassword' => 'required|string|min:8',
+        ], [
+            'statusConfirmPassword.required' => 'Please confirm your password to proceed.',
+        ]);
+
+        try {
+            if (!Hash::check($this->statusConfirmPassword, auth()->user()->password)) {
+                $this->addError('statusConfirmPassword', 'The password you entered is incorrect.');
+                return;
+            }
+
+            $user = User::findOrFail($this->statusUserId);
+            
             if ($user->id === auth()->id()) {
-                session()->flash('error', 'You cannot delete your own account.');
+                session()->flash('error', 'You cannot deactivate your own account.');
+                $this->closeStatusModal();
                 return;
             }
             
-            $user->delete();
-            session()->flash('message', 'User deleted successfully!');
+            $newStatus = $this->statusAction === 'deactivate' ? 'inactive' : 'active';
+            $user->update(['status' => $newStatus]);
+            
+            $statusText = $newStatus === 'active' ? 'activated' : 'deactivated';
+            session()->flash('message', "User {$statusText} successfully!");
+            $this->closeStatusModal();
         } catch (\Exception $e) {
-            session()->flash('error', 'Failed to delete user: ' . $e->getMessage());
+            session()->flash('error', 'Failed to update user status: ' . $e->getMessage());
         }
     }
 

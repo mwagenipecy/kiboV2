@@ -26,6 +26,7 @@ class User extends Authenticatable implements CanResetPassword
         'email',
         'password',
         'role',
+        'status',
         'entity_id',
         'otp_code',
         'otp_expires_at',

@@ -7,6 +7,7 @@
 </head>
 <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
     <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+        <img src="{{ asset('logo/white.png') }}" alt="Kibo" style="height: 50px; width: auto; margin-bottom: 15px;" />
         <h1 style="color: white; margin: 0; font-size: 28px;">Import Request Received!</h1>
         <p style="color: #f0fdf4; margin: 10px 0 0 0; font-size: 16px;">We'll help you import your dream car</p>
     </div>
