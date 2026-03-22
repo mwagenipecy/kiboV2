@@ -11,7 +11,7 @@
             </div>
             <div class="hidden md:flex flex-col items-start">
                 <span class="text-sm font-medium">{{ $this->user->name }}</span>
-                <span class="text-xs text-gray-500">{{ $this->user->email }}</span>
+                <!-- <span class="text-xs text-gray-500">{{ $this->user->email }}</span> -->
             </div>
             <svg 
                 class="w-4 h-4 transition-transform duration-200"
