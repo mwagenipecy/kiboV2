@@ -16,29 +16,48 @@ class CarExchangeForm extends Component
 
     // Current vehicle fields
     public $current_vehicle_make_id = '';
+
     public $current_vehicle_model_id = '';
+
     public $current_vehicle_year = '';
+
     public $current_vehicle_registration = '';
+
     public $current_vehicle_mileage = '';
+
     public $current_vehicle_condition = '';
+
     public $current_vehicle_description = '';
+
     public $current_vehicle_images = [];
+
+    /** Single-file staging; appended to current_vehicle_images one at a time (reliable with Livewire). */
+    public $current_vehicle_image_upload = null;
 
     // Desired vehicle fields
     public $desired_vehicle_make_id = '';
+
     public $desired_vehicle_model_id = '';
+
     public $desired_min_year = '';
+
     public $desired_max_year = '';
+
     public $desired_fuel_type = '';
+
     public $desired_transmission = '';
+
     public $desired_body_type = '';
+
     public $max_budget = '';
 
     // Additional fields
     public $notes = '';
+
     public $location = '';
 
     public $currentModels = [];
+
     public $desiredModels = [];
 
     public function mount(): void
@@ -79,24 +98,61 @@ class CarExchangeForm extends Component
         }
     }
 
+    public function updatedCurrentVehicleImageUpload(): void
+    {
+        if (! $this->current_vehicle_image_upload) {
+            return;
+        }
+
+        try {
+            $this->validateOnly('current_vehicle_image_upload', [
+                'current_vehicle_image_upload' => 'required|image|max:5120',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            $this->current_vehicle_image_upload = null;
+
+            throw $e;
+        }
+
+        if (count($this->current_vehicle_images) >= 12) {
+            $this->current_vehicle_image_upload = null;
+
+            return;
+        }
+
+        $this->current_vehicle_images[] = $this->current_vehicle_image_upload;
+        $this->current_vehicle_image_upload = null;
+    }
+
+    public function removeCurrentVehicleImage(int $index): void
+    {
+        if (! isset($this->current_vehicle_images[$index])) {
+            return;
+        }
+
+        unset($this->current_vehicle_images[$index]);
+        $this->current_vehicle_images = array_values($this->current_vehicle_images);
+    }
+
     public function submit()
     {
         $validated = $this->validate([
             // Current vehicle
             'current_vehicle_make_id' => ['required', 'integer', 'exists:vehicle_makes,id'],
             'current_vehicle_model_id' => ['required', 'integer', 'exists:vehicle_models,id'],
-            'current_vehicle_year' => ['required', 'integer', 'min:1950', 'max:' . (date('Y') + 1)],
+            'current_vehicle_year' => ['required', 'integer', 'min:1950', 'max:'.(date('Y') + 1)],
             'current_vehicle_registration' => ['nullable', 'string', 'max:50'],
             'current_vehicle_mileage' => ['nullable', 'integer', 'min:0'],
             'current_vehicle_condition' => ['required', 'string', 'in:excellent,good,fair,poor'],
             'current_vehicle_description' => ['nullable', 'string', 'max:2000'],
-            'current_vehicle_images.*' => ['nullable', 'image', 'max:5120'], // 5MB max per image
+            'current_vehicle_images' => ['nullable', 'array', 'max:12'],
+            'current_vehicle_images.*' => ['required', 'image', 'max:5120'],
 
             // Desired vehicle
             'desired_vehicle_make_id' => ['nullable', 'integer', 'exists:vehicle_makes,id'],
             'desired_vehicle_model_id' => ['nullable', 'integer', 'exists:vehicle_models,id'],
-            'desired_min_year' => ['nullable', 'integer', 'min:1950', 'max:' . (date('Y') + 1)],
-            'desired_max_year' => ['nullable', 'integer', 'min:1950', 'max:' . (date('Y') + 1)],
+            'desired_min_year' => ['nullable', 'integer', 'min:1950', 'max:'.(date('Y') + 1)],
+            'desired_max_year' => ['nullable', 'integer', 'min:1950', 'max:'.(date('Y') + 1)],
             'desired_fuel_type' => ['nullable', 'string', 'max:50'],
             'desired_transmission' => ['nullable', 'string', 'max:50'],
             'desired_body_type' => ['nullable', 'string', 'max:50'],
@@ -107,50 +163,55 @@ class CarExchangeForm extends Component
             'location' => ['required', 'string', 'max:255'],
         ]);
 
-        if (!empty($validated['desired_min_year']) && !empty($validated['desired_max_year']) && $validated['desired_min_year'] > $validated['desired_max_year']) {
+        if (! empty($validated['desired_min_year']) && ! empty($validated['desired_max_year']) && $validated['desired_min_year'] > $validated['desired_max_year']) {
             $this->addError('desired_min_year', 'Min year cannot be greater than max year.');
+
             return;
         }
 
         // Validate current vehicle model belongs to selected make
-        if (!empty($validated['current_vehicle_model_id']) && !empty($validated['current_vehicle_make_id'])) {
+        if (! empty($validated['current_vehicle_model_id']) && ! empty($validated['current_vehicle_make_id'])) {
             $model = VehicleModel::where('id', $validated['current_vehicle_model_id'])
                 ->where('vehicle_make_id', $validated['current_vehicle_make_id'])
                 ->exists();
-            
-            if (!$model) {
+
+            if (! $model) {
                 $this->addError('current_vehicle_model_id', 'The selected model does not belong to the selected make.');
+
                 return;
             }
         }
 
         // Validate desired vehicle model belongs to selected make
-        if (!empty($validated['desired_vehicle_model_id']) && !empty($validated['desired_vehicle_make_id'])) {
+        if (! empty($validated['desired_vehicle_model_id']) && ! empty($validated['desired_vehicle_make_id'])) {
             $model = VehicleModel::where('id', $validated['desired_vehicle_model_id'])
                 ->where('vehicle_make_id', $validated['desired_vehicle_make_id'])
                 ->exists();
-            
-            if (!$model) {
+
+            if (! $model) {
                 $this->addError('desired_vehicle_model_id', 'The selected model does not belong to the selected make.');
+
                 return;
             }
         }
 
-        if (!empty($validated['desired_vehicle_model_id']) && empty($validated['desired_vehicle_make_id'])) {
+        if (! empty($validated['desired_vehicle_model_id']) && empty($validated['desired_vehicle_make_id'])) {
             $this->addError('desired_vehicle_model_id', 'Please select a make first.');
+
             return;
         }
 
         $user = auth()->user();
-        if (!$user) {
+        if (! $user) {
             $this->dispatch('open-auth-modal');
             $this->addError('auth', 'Please sign in or create an account before submitting your exchange request.');
+
             return;
         }
 
         // Handle image uploads
         $imagePaths = [];
-        if (!empty($this->current_vehicle_images)) {
+        if (! empty($this->current_vehicle_images)) {
             foreach ($this->current_vehicle_images as $image) {
                 $path = $image->store('car-exchange-requests', 'public');
                 $imagePaths[] = $path;
@@ -201,6 +262,6 @@ class CarExchangeForm extends Component
         return view('livewire.customer.car-exchange-form', [
             'makes' => $makes,
             'years' => $years,
-        ])->layout('layouts.customer');
+        ]);
     }
 }

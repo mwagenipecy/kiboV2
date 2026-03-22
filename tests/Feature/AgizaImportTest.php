@@ -4,6 +4,8 @@ namespace Tests\Feature;
 
 use App\Models\AgizaImportRequest;
 use App\Models\User;
+use App\Models\VehicleMake;
+use App\Models\VehicleModel;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -14,9 +16,12 @@ class AgizaImportTest extends TestCase
 
     public function test_guest_cannot_submit_agiza_import_request()
     {
+        $make = VehicleMake::create(['name' => 'Toyota', 'status' => 'active']);
+        $model = VehicleModel::create(['name' => 'Land Cruiser', 'vehicle_make_id' => $make->id, 'status' => 'active']);
+
         Livewire::test(\App\Livewire\Customer\AgizaImport::class)
-            ->set('vehicleMake', 'Toyota')
-            ->set('vehicleModel', 'Land Cruiser')
+            ->set('vehicleMakeId', $make->id)
+            ->set('vehicleModelId', $model->id)
             ->set('sourceCountry', 'Japan')
             ->set('vehicleLink', 'https://example.com/car')
             ->call('submit')
@@ -29,15 +34,17 @@ class AgizaImportTest extends TestCase
             'role' => 'customer',
         ]);
 
+        $make = VehicleMake::create(['name' => 'Toyota', 'status' => 'active']);
+        $model = VehicleModel::create(['name' => 'Land Cruiser', 'vehicle_make_id' => $make->id, 'status' => 'active']);
+
         $this->actingAs($user);
 
         Livewire::test(\App\Livewire\Customer\AgizaImport::class)
             ->set('customerName', $user->name)
             ->set('customerEmail', $user->email)
             ->set('customerPhone', '0712345678')
-            ->set('requestType', 'with_link')
-            ->set('vehicleMake', 'Toyota')
-            ->set('vehicleModel', 'Land Cruiser')
+            ->set('vehicleMakeId', $make->id)
+            ->set('vehicleModelId', $model->id)
             ->set('sourceCountry', 'Japan')
             ->set('vehicleLink', 'https://example.com/car')
             ->call('submit')
@@ -53,39 +60,10 @@ class AgizaImportTest extends TestCase
         ]);
     }
 
-    public function test_authenticated_user_can_submit_agiza_import_request_with_dealer_contact()
-    {
-        $user = User::factory()->create([
-            'role' => 'customer',
-        ]);
-
-        $this->actingAs($user);
-
-        Livewire::test(\App\Livewire\Customer\AgizaImport::class)
-            ->set('customerName', $user->name)
-            ->set('customerEmail', $user->email)
-            ->set('customerPhone', '0712345678')
-            ->set('requestType', 'already_contacted')
-            ->set('vehicleMake', 'Toyota')
-            ->set('vehicleModel', 'Land Cruiser')
-            ->set('sourceCountry', 'Japan')
-            ->set('dealerContactInfo', 'John Doe, +81-123-456-7890, john@dealer.com')
-            ->call('submit')
-            ->assertSet('showSuccessModal', true);
-
-        $this->assertDatabaseHas('agiza_import_requests', [
-            'user_id' => $user->id,
-            'vehicle_make' => 'Toyota',
-            'vehicle_model' => 'Land Cruiser',
-            'request_type' => 'already_contacted',
-            'status' => 'pending',
-        ]);
-    }
-
     public function test_request_number_is_generated_correctly()
     {
         $user = User::factory()->create(['role' => 'customer']);
-        
+
         $request = AgizaImportRequest::create([
             'request_number' => AgizaImportRequest::generateRequestNumber(),
             'user_id' => $user->id,

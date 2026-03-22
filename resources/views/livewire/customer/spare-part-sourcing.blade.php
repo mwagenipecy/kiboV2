@@ -111,17 +111,10 @@
   </div>
   @endif
 
-  <div class="max-w-[700px] mx-auto">
+  <div class="max-w-full mx-auto">
     <div class="text-center mb-8">
       <h1 class="text-2xl font-bold text-gray-900" style="font-family: 'Syne', sans-serif;">Order Spare Parts</h1>
       <p class="mt-1.5 text-sm text-gray-500">Fill in the details below — we'll find the best match for you.</p>
-    </div>
-
-    <div class="flex gap-1.5 justify-center mb-8">
-      <span class="w-2 h-2 rounded-full" style="background: #009866; width: 24px; border-radius: 99px;"></span>
-      <span class="w-2 h-2 rounded-full bg-gray-200"></span>
-      <span class="w-2 h-2 rounded-full bg-gray-200"></span>
-      <span class="w-2 h-2 rounded-full bg-gray-200"></span>
     </div>
 
     <form wire:submit.prevent="submitOrders" id="sparePartsSourcingForm" class="bg-white rounded-2xl shadow-sm overflow-hidden" style="box-shadow: 0 2px 16px rgba(0,0,0,0.06);">
@@ -250,16 +243,37 @@
               </div>
               <div>
                 <label class="block text-xs font-medium text-gray-500 mb-1.5 uppercase tracking-wide">Photos (Optional)</label>
+                @php $partPhotos = $orderItemImages[$index] ?? []; @endphp
+                @if(count($partPhotos) > 0)
+                <div class="flex flex-wrap gap-2 mb-2">
+                  @foreach($partPhotos as $imgIdx => $photo)
+                    @if($photo)
+                    <div wire:key="part-{{ $index }}-photo-{{ $imgIdx }}" class="relative w-20 h-20 rounded-lg overflow-hidden border border-gray-200 bg-gray-100 shrink-0">
+                      <img src="{{ $photo->temporaryUrl() }}" alt="" class="w-full h-full object-cover" />
+                      <button type="button" wire:click="removeOrderItemImage({{ $index }}, {{ $imgIdx }})" class="absolute top-0.5 right-0.5 rounded-full bg-black/60 text-white p-0.5 hover:bg-red-600" title="Remove photo">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                      </button>
+                    </div>
+                    @endif
+                  @endforeach
+                </div>
+                @endif
+                @if(count($partPhotos) < 5)
                 <label class="relative flex items-center gap-2.5 p-3 rounded-xl border-2 border-dashed border-gray-200 bg-gray-50 cursor-pointer hover:border-[#009866] hover:bg-[rgba(0,152,102,0.08)] transition-all overflow-hidden">
-                  <input type="file" wire:model="orderItemImages.{{ $index }}" multiple accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
+                  <input type="file" wire:model="newPartImages.{{ $index }}" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
+                  <div wire:loading wire:target="newPartImages.{{ $index }}" class="absolute inset-0 bg-white/80 flex items-center justify-center z-20 text-xs font-medium text-gray-600">Uploading…</div>
                   <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style="background: rgba(0,152,102,0.08);">
                     <svg class="w-4 h-4" fill="none" stroke="#009866" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/></svg>
                   </div>
                   <div>
-                    <p class="text-sm font-medium text-gray-900">Upload photos</p>
-                    <span class="text-xs text-gray-500">Optional — up to 5 · max 5 MB each</span>
+                    <p class="text-sm font-medium text-gray-900">Add a photo</p>
+                    <span class="text-xs text-gray-500">One at a time — up to 5 · max 5 MB each</span>
                   </div>
                 </label>
+                @else
+                <p class="text-xs text-gray-500">Maximum 5 photos for this part.</p>
+                @endif
+                @error('newPartImages.'.$index) <p class="text-sm text-red-600 mt-1">{{ $message }}</p> @enderror
                 @error('orderItemImages.'.$index) <p class="text-sm text-red-600 mt-1">{{ $message }}</p> @enderror
               </div>
             </div>

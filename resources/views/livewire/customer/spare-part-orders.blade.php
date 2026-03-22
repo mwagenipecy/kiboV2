@@ -77,7 +77,7 @@
                         
                         <div class="flex gap-2">
                             <a
-                                href="{{ route('spare-parts.order-detail', $order->id) }}"
+                                href="{{ route('spare-parts.order-detail', $order->public_token) }}"
                                 class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
                             >
                                 View Details

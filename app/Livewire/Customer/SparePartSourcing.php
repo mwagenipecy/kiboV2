@@ -5,11 +5,10 @@ namespace App\Livewire\Customer;
 use App\Models\SparePartOrder;
 use App\Models\VehicleMake;
 use App\Models\VehicleModel;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use Livewire\Component;
 use Livewire\WithFileUploads;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Auth;
 
 class SparePartSourcing extends Component
 {
@@ -22,11 +21,17 @@ class SparePartSourcing extends Component
     // NOTE: Livewire deep-binding into array-of-arrays can be fragile in some setups.
     // We keep part fields as parallel arrays to ensure reliable hydration.
     public array $orderItems = [];
+
     public array $orderItemIds = [];
+
     public array $partNames = [];
+
     public array $quantities = [];
+
     public array $partNumbers = [];
+
     public array $notes = [];
+
     public array $conditions = [];
 
     /**
@@ -34,42 +39,63 @@ class SparePartSourcing extends Component
      * We keep per-item images here (indexed by the orderItems loop index).
      */
     public array $orderItemImages = [];
-    
+
+    /** Staging slot per line item: pick one file at a time, then append to orderItemImages (avoids broken nested + multiple). */
+    public array $newPartImages = [];
+
     // Track which items are expanded (by index)
     public array $expandedItems = [];
-    
+
     // Modal states
     public $showSuccessModal = false;
+
     public $showErrorModal = false;
+
     public $successMessage = '';
+
     public $errorMessage = '';
+
     public $createdOrderNumbers = [];
 
     // Customer information
     public $customerName = '';
+
     public $customerEmail = '';
+
     public $customerPhone = '';
+
     public $company = '';
 
     // Vehicle information (for single orders only)
     public $vehicleMakeId = '';
+
     public $vehicleModelId = '';
+
     public $vehicleYear = '';
+
     public $vehicleVin = '';
+
     public $preferredCondition = 'any'; // any|new|used
 
     // Delivery information
     public $deliveryAddress = '';
+
     public $deliveryCity = '';
+
     public $deliveryRegion = '';
+
     public $deliveryCountry = 'Tanzania';
+
     public $deliveryPostalCode = '';
 
     public array $tanzaniaRegions = [];
 
     public $vehicleMakes = [];
+
     public $vehicleModels = [];
+
     public $submitted = false;
+
     public $isLoggedIn = false;
 
     /** Optional images (global fallback; per-part images in orderItems.*.images) */
@@ -88,11 +114,11 @@ class SparePartSourcing extends Component
         $this->orderItemImages[] = [];
         $this->expandedItems[] = $newIndex;
     }
-    
+
     public function toggleItem($index)
     {
         if (in_array($index, $this->expandedItems)) {
-            $this->expandedItems = array_values(array_filter($this->expandedItems, fn($i) => $i !== $index));
+            $this->expandedItems = array_values(array_filter($this->expandedItems, fn ($i) => $i !== $index));
         } else {
             $this->expandedItems[] = $index;
         }
@@ -100,14 +126,17 @@ class SparePartSourcing extends Component
 
     public function removeOrderItem($index)
     {
-        if (count($this->orderItemIds) <= 1) return;
+        if (count($this->orderItemIds) <= 1) {
+            return;
+        }
         $i = (int) $index;
-        foreach (['orderItemIds','partNames','quantities','partNumbers','notes','conditions','orderItemImages'] as $prop) {
+        foreach (['orderItemIds', 'partNames', 'quantities', 'partNumbers', 'notes', 'conditions', 'orderItemImages'] as $prop) {
             if (array_key_exists($i, $this->{$prop})) {
                 unset($this->{$prop}[$i]);
                 $this->{$prop} = array_values($this->{$prop});
             }
         }
+        $this->newPartImages = [];
     }
 
     public function mount()
@@ -147,11 +176,11 @@ class SparePartSourcing extends Component
             'Unguja South',
             'Unguja West',
         ];
-        
+
         $this->vehicleMakes = VehicleMake::where('status', 'active')
             ->orderBy('name')
             ->get();
-        
+
         // Initialize with one empty order item
         $this->orderItemIds = [1];
         $this->partNames = [''];
@@ -161,13 +190,61 @@ class SparePartSourcing extends Component
         $this->conditions = ['any'];
         $this->orderItemImages = [[]];
         $this->expandedItems = [0];
-        
+
         // Pre-fill user information if logged in
         if ($this->isLoggedIn) {
             $user = Auth::user();
             $this->customerName = $user->name;
             $this->customerEmail = $user->email;
         }
+    }
+
+    public function updated(string $fullPath, mixed $newValue): void
+    {
+        if (! str_starts_with($fullPath, 'newPartImages.')) {
+            return;
+        }
+
+        $index = (int) Str::after($fullPath, 'newPartImages.');
+
+        if (! $newValue) {
+            return;
+        }
+
+        $propertyName = 'newPartImages.'.$index;
+
+        try {
+            $this->validateOnly($propertyName, [
+                $propertyName => 'required|image|max:5120',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            $this->newPartImages[$index] = null;
+
+            throw $e;
+        }
+
+        if (! isset($this->orderItemImages[$index]) || ! is_array($this->orderItemImages[$index])) {
+            $this->orderItemImages[$index] = [];
+        }
+
+        if (count($this->orderItemImages[$index]) >= 5) {
+            $this->newPartImages[$index] = null;
+
+            return;
+        }
+
+        $this->orderItemImages[$index][] = $newValue;
+        $this->newPartImages[$index] = null;
+    }
+
+    public function removeOrderItemImage(int $itemIndex, int $imageIndex): void
+    {
+        if (! isset($this->orderItemImages[$itemIndex])) {
+            return;
+        }
+
+        unset($this->orderItemImages[$itemIndex][$imageIndex]);
+        $this->orderItemImages[$itemIndex] = array_values($this->orderItemImages[$itemIndex]);
     }
 
     public function updatedVehicleMakeId()
@@ -191,11 +268,11 @@ class SparePartSourcing extends Component
     {
 
         // Check if user is logged in
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             $this->openAuthModal();
+
             return;
         }
-
 
         // Ensure name/email are always taken from the logged-in user
         $user = Auth::user();
@@ -254,14 +331,18 @@ class SparePartSourcing extends Component
         foreach ($this->orderItems as $item) {
             $condition = ($item['condition'] ?? 'any') === 'any' ? 'new' : $item['condition'];
             $storedImages = [];
-            if (!empty($item['images']) && is_array($item['images'])) {
+            if (! empty($item['images']) && is_array($item['images'])) {
                 foreach ($item['images'] as $image) {
-                    if ($image) $storedImages[] = $image->store('spare-part-orders', 'public');
+                    if ($image) {
+                        $storedImages[] = $image->store('spare-part-orders', 'public');
+                    }
                 }
             }
             if (empty($storedImages) && is_array($this->images)) {
                 foreach ($this->images as $image) {
-                    if ($image) $storedImages[] = $image->store('spare-part-orders', 'public');
+                    if ($image) {
+                        $storedImages[] = $image->store('spare-part-orders', 'public');
+                    }
                 }
             }
 
@@ -277,8 +358,8 @@ class SparePartSourcing extends Component
                 'condition' => $condition,
                 'part_name' => $item['part_name'],
                 'description' => trim(
-                    ($item['part_number'] ? ('Part number: ' . $item['part_number'] . "\n") : '') .
-                    "Qty: " . ($item['quantity'] ?? 1) . "\n" .
+                    ($item['part_number'] ? ('Part number: '.$item['part_number']."\n") : '').
+                    'Qty: '.($item['quantity'] ?? 1)."\n".
                     ($item['notes'] ?? '')
                 ),
                 'images' => $storedImages,
@@ -305,14 +386,14 @@ class SparePartSourcing extends Component
         $this->showSuccessModal = true;
         $this->resetForm();
     }
-    
+
     public function closeSuccessModal()
     {
         $this->showSuccessModal = false;
         $this->successMessage = '';
         $this->createdOrderNumbers = [];
     }
-    
+
     public function closeErrorModal()
     {
         $this->showErrorModal = false;
@@ -339,11 +420,13 @@ class SparePartSourcing extends Component
             'deliveryPostalCode',
             'images',
             'orderItemImages',
+            'newPartImages',
         ]);
         $this->orderItemImages = [[]];
+        $this->newPartImages = [];
         $this->submitted = false;
         $this->vehicleModels = [];
-        
+
         // Re-populate user info if logged in
         if ($this->isLoggedIn) {
             $user = Auth::user();
@@ -357,4 +440,3 @@ class SparePartSourcing extends Component
         return view('livewire.customer.spare-part-sourcing');
     }
 }
-

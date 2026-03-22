@@ -41,7 +41,7 @@ class SparePartOrderConfirmationMail extends Mailable
             markdown: 'emails.spare-parts.order-confirmation',
             with: [
                 'order' => $this->order,
-                'orderUrl' => route('spare-parts.order-detail', ['id' => $this->order->id]),
+                'orderUrl' => route('spare-parts.order-detail', $this->order->public_token),
             ],
         );
     }

@@ -400,32 +400,12 @@
                             </svg>
                         </div>
                         <div>
-                            <h2 class="text-lg sm:text-xl font-bold text-gray-900">What type of financing do you need?</h2>
-                            <p class="text-gray-500 text-xs sm:text-sm">Choose the option that best describes your situation.</p>
+                            <h2 class="text-lg sm:text-xl font-bold text-gray-900">Import cost financing</h2>
+                            <p class="text-gray-500 text-xs sm:text-sm">Cover import taxes, duties, and transport for a vehicle you've already purchased. Select below to continue.</p>
                         </div>
                     </div>
                     
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                        <!-- Buy Car Option -->
-                        <button type="button" wire:click="handleRequestTypeClick('buy_car')" class="text-left w-full">
-                            <div class="p-4 sm:p-6 rounded-xl sm:rounded-2xl border-2 transition-all duration-300 {{ $requestType === 'buy_car' ? 'border-emerald-500 bg-emerald-50 ring-4 ring-emerald-100' : 'border-gray-200 hover:border-emerald-300 hover:bg-gray-50' }}">
-                                <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center mb-3 sm:mb-4 {{ $requestType === 'buy_car' ? 'bg-emerald-500 text-white' : 'bg-gray-100 text-gray-600' }} transition-colors">
-                                    <svg class="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
-                                    </svg>
-                                </div>
-                                <h3 class="text-base sm:text-lg font-semibold text-gray-900 mb-1 sm:mb-2">I Want to Buy a Car</h3>
-                                <p class="text-xs sm:text-sm text-gray-500">Finance the purchase of a car from abroad. Provide a link to the listing and we'll help you import it.</p>
-                                <div class="mt-3 sm:mt-4 flex items-center text-xs sm:text-sm {{ $requestType === 'buy_car' ? 'text-emerald-600' : 'text-gray-400' }}">
-                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
-                                    </svg>
-                                    Paste car listing link
-                                </div>
-                            </div>
-                        </button>
-
-                        <!-- Tax & Transport Option -->
+                    <div class="max-w-2xl mx-auto">
                         <button type="button" wire:click="handleRequestTypeClick('tax_transport')" class="text-left w-full">
                             <div class="p-4 sm:p-6 rounded-xl sm:rounded-2xl border-2 transition-all duration-300 {{ $requestType === 'tax_transport' ? 'border-emerald-500 bg-emerald-50 ring-4 ring-emerald-100' : 'border-gray-200 hover:border-emerald-300 hover:bg-gray-50' }}">
                                 <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center mb-3 sm:mb-4 {{ $requestType === 'tax_transport' ? 'bg-emerald-500 text-white' : 'bg-gray-100 text-gray-600' }} transition-colors">
@@ -498,51 +478,14 @@
                             </svg>
                         </div>
                         <div>
-                            <h2 class="text-lg sm:text-xl font-bold text-gray-900">{{ $requestType === 'buy_car' ? 'Vehicle Details' : 'Car & Cost Details' }}</h2>
-                            <p class="text-gray-500 text-xs sm:text-sm">{{ $requestType === 'buy_car' ? 'Paste a link to the car listing or enter details manually.' : 'Tell us about the car and the costs you need to cover.' }}</p>
+                            <h2 class="text-lg sm:text-xl font-bold text-gray-900">Car & Cost Details</h2>
+                            <p class="text-gray-500 text-xs sm:text-sm">Tell us about the car and the costs you need to cover.</p>
                         </div>
                     </div>
-                    
-                    @if($requestType === 'buy_car')
-                        <!-- Car Link Section -->
-                        <div class="mb-6 sm:mb-8 p-4 sm:p-6 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl sm:rounded-2xl border border-emerald-100">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
-                                </svg>
-                                Car Listing Link
-                            </label>
-                            <div class="flex flex-col sm:flex-row gap-3">
-                                <input type="url" wire:model="carLink" class="flex-1 px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors text-sm sm:text-base" placeholder="https://www.example.com/car-listing">
-                                <button wire:click="extractCarInfo" wire:loading.attr="disabled" class="px-4 sm:px-6 py-2.5 sm:py-3 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white font-semibold rounded-lg sm:rounded-xl transition-colors flex items-center justify-center gap-2 text-sm sm:text-base">
-                                    <span wire:loading.remove wire:target="extractCarInfo">Extract Info</span>
-                                    <span wire:loading wire:target="extractCarInfo">
-                                        <svg class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
-                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                        </svg>
-                                    </span>
-                                </button>
-                            </div>
-                            @if($extractionError)
-                                <p class="mt-2 text-sm text-amber-600">{{ $extractionError }}</p>
-                            @endif
-                            @if($extractedCarInfo)
-                                <div class="mt-3 p-3 bg-white rounded-lg border border-emerald-200">
-                                    <p class="text-sm text-emerald-600 font-medium">
-                                        <svg class="w-4 h-4 inline mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                                        </svg>
-                                        Link saved! Please fill in the vehicle details below.
-                                    </p>
-                                </div>
-                            @endif
-                        </div>
-                    @endif
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Vehicle Make {{ $requestType === 'buy_car' ? '*' : '' }}</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Vehicle Make</label>
                             <div class="relative">
                                 <select wire:model.live="vehicleMake" class="appearance-none w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors bg-white text-sm sm:text-base">
                                     <option value="">Select make</option>
@@ -560,7 +503,7 @@
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Vehicle Model {{ $requestType === 'buy_car' ? '*' : '' }}</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Vehicle Model</label>
                             <div class="relative">
                                 <select wire:model.live="vehicleModel" class="appearance-none w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors bg-white text-sm sm:text-base">
                                     <option value="">Select model</option>
@@ -594,28 +537,7 @@
                             </select>
                         </div>
 
-                        @if($requestType === 'buy_car')
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Vehicle Price *</label>
-                                <div class="flex gap-2">
-                                    <select wire:model.live="vehicleCurrency" class="w-20 sm:w-24 px-2 sm:px-3 py-2.5 sm:py-3 border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors text-sm sm:text-base">
-                                        <option value="USD">USD</option>
-                                        <option value="EUR">EUR</option>
-                                        <option value="GBP">GBP</option>
-                                        <option value="JPY">JPY</option>
-                                        <option value="TZS">TZS</option>
-                                    </select>
-                                    <input type="number" wire:model.live="vehiclePrice" class="flex-1 px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors text-sm sm:text-base" placeholder="Enter price" step="0.01">
-                                </div>
-                                @error('vehiclePrice') <p class="mt-1 text-sm text-red-500">{{ $message }}</p> @enderror
-                            </div>
-
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Vehicle Location</label>
-                                <input type="text" wire:model="vehicleLocation" class="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors text-sm sm:text-base" placeholder="e.g., Japan, Dubai">
-                            </div>
-                        @else
-                            <div>
+                        <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Import Tax/Duty Amount *</label>
                                 <div class="relative">
                                     <span class="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm">TZS</span>
@@ -640,7 +562,6 @@
                                     <input type="number" wire:model="totalClearingCost" class="w-full pl-12 sm:pl-14 pr-3 sm:pr-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors text-sm sm:text-base" placeholder="0.00" step="0.01">
                                 </div>
                             </div>
-                        @endif
                     </div>
                 </div>
                 @endif
@@ -664,11 +585,11 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Amount You Need to Finance *</label>
                             <div class="relative">
-                                <span class="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm">{{ $requestType === 'buy_car' ? $vehicleCurrency : 'TZS' }}</span>
+                                <span class="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm">TZS</span>
                                 <input type="number" wire:model="financingAmountRequested" class="w-full pl-12 sm:pl-14 pr-3 sm:pr-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors text-sm sm:text-base" placeholder="Enter amount" step="0.01">
                             </div>
                             @error('financingAmountRequested') <p class="mt-1 text-sm text-red-500">{{ $message }}</p> @enderror
-                            @if($requestType === 'tax_transport' && ($taxAmount || $transportCost || $totalClearingCost))
+                            @if($taxAmount || $transportCost || $totalClearingCost)
                                 <p class="mt-2 text-sm text-gray-500">Total costs: TZS {{ number_format(($taxAmount ?? 0) + ($transportCost ?? 0) + ($totalClearingCost ?? 0), 2) }}</p>
                             @endif
                         </div>
@@ -691,7 +612,7 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Down Payment (if any)</label>
                             <div class="relative">
-                                <span class="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm">{{ $requestType === 'buy_car' ? $vehicleCurrency : 'TZS' }}</span>
+                                <span class="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm">TZS</span>
                                 <input type="number" wire:model="downPayment" class="w-full pl-12 sm:pl-14 pr-3 sm:pr-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors text-sm sm:text-base" placeholder="0.00" step="0.01">
                             </div>
                         </div>
@@ -715,7 +636,7 @@
                                 <div class="space-y-2 sm:space-y-3">
                                     <div class="flex justify-between items-center">
                                         <span class="text-xs sm:text-sm text-gray-600">Request Type</span>
-                                        <span class="px-2 py-1 text-xs font-medium bg-white rounded-md">{{ $requestType === 'buy_car' ? 'Buy Car' : 'Tax & Transport' }}</span>
+                                        <span class="px-2 py-1 text-xs font-medium bg-white rounded-md">Tax & Transport</span>
                                     </div>
                                     @if($this->vehicleMakeName || $vehicleModel)
                                     <div class="flex justify-between items-center">
@@ -723,23 +644,15 @@
                                         <span class="font-medium text-gray-900 text-xs sm:text-sm text-right">{{ $this->vehicleMakeName }} {{ $vehicleModel }} {{ $vehicleYear ? '(' . $vehicleYear . ')' : '' }}</span>
                                     </div>
                                     @endif
-                                    @if($requestType === 'buy_car' && $vehiclePrice)
-                                    <div class="flex justify-between items-center">
-                                        <span class="text-xs sm:text-sm text-gray-600">Vehicle Price</span>
-                                        <span class="font-medium text-gray-900 text-xs sm:text-sm">{{ $vehicleCurrency }} {{ number_format($vehiclePrice, 2) }}</span>
-                                    </div>
-                                    @endif
-                                    @if($requestType === 'tax_transport')
                                     <div class="flex justify-between items-center">
                                         <span class="text-xs sm:text-sm text-gray-600">Total Costs</span>
                                         <span class="font-medium text-gray-900 text-xs sm:text-sm">TZS {{ number_format(($taxAmount ?? 0) + ($transportCost ?? 0) + ($totalClearingCost ?? 0), 2) }}</span>
                                     </div>
-                                    @endif
                                 </div>
                                 <div class="bg-white rounded-lg p-3 sm:p-4">
                                     <div class="text-center">
                                         <div class="text-xs text-gray-500 uppercase tracking-wide mb-1">Financing Amount</div>
-                                        <div class="text-xl sm:text-2xl font-bold text-emerald-600">{{ $requestType === 'buy_car' ? $vehicleCurrency : 'TZS' }} {{ number_format($financingAmountRequested ?? 0, 0) }}</div>
+                                        <div class="text-xl sm:text-2xl font-bold text-emerald-600">TZS {{ number_format($financingAmountRequested ?? 0, 0) }}</div>
                                         <div class="text-xs text-gray-500 mt-1">{{ $loanTermMonths }} months</div>
                                     </div>
                                 </div>

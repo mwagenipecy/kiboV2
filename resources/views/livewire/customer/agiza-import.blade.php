@@ -133,41 +133,7 @@
         </div>
       </div>
 
-      {{-- ② REQUEST TYPE --}}
-      <div class="p-6 sm:p-8 border-b border-gray-200">
-        <div class="flex items-center gap-2.5 mb-5">
-          <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style="background: rgba(0,152,102,0.08);">
-            <svg class="w-4 h-4" fill="none" stroke="#009866" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-          </div>
-          <span class="text-sm font-semibold text-gray-900" style="font-family: 'Syne', sans-serif;">Request Type</span>
-        </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div wire:click="$set('requestType', 'with_link')" class="relative cursor-pointer p-4 rounded-xl border-2 transition-all {{ $requestType === 'with_link' ? 'border-[#009866] bg-[rgba(0,152,102,0.08)]' : 'border-gray-200' }}">
-            <div class="flex items-center gap-2 mb-2">
-              <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all {{ $requestType === 'with_link' ? 'border-[#009866] bg-[#009866]' : 'border-gray-300' }}">
-                @if($requestType === 'with_link')
-                <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg>
-                @endif
-              </div>
-              <span class="text-sm font-semibold text-gray-900">I have a car link</span>
-            </div>
-            <p class="text-xs text-gray-500">Provide a link to the car listing online</p>
-          </div>
-          <div wire:click="$set('requestType', 'already_contacted')" class="relative cursor-pointer p-4 rounded-xl border-2 transition-all {{ $requestType === 'already_contacted' ? 'border-[#009866] bg-[rgba(0,152,102,0.08)]' : 'border-gray-200' }}">
-            <div class="flex items-center gap-2 mb-2">
-              <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all {{ $requestType === 'already_contacted' ? 'border-[#009866] bg-[#009866]' : 'border-gray-300' }}">
-                @if($requestType === 'already_contacted')
-                <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg>
-                @endif
-              </div>
-              <span class="text-sm font-semibold text-gray-900">Already contacted dealer</span>
-            </div>
-            <p class="text-xs text-gray-500">You've spoken to a dealer and need import help</p>
-          </div>
-        </div>
-      </div>
-
-      {{-- ③ VEHICLE DETAILS --}}
+      {{-- ② VEHICLE DETAILS --}}
       <div class="p-6 sm:p-8 border-b border-gray-200">
         <div class="flex items-center gap-2.5 mb-5">
           <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style="background: rgba(0,152,102,0.08);">
@@ -176,16 +142,21 @@
           <span class="text-sm font-semibold text-gray-900" style="font-family: 'Syne', sans-serif;">Vehicle Details</span>
         </div>
 
-        <div class="mb-4 {{ $requestType === 'with_link' ? '' : 'hidden' }}">
+        <div class="mb-4">
           <label class="block text-xs font-medium text-gray-500 mb-1.5 uppercase tracking-wide">Car Listing Link <span style="color: #009866;">*</span></label>
-          <input type="url" wire:model.lazy="vehicleLink" {{ $requestType === 'with_link' ? 'required' : '' }} placeholder="https://example.com/car-listing" class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-900 text-[0.95rem] focus:border-[#009866] focus:ring-[3px] focus:ring-[rgba(0,152,102,0.18)] focus:bg-white outline-none transition-all" />
-          <p class="text-xs text-gray-500 mt-1">Paste the link to the car you want to import</p>
+          <div class="flex flex-col gap-2 sm:flex-row sm:items-stretch">
+            <input type="url" wire:model.blur="vehicleLink" required placeholder="https://example.com/car-listing" class="w-full flex-1 px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-900 text-[0.95rem] focus:border-[#009866] focus:ring-[3px] focus:ring-[rgba(0,152,102,0.18)] focus:bg-white outline-none transition-all" />
+            <button type="button" wire:click="refreshFromLink" wire:loading.attr="disabled" class="shrink-0 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50" style="border-color: rgba(0,152,102,0.35); color: #007a52;">
+              <span wire:loading.remove wire:target="refreshFromLink,vehicleLink">Load from link</span>
+              <span wire:loading wire:target="refreshFromLink,vehicleLink">…</span>
+            </button>
+          </div>
+          <p class="text-xs text-gray-500 mt-1">Paste the listing URL; we try to fill make, model, and year. If that fails, choose them below.</p>
+          <p wire:loading wire:target="vehicleLink,refreshFromLink" class="text-xs text-[#009866] mt-1.5">Reading listing…</p>
+          @if($listingParseHint)
+            <p class="text-xs mt-1.5 {{ ($listingParseHintTone ?? '') === 'warning' ? 'text-amber-700' : 'text-gray-600' }}">{{ $listingParseHint }}</p>
+          @endif
           @error('vehicleLink') <p class="text-sm text-red-600 mt-1">{{ $message }}</p> @enderror
-        </div>
-        <div class="mb-4 {{ $requestType === 'already_contacted' ? '' : 'hidden' }}">
-          <label class="block text-xs font-medium text-gray-500 mb-1.5 uppercase tracking-wide">Dealer Contact Information <span style="color: #009866;">*</span></label>
-          <textarea wire:model.lazy="dealerContactInfo" {{ $requestType === 'already_contacted' ? 'required' : '' }} rows="3" placeholder="Dealer name, phone, email, location..." class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-900 text-[0.95rem] focus:border-[#009866] focus:ring-[3px] focus:ring-[rgba(0,152,102,0.18)] focus:bg-white outline-none resize-none leading-relaxed"></textarea>
-          @error('dealerContactInfo') <p class="text-sm text-red-600 mt-1">{{ $message }}</p> @enderror
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
@@ -253,7 +224,7 @@
         </div>
       </div>
 
-      {{-- ④ ADDITIONAL INFO --}}
+      {{-- ③ ADDITIONAL INFO --}}
       <div class="p-6 sm:p-8 border-b border-gray-200">
         <div class="flex items-center gap-2.5 mb-5">
           <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style="background: rgba(0,152,102,0.08);">
@@ -270,44 +241,6 @@
         <div class="mb-4">
           <label class="block text-xs font-medium text-gray-500 mb-1.5 uppercase tracking-wide">Additional Notes</label>
           <textarea wire:model.lazy="customerNotes" rows="3" placeholder="Any other information that might help us assist you better..." class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-900 text-[0.95rem] focus:border-[#009866] focus:ring-[3px] focus:ring-[rgba(0,152,102,0.18)] focus:bg-white outline-none resize-none leading-relaxed"></textarea>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label class="block text-xs font-medium text-gray-500 mb-1.5 uppercase tracking-wide">Vehicle Photos (Optional)</label>
-            <div class="flex items-center gap-2.5 p-3 rounded-xl border-2 border-dashed border-gray-200 bg-gray-50 hover:border-[#009866] hover:bg-[rgba(0,152,102,0.08)] transition-all">
-              <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style="background: rgba(0,152,102,0.08);">
-                <svg class="w-4 h-4" fill="none" stroke="#009866" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/></svg>
-              </div>
-              <div class="flex-1">
-                <input type="file" wire:model="vehicleImages" multiple accept="image/*" id="vehicleImagesInput" class="block w-full text-sm text-gray-900 cursor-pointer" />
-              </div>
-            </div>
-            <div wire:loading wire:target="vehicleImages" class="mt-2 text-xs text-blue-600">Uploading photos...</div>
-            @if(!empty($vehicleImages))
-            <div class="mt-2 text-xs text-green-600">{{ count($vehicleImages) }} photo(s) selected</div>
-            @endif
-            @error('vehicleImages') <p class="text-sm text-red-600 mt-1">{{ $message }}</p> @enderror
-            @error('vehicleImages.*') <p class="text-sm text-red-600 mt-1">{{ $message }}</p> @enderror
-          </div>
-
-          <div>
-            <label class="block text-xs font-medium text-gray-500 mb-1.5 uppercase tracking-wide">Documents (Optional)</label>
-            <div class="flex items-center gap-2.5 p-3 rounded-xl border-2 border-dashed border-gray-200 bg-gray-50 hover:border-[#009866] hover:bg-[rgba(0,152,102,0.08)] transition-all">
-              <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style="background: rgba(0,152,102,0.08);">
-                <svg class="w-4 h-4" fill="none" stroke="#009866" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/></svg>
-              </div>
-              <div class="flex-1">
-                <input type="file" wire:model="documents" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" id="documentsInput" class="block w-full text-sm text-gray-900 cursor-pointer" />
-              </div>
-            </div>
-            <div wire:loading wire:target="documents" class="mt-2 text-xs text-blue-600">Uploading documents...</div>
-            @if(!empty($documents))
-            <div class="mt-2 text-xs text-green-600">{{ count($documents) }} document(s) selected</div>
-            @endif
-            @error('documents') <p class="text-sm text-red-600 mt-1">{{ $message }}</p> @enderror
-            @error('documents.*') <p class="text-sm text-red-600 mt-1">{{ $message }}</p> @enderror
-          </div>
         </div>
 
         <div class="mt-4 rounded-r-lg py-2.5 px-4 text-sm leading-relaxed" style="background: rgba(0,152,102,0.08); border-left: 3px solid #009866; color: #007a52;">

@@ -3,26 +3,11 @@
 @section('title', 'Trucks for Sale - Find Your Perfect Truck | Autotrader')
 
 @section('content')
-    <!-- Hero Section with Search -->
-    <section class="relative bg-white mb-20">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div class="relative">
-                <!-- Hero Image -->
-                <div class="relative h-80 rounded-2xl overflow-hidden">
-                    <img src="https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?auto=format&fit=crop&w=2000&q=80" 
-                         alt="Commercial trucks" 
-                         class="w-full h-full object-cover">
-                </div>
-
-                <!-- Search Form Overlay -->
-                <div class="absolute bottom-0 left-0 right-0 transform translate-y-1/2 px-4">
-                    <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-6">
-                        @livewire('customer.vehicle-search-form', ['vehicleType' => 'trucks'])
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+    <x-customer.page-hero slug="trucks" variant="floating_overlay">
+        <x-slot:overlay>
+            @livewire('customer.vehicle-search-form', ['vehicleType' => 'trucks'])
+        </x-slot:overlay>
+    </x-customer.page-hero>
 
     <!-- Trucks List Preview (few trucks + Used / New links) -->
     <x-customer.trucks-list-preview />

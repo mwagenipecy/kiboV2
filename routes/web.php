@@ -484,9 +484,9 @@ Route::prefix('spare-parts')->name('spare-parts.')->group(function () {
             return view('spare-parts.orders', ['vehicleType' => 'spare-parts']);
         })->name('orders');
         
-        Route::get('/order/{id}', function ($id) {
-            return view('spare-parts.order-detail', ['id' => $id, 'vehicleType' => 'spare-parts']);
-        })->name('order-detail');
+        Route::get('/order/{token}', function (string $token) {
+            return view('spare-parts.order-detail', ['token' => $token, 'vehicleType' => 'spare-parts']);
+        })->where('token', '[a-f0-9]{40}')->name('order-detail');
     });
     
     Route::get('/supplier/{id}', \App\Livewire\Customer\SparePartSupplierDetail::class)->name('supplier');
@@ -1214,6 +1214,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'otp.ver
         })->name('view');
     });
     
+    Route::get('/content/heroes', \App\Livewire\Admin\PageHeroManager::class)->name('content.heroes');
+
     // Settings
     Route::prefix('settings')->name('settings.')->group(function () {
         Route::get('/vehicles', function () {

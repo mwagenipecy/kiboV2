@@ -175,6 +175,26 @@
                         <p class="text-gray-900 mt-1">{{ $order->description }}</p>
                     </div>
                 @endif
+                @php
+                    $referenceImages = is_array($order->images) ? array_values(array_filter($order->images)) : [];
+                @endphp
+                @if(count($referenceImages) > 0)
+                    <div class="mt-6">
+                        <label class="text-sm font-medium text-gray-500">Reference photos</label>
+                        <p class="text-xs text-gray-500 mt-1 mb-3">Images you uploaded with your request.</p>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                            @foreach($referenceImages as $imagePath)
+                                <a href="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($imagePath) }}" target="_blank" rel="noopener noreferrer" class="block group">
+                                    <img
+                                        src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($imagePath) }}"
+                                        alt="Reference photo"
+                                        class="w-full h-28 object-cover rounded-lg border border-gray-200 group-hover:ring-2 group-hover:ring-green-500 transition-shadow"
+                                    >
+                                </a>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
             </div>
 
             <!-- Delivery Information -->

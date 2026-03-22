@@ -1,4 +1,4 @@
-<div class="max-w-4xl mx-auto px-4 py-8">
+<div class="max-w-3xl mx-auto px-4 py-6 sm:py-8">
     {{-- Guest: login prompt modal --}}
     @guest
         <div id="carExchangeLoginPrompt" role="dialog" aria-modal="true" class="fixed inset-0 z-[9999] grid place-items-center bg-black/50 p-4">
@@ -64,12 +64,6 @@
         @endpush
     @endguest
 
-    <!-- Header -->
-    <div class="text-center mb-8">
-        <h1 class="text-3xl font-bold text-gray-900 mb-2">Exchange Your Car</h1>
-        <p class="text-gray-600">Trade in your current vehicle for a better one</p>
-    </div>
-
     <!-- Success Message -->
     @if (session()->has('exchange_success'))
         <div class="mb-6 rounded-xl px-4 py-3 text-center" style="background-color: rgba(0, 152, 102, 0.1); color: #007a52;">
@@ -78,12 +72,17 @@
     @endif
 
     @auth
+    <p class="text-center text-sm text-gray-600 mb-6">Complete the form below — add photos of your car one at a time so dealers can value it accurately.</p>
+
     <!-- Main Form -->
-    <form wire:submit.prevent="submit" class="bg-white rounded-2xl shadow-lg p-8 space-y-8">
+    <form wire:submit.prevent="submit" class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 sm:p-8 space-y-8 ring-1 ring-black/5">
         
         <!-- Section 1: Current Vehicle -->
         <div class="space-y-5">
-            <h2 class="text-lg font-semibold text-gray-900 pb-2 border-b">Your Current Vehicle</h2>
+            <h2 class="text-base font-semibold text-gray-900 pb-2 border-b border-gray-200 flex items-center gap-2">
+                <span class="flex h-7 w-7 items-center justify-center rounded-lg text-xs font-bold text-white shrink-0" style="background-color: #009866;">1</span>
+                Your current vehicle
+            </h2>
             
             <div class="grid md:grid-cols-2 gap-5">
                 <div>
@@ -179,22 +178,43 @@
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Vehicle Photos</label>
-                <input 
-                    type="file" 
-                    wire:model="current_vehicle_images" 
-                    multiple
-                    accept="image/*"
-                    class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                >
-                <p class="text-xs text-gray-500 mt-1">You can upload multiple images (max 5MB each)</p>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Vehicle photos</label>
+                @if(count($current_vehicle_images) > 0)
+                <div class="flex flex-wrap gap-2 mb-3">
+                    @foreach($current_vehicle_images as $imgIdx => $photo)
+                        @if($photo)
+                        <div wire:key="exchange-photo-{{ $imgIdx }}" class="relative w-24 h-24 rounded-xl overflow-hidden border border-gray-200 bg-gray-100 shrink-0">
+                            <img src="{{ $photo->temporaryUrl() }}" alt="" class="w-full h-full object-cover" />
+                            <button type="button" wire:click="removeCurrentVehicleImage({{ $imgIdx }})" class="absolute top-1 right-1 rounded-full bg-black/60 text-white p-1 hover:bg-red-600" title="Remove">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                            </button>
+                        </div>
+                        @endif
+                    @endforeach
+                </div>
+                @endif
+                @if(count($current_vehicle_images) < 12)
+                <label class="relative flex flex-col items-center justify-center gap-2 w-full px-4 py-6 rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 cursor-pointer hover:border-green-600 hover:bg-green-50/50 transition-colors">
+                    <input type="file" wire:model="current_vehicle_image_upload" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                    <div wire:loading wire:target="current_vehicle_image_upload" class="absolute inset-0 bg-white/80 flex items-center justify-center rounded-xl text-sm font-medium text-gray-600 z-10">Uploading…</div>
+                    <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    <span class="text-sm font-medium text-gray-800">Add a photo</span>
+                    <span class="text-xs text-gray-500 text-center px-2">One image per click — up to 12 photos, 5 MB each</span>
+                </label>
+                @else
+                <p class="text-xs text-gray-500">Maximum 12 photos reached.</p>
+                @endif
+                @error('current_vehicle_image_upload') <p class="text-sm text-red-600 mt-1">{{ $message }}</p> @enderror
                 @error('current_vehicle_images.*') <p class="text-sm text-red-600 mt-1">{{ $message }}</p> @enderror
             </div>
         </div>
 
         <!-- Section 2: Desired Vehicle -->
         <div class="space-y-5">
-            <h2 class="text-lg font-semibold text-gray-900 pb-2 border-b">Vehicle You Want</h2>
+            <h2 class="text-base font-semibold text-gray-900 pb-2 border-b border-gray-200 flex items-center gap-2">
+                <span class="flex h-7 w-7 items-center justify-center rounded-lg text-xs font-bold text-white shrink-0" style="background-color: #009866;">2</span>
+                Vehicle you want
+            </h2>
             
             <div class="grid md:grid-cols-2 gap-5">
                 <div>
@@ -313,7 +333,10 @@
 
         <!-- Section 3: Additional Info -->
         <div class="space-y-5">
-            <h2 class="text-lg font-semibold text-gray-900 pb-2 border-b">Additional Information</h2>
+            <h2 class="text-base font-semibold text-gray-900 pb-2 border-b border-gray-200 flex items-center gap-2">
+                <span class="flex h-7 w-7 items-center justify-center rounded-lg text-xs font-bold text-white shrink-0" style="background-color: #009866;">3</span>
+                Additional information
+            </h2>
             
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Location *</label>
@@ -339,12 +362,14 @@
         </div>
 
         <!-- Submit Button -->
-        <div class="pt-4">
+        <div class="pt-2">
             <button 
                 type="submit" 
-                class="w-full text-white font-semibold py-4 px-6 rounded-xl transition-colors duration-200 text-lg" style="background-color: #009866;"
+                wire:loading.attr="disabled"
+                class="w-full text-white font-semibold py-3.5 px-6 rounded-xl transition-colors duration-200 text-base disabled:opacity-60" style="background-color: #009866;"
             >
-                Submit Exchange Request
+                <span wire:loading.remove wire:target="submit">Submit exchange request</span>
+                <span wire:loading wire:target="submit">Submitting…</span>
             </button>
         </div>
     </form>

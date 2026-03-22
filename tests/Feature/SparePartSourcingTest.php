@@ -49,6 +49,11 @@ it('submits spare part request and creates orders', function () {
 
     expect(SparePartOrder::query()->count())->toBe(2);
 
+    $orders = SparePartOrder::query()->orderBy('id')->get();
+    expect($orders->first()->public_token)->toBeString()->toHaveLength(40);
+    expect($orders->last()->public_token)->toBeString()->toHaveLength(40);
+    expect($orders->pluck('public_token')->unique()->count())->toBe(2);
+
     $this->assertDatabaseHas('spare_part_orders', [
         'user_id' => $user->id,
         'vehicle_make_id' => $make->id,

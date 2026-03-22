@@ -9,8 +9,18 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class SparePartOrder extends Model
 {
+    protected static function booted(): void
+    {
+        static::creating(function (SparePartOrder $order) {
+            if (empty($order->public_token)) {
+                $order->public_token = self::generatePublicToken();
+            }
+        });
+    }
+
     protected $fillable = [
         'order_number',
+        'public_token',
         'order_channel',
         'user_id',
         'customer_name',
@@ -94,6 +104,18 @@ class SparePartOrder extends Model
         } while (self::where('order_number', $number)->exists());
 
         return $number;
+    }
+
+    /**
+     * Opaque token for customer-facing order URLs (not sequential / guessable).
+     */
+    public static function generatePublicToken(): string
+    {
+        do {
+            $token = bin2hex(random_bytes(20));
+        } while (self::where('public_token', $token)->exists());
+
+        return $token;
     }
 
     public function user(): BelongsTo

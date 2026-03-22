@@ -14,7 +14,8 @@ class SparePartOrderDetail extends Component
     use WithFileUploads;
 
     public $order;
-    public $orderId;
+
+    public string $publicToken;
     public $messages = [];
     public $newMessage = '';
     
@@ -33,17 +34,17 @@ class SparePartOrderDetail extends Component
     public $successMessage = '';
     public $errorMessage = '';
 
-    public function mount($id)
+    public function mount(string $publicToken): void
     {
-        $this->orderId = $id;
+        $this->publicToken = $publicToken;
         $this->loadOrder();
         $this->loadMessages();
     }
 
-    public function loadOrder()
+    public function loadOrder(): void
     {
         $this->order = SparePartOrder::with(['vehicleMake', 'vehicleModel', 'user', 'assignedTo', 'quotations.agent', 'acceptedQuotation.agent'])
-            ->where('id', $this->orderId)
+            ->where('public_token', $this->publicToken)
             ->where('user_id', Auth::id())
             ->firstOrFail();
     }
