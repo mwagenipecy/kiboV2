@@ -52,11 +52,23 @@ return [
         'menu_template_sid' => env('TWILIO_MENU_TEMPLATE_SID', null),
     ],
 
+    'selcom_sms' => [
+        'base_url' => env('SELCOM_SMS_BASE_URL', 'https://gw.selcommobile.com:8443'),
+        'username' => env('SELCOM_SMS_USERNAME', 'savannahills'),
+        'password' => env('SELCOM_SMS_PASSWORD', 'savannahills'),
+    ],
+
     'universal_payment_link' => [
         'base_url' => env('PAYMENT_LINK_BASE_URL', 'http://197.250.35.61:8085'),
         'api_key' => env('PAYMENT_LINK_API_KEY'),
         'api_secret' => env('PAYMENT_LINK_API_SECRET'),
         'generate_universal_path' => '/api/payment-links/generate-universal',
     ],
+    'mailgun' => [
+    'domain' => env('MAILGUN_DOMAIN'),
+    'secret' => env('MAILGUN_SECRET'),
+    'endpoint' => env('MAILGUN_ENDPOINT', 'api.mailgun.net'),
+],
+
 
 ];

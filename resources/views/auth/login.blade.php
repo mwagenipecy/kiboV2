@@ -153,6 +153,13 @@
                     Sign up now
                 </a>
             </p>
+
+            <!-- Trust & Security -->
+            <div class="mt-8 text-center space-y-2">
+                <p class="text-sm text-gray-600">powered by Savanna Hills</p>
+                <p class="text-xs text-gray-600">Copyright © Kibo Auto Limited {{ date('Y') }}.</p>
+                <p class="text-xs text-gray-600">Your data is protected with 256-bit SSL encryption</p>
+            </div>
         </div>
     </div>
 

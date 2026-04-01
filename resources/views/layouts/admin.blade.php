@@ -122,12 +122,12 @@
     <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 hidden lg:hidden" style="z-index: 9998;" aria-hidden="true"></div>
 
     <!-- Main Content Area -->
-    <div class="main-content expanded transition-[margin] duration-300">
+    <div class="main-content expanded transition-[margin] duration-300 min-h-screen flex flex-col">
         <!-- Navbar Component -->
         <x-admin.navbar />
 
         <!-- Page Content -->
-        <main class="p-3 sm:p-6 lg:p-8 min-w-0 overflow-x-auto">
+        <main class="flex-1 p-3 sm:p-6 lg:p-8 min-w-0 overflow-x-auto">
             @yield('content')
             {{ $slot ?? '' }}
         </main>

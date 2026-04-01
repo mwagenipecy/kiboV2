@@ -63,5 +63,12 @@
             <span>{{ __('Already have an account?') }}</span>
             <flux:link :href="route('login')" wire:navigate>{{ __('Log in') }}</flux:link>
         </div>
+
+        <!-- Trust & Security -->
+        <div class="text-center text-sm text-zinc-600 dark:text-zinc-400 space-y-2">
+            <p>powered by Savanna Hills</p>
+            <p class="text-xs">Copyright © Kibo Auto Limited {{ date('Y') }}.</p>
+            <p class="text-xs">Your data is protected with 256-bit SSL encryption</p>
+        </div>
     </div>
 </x-layouts.auth>

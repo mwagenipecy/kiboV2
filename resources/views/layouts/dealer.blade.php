@@ -95,12 +95,12 @@
     <x-dealer.sidebar />
 
     <!-- Main Content Area -->
-    <div class="ml-64 main-content main-content-expanded">
+    <div class="ml-64 main-content main-content-expanded min-h-screen flex flex-col">
         <!-- Navbar Component -->
         <x-dealer.navbar />
 
         <!-- Page Content -->
-        <main class="p-4 sm:p-6 lg:p-8">
+        <main class="flex-1 p-4 sm:p-6 lg:p-8">
             @yield('content')
             {{ $slot ?? '' }}
         </main>

@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Actions\Fortify\CreateNewUser;
 use App\Actions\Fortify\ResetUserPassword;
 use App\Jobs\SendLoginOtp;
+use App\Jobs\SendOtpSms;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
@@ -37,9 +38,17 @@ class FortifyServiceProvider extends ServiceProvider
                     'otp_code' => $otpCode,
                     'otp_expires_at' => now()->addMinutes(5),
                 ]);
-                
-                // Send OTP email asynchronously so user is not blocked
-                SendLoginOtp::dispatch($user->email, $user->name ?? 'User', $otpCode);
+
+                $channel = $request->input('otp_channel', 'email');
+                $phone = optional($user->customer)->phone_number;
+                $actualChannel = $channel === 'sms' && !empty($phone) ? 'sms' : 'email';
+
+                if ($actualChannel === 'sms') {
+                    SendOtpSms::dispatch($phone, $otpCode);
+                } else {
+                    SendLoginOtp::dispatch($user->email, $user->name ?? 'User', $otpCode);
+                }
+                session()->put('otp_delivery_channel', $actualChannel);
                 
                 // Store intended URL in session for after OTP verification
                 // If user is not a customer and has a role, redirect to admin dashboard
@@ -70,9 +79,17 @@ class FortifyServiceProvider extends ServiceProvider
                         'otp_code' => $otpCode,
                         'otp_expires_at' => now()->addMinutes(5),
                     ]);
-                    
-                    // Send OTP email asynchronously via queue
-                    SendLoginOtp::dispatch($user->email, $user->name, $otpCode);
+
+                    $channel = $request->input('otp_channel', 'email');
+                    $phone = $request->input('phone_number') ?: optional($user->customer)->phone_number;
+                    $actualChannel = $channel === 'sms' && !empty($phone) ? 'sms' : 'email';
+
+                    if ($actualChannel === 'sms') {
+                        SendOtpSms::dispatch($phone, $otpCode);
+                    } else {
+                        SendLoginOtp::dispatch($user->email, $user->name, $otpCode);
+                    }
+                    session()->put('otp_delivery_channel', $actualChannel);
                     
                     // Store intended URL in session for after OTP verification
                     // If user is not a customer and has a role, redirect to admin dashboard

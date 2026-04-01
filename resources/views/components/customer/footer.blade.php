@@ -1,5 +1,5 @@
 <!-- Footer -->
-<footer class="bg-white border-t border-gray-200">
+<footer class="mt-auto w-full bg-white border-t border-gray-200">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
             <!-- Left Column - Logo & Links (only real links) -->
@@ -145,7 +145,6 @@
 
                 <!-- Copyright & Company Info -->
                 <div class="text-xs text-gray-600 space-y-2">
-                    <p>Copyright © Kibo Auto Limited {{ date('Y') }}.</p>
                     <p>
                         Kibo Auto Limited operates in Tanzania. We help you buy and sell vehicles and may introduce third-party finance or insurance providers where available.
                     </p>
@@ -166,6 +165,13 @@
                     </div>
                 </div>
             </div>
+        </div>
+
+        <!-- Bottom Trust & Copyright Bar -->
+        <div class="mt-10 border-t border-gray-200 pt-6 text-center space-y-2">
+            <span class="block text-sm text-gray-600">powered by Savanna Hills</span>
+            <span class="block text-xs text-gray-600">Copyright © Kibo Auto Limited {{ date('Y') }}.</span>
+            <span class="block text-xs text-gray-600">Your data is protected with 256-bit SSL encryption</span>
         </div>
     </div>
 </footer>

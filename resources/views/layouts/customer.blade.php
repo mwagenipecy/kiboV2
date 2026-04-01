@@ -19,13 +19,13 @@
     @stack('styles')
     @livewireStyles
 </head>
-<body class="bg-white" style="font-family: ATVFabriga, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif !important;">
+<body class="bg-white min-h-screen flex flex-col" style="font-family: ATVFabriga, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif !important;">
     
     <!-- Header Component with Dynamic Vehicle Type -->
     <x-customer.header :vehicleType="$vehicleType ?? 'cars'" />
 
     <!-- Main Content -->
-    <main>
+    <main class="flex-1">
         @yield('content')
         @isset($slot)
             {{ $slot }}
