@@ -65,19 +65,24 @@ class SelcomSmsService
             return '';
         }
 
+        // Handle +255XXXXXXXXX or 255XXXXXXXXX
         if (str_starts_with($digits, '255')) {
-            return $digits;
+            return strlen($digits) === 12 ? $digits : '';
         }
 
+        // Handle 0XXXXXXXXX
         if (str_starts_with($digits, '0')) {
-            return '255' . substr($digits, 1);
+            $local = substr($digits, 1);
+            return strlen($local) === 9 ? '255' . $local : '';
         }
 
+        // Handle 9-digit local numbers (e.g. 758238772)
         if (strlen($digits) === 9) {
             return '255' . $digits;
         }
 
-        return $digits;
+        // Reject unsupported formats explicitly
+        return '';
     }
 }
 
