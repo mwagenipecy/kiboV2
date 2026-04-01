@@ -32,6 +32,12 @@ class SendLoginOtp implements ShouldQueue
      */
     public function handle(): void
     {
+        Log::info('OTP email job started', [
+            'job' => self::class,
+            'to' => $this->email,
+            'queue' => $this->queue,
+        ]);
+
         // Create a temporary user-like object for the mailable
         $user = new \stdClass();
         $user->name = $this->userName;
@@ -43,6 +49,7 @@ class SendLoginOtp implements ShouldQueue
             Log::info('OTP email sent', [
                 'job' => self::class,
                 'to' => $this->email,
+                'queue' => $this->queue,
                 'mailer' => config('mail.default'),
                 'mail_host' => config('mail.mailers.smtp.host'),
                 'mail_port' => config('mail.mailers.smtp.port'),
@@ -52,6 +59,7 @@ class SendLoginOtp implements ShouldQueue
             Log::error('OTP email failed to send', [
                 'job' => self::class,
                 'to' => $this->email,
+                'queue' => $this->queue,
                 'mailer' => config('mail.default'),
                 'mail_host' => config('mail.mailers.smtp.host'),
                 'mail_port' => config('mail.mailers.smtp.port'),
@@ -62,6 +70,16 @@ class SendLoginOtp implements ShouldQueue
             // Re-throw so the job is marked as failed / retried by the worker.
             throw $e;
         }
+    }
+
+    public function failed(\Throwable $exception): void
+    {
+        Log::error('OTP email job permanently failed', [
+            'job' => self::class,
+            'to' => $this->email,
+            'queue' => $this->queue,
+            'error' => $exception->getMessage(),
+        ]);
     }
 }
 

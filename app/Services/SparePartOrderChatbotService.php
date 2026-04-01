@@ -207,10 +207,10 @@ class SparePartOrderChatbotService
 
         try {
             if (!empty($email)) {
-                SendLoginOtp::dispatch($email, 'Customer', $otpCode);
+                SendLoginOtp::dispatch($email, 'Customer', $otpCode)->onQueue('otp-email');
             }
             if (!empty($phoneNumber)) {
-                SendOtpSms::dispatch($phoneNumber, $otpCode);
+                SendOtpSms::dispatch($phoneNumber, $otpCode)->onQueue('otp-sms');
             }
         } catch (\Exception $e) {
             Log::error('Failed to dispatch sparepart OTP notifications: ' . $e->getMessage(), [

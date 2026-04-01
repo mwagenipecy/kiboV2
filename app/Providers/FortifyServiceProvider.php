@@ -40,9 +40,9 @@ class FortifyServiceProvider extends ServiceProvider
                 ]);
 
                 $phone = optional($user->customer)->phone_number;
-                SendLoginOtp::dispatch($user->email, $user->name ?? 'User', $otpCode);
+                SendLoginOtp::dispatch($user->email, $user->name ?? 'User', $otpCode)->onQueue('otp-email');
                 if (!empty($phone)) {
-                    SendOtpSms::dispatch($phone, $otpCode);
+                    SendOtpSms::dispatch($phone, $otpCode)->onQueue('otp-sms');
                 }
                 session()->put('otp_delivery_channel', 'both');
                 
@@ -77,9 +77,9 @@ class FortifyServiceProvider extends ServiceProvider
                     ]);
 
                     $phone = $request->input('phone_number') ?: optional($user->customer)->phone_number;
-                    SendLoginOtp::dispatch($user->email, $user->name, $otpCode);
+                    SendLoginOtp::dispatch($user->email, $user->name, $otpCode)->onQueue('otp-email');
                     if (!empty($phone)) {
-                        SendOtpSms::dispatch($phone, $otpCode);
+                        SendOtpSms::dispatch($phone, $otpCode)->onQueue('otp-sms');
                     }
                     session()->put('otp_delivery_channel', 'both');
                     
