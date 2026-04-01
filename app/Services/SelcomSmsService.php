@@ -9,9 +9,9 @@ class SelcomSmsService
 {
     public function send(string $phoneNumber, string $message): bool
     {
-        $baseUrl = rtrim((string) config('services.selcom_sms.base_url'), '/');
-        $username = (string) config('services.selcom_sms.username');
-        $password = (string) config('services.selcom_sms.password');
+        $baseUrl = rtrim((string) (config('services.selcom_sms.base_url') ?: 'https://gw.selcommobile.com:8443'), '/');
+        $username = (string) (config('services.selcom_sms.username') ?: 'savannahills');
+        $password = (string) (config('services.selcom_sms.password') ?: 'savannahills');
 
         $normalized = $this->normalizeTanzaniaNumber($phoneNumber);
 

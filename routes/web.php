@@ -1290,10 +1290,6 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/resend-otp', [App\Http\Controllers\Auth\OtpVerificationController::class, 'resend'])->name('otp.resend');
 });
 
-Route::post('/forgot-password/channel', [App\Http\Controllers\Auth\PasswordResetChannelController::class, 'send'])
-    ->middleware('guest')
-    ->name('password.channel');
-
 // ============================================
 // AUTHENTICATED ROUTES
 // ============================================

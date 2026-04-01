@@ -95,20 +95,6 @@
                         <button type="button" id="showForgotPasswordForm" class="text-sm text-green-700 hover:text-green-800">{{ __('auth.forgot_password') }}</button>
                     </div>
 
-                    <div class="mb-6">
-                        <p class="block text-sm font-medium text-gray-700 mb-2">Send OTP via</p>
-                        <div class="flex items-center gap-4 text-sm text-gray-700">
-                            <label class="flex items-center gap-2">
-                                <input type="radio" name="otp_channel" value="email" checked class="text-green-700 focus:ring-green-600">
-                                <span>Email</span>
-                            </label>
-                            <label class="flex items-center gap-2">
-                                <input type="radio" name="otp_channel" value="sms" class="text-green-700 focus:ring-green-600">
-                                <span>SMS</span>
-                            </label>
-                        </div>
-                    </div>
-
                     <!-- Sign In Button -->
                     <button 
                         type="submit" 
@@ -322,20 +308,6 @@
                         </label>
                     </div>
 
-                    <div class="mb-6">
-                        <p class="block text-sm font-medium text-gray-700 mb-2">Send OTP via</p>
-                        <div class="flex items-center gap-4 text-sm text-gray-700">
-                            <label class="flex items-center gap-2">
-                                <input type="radio" name="otp_channel" value="email" checked class="text-green-700 focus:ring-green-600">
-                                <span>Email</span>
-                            </label>
-                            <label class="flex items-center gap-2">
-                                <input type="radio" name="otp_channel" value="sms" class="text-green-700 focus:ring-green-600">
-                                <span>SMS</span>
-                            </label>
-                        </div>
-                    </div>
-
                     <!-- Create Account Button -->
                     <button 
                         type="submit" 
@@ -374,7 +346,7 @@
 
             <!-- Forgot Password Form (Hidden by default) -->
             <div id="forgotPasswordForm" class="space-y-4 hidden">
-                <form action="{{ route('password.channel') }}" method="POST">
+                <form action="{{ route('password.email') }}" method="POST">
                     @csrf
                     
                     <!-- Display success message -->
@@ -428,20 +400,6 @@
                     </div>
 
                     <!-- Send Reset Link Button -->
-                    <div class="mb-6">
-                        <p class="block text-sm font-medium text-gray-700 mb-2">Send reset link via</p>
-                        <div class="flex items-center gap-4 text-sm text-gray-700">
-                            <label class="flex items-center gap-2">
-                                <input type="radio" name="reset_channel" value="email" checked class="text-green-700 focus:ring-green-600">
-                                <span>Email</span>
-                            </label>
-                            <label class="flex items-center gap-2">
-                                <input type="radio" name="reset_channel" value="sms" class="text-green-700 focus:ring-green-600">
-                                <span>SMS</span>
-                            </label>
-                        </div>
-                    </div>
-
                     <button 
                         type="submit" 
                         id="forgotPasswordSubmitBtn"
@@ -521,9 +479,9 @@
                         @endif
                         <p class="text-sm text-gray-600">
                             @if(session('registrationSuccess'))
-                            Welcome to Kibo Auto! We've sent a 4-digit verification code to your {{ session('otp_delivery_channel', 'email') === 'sms' ? 'phone number' : 'email address' }}.
+                            Welcome to Kibo Auto! We've sent a 4-digit verification code to your email and phone number.
                             @else
-                            We've sent a 4-digit verification code to your {{ session('otp_delivery_channel', 'email') === 'sms' ? 'phone number' : 'email address' }}.
+                            We've sent a 4-digit verification code to your email and phone number.
                             @endif
                             <br>
                             @php
@@ -556,18 +514,7 @@
                                 
                                 $maskedEmail = $maskedLocal . '@' . $maskedDomain;
                             @endphp
-                            @if(session('otp_delivery_channel', 'email') === 'sms' && optional(auth()->user()->customer)->phone_number)
-                                @php
-                                    $phone = optional(auth()->user()->customer)->phone_number;
-                                    $digits = preg_replace('/\D+/', '', $phone);
-                                    $maskedPhone = strlen($digits) > 4
-                                        ? str_repeat('*', strlen($digits) - 4) . substr($digits, -4)
-                                        : $phone;
-                                @endphp
-                                <span class="font-medium text-gray-900">{{ $maskedPhone }}</span>
-                            @else
-                                <span class="font-medium text-gray-900">{{ $maskedEmail }}</span>
-                            @endif
+                            <span class="font-medium text-gray-900">{{ $maskedEmail }}</span>
                         </p>
                     </div>
 
@@ -621,7 +568,6 @@
                         <form action="{{ route('otp.resend') }}" method="POST" class="inline" id="resendOtpForm">
                             @csrf
                             <input type="hidden" name="from_modal" value="1">
-                            <input type="hidden" name="otp_channel" value="{{ session('otp_delivery_channel', 'email') }}">
                             <button type="submit" id="resendOtpBtn" class="text-sm text-green-700 hover:text-green-800 font-medium disabled:opacity-50 disabled:cursor-not-allowed">
                                 <span id="resendOtpText">Resend Code</span>
                                 <span id="resendOtpLoading" class="hidden flex items-center gap-1">

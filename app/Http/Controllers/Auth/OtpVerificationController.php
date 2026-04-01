@@ -36,14 +36,12 @@ class OtpVerificationController extends Controller
                 'otp_expires_at' => now()->addMinutes(5),
             ]);
             
-            $channel = session('otp_delivery_channel', 'email');
             $phone = optional($user->customer)->phone_number;
-            if ($channel === 'sms' && !empty($phone)) {
+            SendLoginOtp::dispatch($user->email, $user->name ?? 'User', $otpCode);
+            if (!empty($phone)) {
                 SendOtpSms::dispatch($phone, $otpCode);
-            } else {
-                SendLoginOtp::dispatch($user->email, $user->name ?? 'User', $otpCode);
-                session()->put('otp_delivery_channel', 'email');
             }
+            session()->put('otp_delivery_channel', 'both');
         }
 
         return view('auth.verify-otp');
@@ -113,33 +111,24 @@ class OtpVerificationController extends Controller
             'otp_expires_at' => now()->addMinutes(5),
         ]);
         
-        $requestedChannel = $request->input('otp_channel', session('otp_delivery_channel', 'email'));
         $phone = optional($user->customer)->phone_number;
-        $actualChannel = $requestedChannel === 'sms' && !empty($phone) ? 'sms' : 'email';
-
-        if ($actualChannel === 'sms') {
+        SendLoginOtp::dispatch($user->email, $user->name ?? 'User', $otpCode);
+        if (!empty($phone)) {
             SendOtpSms::dispatch($phone, $otpCode);
-        } else {
-            SendLoginOtp::dispatch($user->email, $user->name ?? 'User', $otpCode);
         }
-        session()->put('otp_delivery_channel', $actualChannel);
+        session()->put('otp_delivery_channel', 'both');
 
         // Determine redirect based on user role
         $redirectRoute = $user->isAdmin() ? route('admin.dashboard') : route('cars.index');
         
         // If from modal, redirect appropriately with flag
         if (request()->has('from_modal')) {
-            $message = $actualChannel === 'sms'
-                ? 'A new OTP code has been sent to your phone.'
-                : 'A new OTP code has been sent to your email.';
             return redirect($redirectRoute)
                 ->with('showOtpVerification', true)
-                ->with('status', $message);
+                ->with('status', 'A new OTP code has been sent to your email and phone number.');
         }
 
-        return back()->with('status', $actualChannel === 'sms'
-            ? 'A new OTP code has been sent to your phone.'
-            : 'A new OTP code has been sent to your email.');
+        return back()->with('status', 'A new OTP code has been sent to your email and phone number.');
     }
 
     /**

@@ -39,16 +39,12 @@ class FortifyServiceProvider extends ServiceProvider
                     'otp_expires_at' => now()->addMinutes(5),
                 ]);
 
-                $channel = $request->input('otp_channel', 'email');
                 $phone = optional($user->customer)->phone_number;
-                $actualChannel = $channel === 'sms' && !empty($phone) ? 'sms' : 'email';
-
-                if ($actualChannel === 'sms') {
+                SendLoginOtp::dispatch($user->email, $user->name ?? 'User', $otpCode);
+                if (!empty($phone)) {
                     SendOtpSms::dispatch($phone, $otpCode);
-                } else {
-                    SendLoginOtp::dispatch($user->email, $user->name ?? 'User', $otpCode);
                 }
-                session()->put('otp_delivery_channel', $actualChannel);
+                session()->put('otp_delivery_channel', 'both');
                 
                 // Store intended URL in session for after OTP verification
                 // If user is not a customer and has a role, redirect to admin dashboard
@@ -80,16 +76,12 @@ class FortifyServiceProvider extends ServiceProvider
                         'otp_expires_at' => now()->addMinutes(5),
                     ]);
 
-                    $channel = $request->input('otp_channel', 'email');
                     $phone = $request->input('phone_number') ?: optional($user->customer)->phone_number;
-                    $actualChannel = $channel === 'sms' && !empty($phone) ? 'sms' : 'email';
-
-                    if ($actualChannel === 'sms') {
+                    SendLoginOtp::dispatch($user->email, $user->name, $otpCode);
+                    if (!empty($phone)) {
                         SendOtpSms::dispatch($phone, $otpCode);
-                    } else {
-                        SendLoginOtp::dispatch($user->email, $user->name, $otpCode);
                     }
-                    session()->put('otp_delivery_channel', $actualChannel);
+                    session()->put('otp_delivery_channel', 'both');
                     
                     // Store intended URL in session for after OTP verification
                     // If user is not a customer and has a role, redirect to admin dashboard

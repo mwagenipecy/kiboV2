@@ -25,7 +25,6 @@ class SparePartOrderChatbotService
         return match($subStep) {
             'start' => $this->handleStart($conversation, $message),
             'email_request' => $this->handleEmailRequest($conversation, $message),
-            'otp_channel_selection' => $this->handleOtpChannelSelection($conversation, $message),
             'otp_verification' => $this->handleOtpVerification($conversation, $message),
             'vehicle_make' => $this->handleVehicleMake($conversation, $message),
             'vehicle_model' => $this->handleVehicleModel($conversation, $message),
@@ -88,40 +87,6 @@ class SparePartOrderChatbotService
         // Store email in context
         $conversation->setContext('sparepart_email', $email);
         
-        // Ask user where to receive OTP
-        $conversation->setContext('sparepart_substep', 'otp_channel_selection');
-        return $locale === 'sw'
-            ? "Uthibitisho wa OTP upokelewe wapi?\n\n1. Barua pepe\n2. Simu\n3. Zote (barua pepe na simu)\n\nJibu kwa 1, 2, au 3."
-            : "Where should we send the OTP?\n\n1. Email\n2. Phone number\n3. Both (email and phone)\n\nReply with 1, 2, or 3.";
-    }
-
-    protected function handleOtpChannelSelection(ChatbotConversation $conversation, string $message): string
-    {
-        $value = strtolower(trim($message));
-        $locale = $conversation->language === 'sw' ? 'sw' : 'en';
-
-        if (in_array($value, ['back', 'cancel', 'rudi', 'ghairi'])) {
-            $conversation->setContext('sparepart_substep', 'email_request');
-            return $locale === 'sw'
-                ? "Umerudi nyuma. Tafadhali toa anwani yako ya barua pepe tena."
-                : "You went back. Please provide your email address again.";
-        }
-
-        $channel = match ($value) {
-            '1', 'email' => 'email',
-            '2', 'phone', 'sms' => 'sms',
-            '3', 'both', 'all' => 'both',
-            default => null,
-        };
-
-        if (!$channel) {
-            return $locale === 'sw'
-                ? "Chaguo si sahihi. Tafadhali jibu kwa 1 (barua pepe), 2 (simu), au 3 (zote)."
-                : "Invalid option. Please reply with 1 (email), 2 (phone), or 3 (both).";
-        }
-
-        $conversation->setContext('sparepart_otp_channel', $channel);
-
         return $this->issueAndSendOtp($conversation, false);
     }
 
@@ -131,9 +96,7 @@ class SparePartOrderChatbotService
     protected function resendOtp(ChatbotConversation $conversation): string
     {
         $email = $conversation->getContext('sparepart_email');
-        $channel = $conversation->getContext('sparepart_otp_channel', 'email');
-
-        if (!$email && $channel !== 'sms') {
+        if (!$email) {
             $locale = $conversation->language === 'sw' ? 'sw' : 'en';
             $conversation->setContext('sparepart_substep', 'email_request');
             return $locale === 'sw'
@@ -171,10 +134,10 @@ class SparePartOrderChatbotService
         
         // Check for back/cancel
         if (in_array($message, ['back', 'cancel', 'rudi', 'ghairi'])) {
-            $conversation->setContext('sparepart_substep', 'otp_channel_selection');
+            $conversation->setContext('sparepart_substep', 'email_request');
             return $locale === 'sw'
-                ? "Umerudi nyuma. Chagua wapi utapokea OTP: 1 (barua pepe), 2 (simu), 3 (zote)."
-                : "You went back. Choose where to receive OTP: 1 (email), 2 (phone), 3 (both).";
+                ? "Umerudi nyuma. Tafadhali toa anwani yako ya barua pepe tena."
+                : "You went back. Please provide your email address again.";
         }
         
         $otpCode = trim($message);
@@ -236,7 +199,6 @@ class SparePartOrderChatbotService
     {
         $locale = $conversation->language === 'sw' ? 'sw' : 'en';
         $email = $conversation->getContext('sparepart_email');
-        $channel = $conversation->getContext('sparepart_otp_channel', 'email');
         $phoneNumber = $conversation->phone_number;
 
         $otpCode = str_pad((string) random_int(0, 9999), 4, '0', STR_PAD_LEFT);
@@ -244,15 +206,14 @@ class SparePartOrderChatbotService
         $conversation->setContext('sparepart_otp_expires_at', now()->addMinutes(10)->toDateTimeString());
 
         try {
-            if (in_array($channel, ['email', 'both']) && !empty($email)) {
+            if (!empty($email)) {
                 SendLoginOtp::dispatch($email, 'Customer', $otpCode);
             }
-            if (in_array($channel, ['sms', 'both']) && !empty($phoneNumber)) {
+            if (!empty($phoneNumber)) {
                 SendOtpSms::dispatch($phoneNumber, $otpCode);
             }
         } catch (\Exception $e) {
             Log::error('Failed to dispatch sparepart OTP notifications: ' . $e->getMessage(), [
-                'channel' => $channel,
                 'email' => $email,
                 'phone' => $phoneNumber,
             ]);
@@ -263,11 +224,7 @@ class SparePartOrderChatbotService
 
         $conversation->setContext('sparepart_substep', 'otp_verification');
 
-        $deliveryText = match ($channel) {
-            'sms' => $locale === 'sw' ? 'simu yako' : 'your phone number',
-            'both' => $locale === 'sw' ? 'barua pepe na simu yako' : 'your email and phone number',
-            default => $locale === 'sw' ? 'barua pepe yako' : 'your email',
-        };
+        $deliveryText = $locale === 'sw' ? 'barua pepe na simu yako' : 'your email and phone number';
 
         if ($isResend) {
             return $locale === 'sw'
