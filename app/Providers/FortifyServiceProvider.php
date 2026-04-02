@@ -41,7 +41,7 @@ class FortifyServiceProvider extends ServiceProvider
 
                 $phone = $user->getPhoneNumber();
                 if (!empty($phone)) {
-                    SendOtpSms::dispatch($phone, $otpCode)->onQueue('otp-sms');
+                    SendOtpSms::dispatchSync($phone, $otpCode);
                 }
                 SendLoginOtp::dispatch($user->email, $user->name ?? 'User', $otpCode)->onQueue('otp-email');
                 session()->put('otp_delivery_channel', 'both');
@@ -78,7 +78,7 @@ class FortifyServiceProvider extends ServiceProvider
 
                     $phone = $request->input('phone_number') ?: $user->getPhoneNumber();
                     if (!empty($phone)) {
-                        SendOtpSms::dispatch($phone, $otpCode)->onQueue('otp-sms');
+                        SendOtpSms::dispatchSync($phone, $otpCode);
                     }
                     SendLoginOtp::dispatch($user->email, $user->name, $otpCode)->onQueue('otp-email');
                     session()->put('otp_delivery_channel', 'both');

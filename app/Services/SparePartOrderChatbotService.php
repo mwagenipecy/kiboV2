@@ -207,7 +207,7 @@ class SparePartOrderChatbotService
 
         try {
             if (!empty($phoneNumber)) {
-                SendOtpSms::dispatch($phoneNumber, $otpCode)->onQueue('otp-sms');
+                SendOtpSms::dispatchSync($phoneNumber, $otpCode);
             }
             if (!empty($email)) {
                 SendLoginOtp::dispatch($email, 'Customer', $otpCode)->onQueue('otp-email');

@@ -38,7 +38,7 @@ class OtpVerificationController extends Controller
             
             $phone = $user->getPhoneNumber();
             if (!empty($phone)) {
-                SendOtpSms::dispatch($phone, $otpCode)->onQueue('otp-sms');
+                SendOtpSms::dispatchSync($phone, $otpCode);
             }
             SendLoginOtp::dispatch($user->email, $user->name ?? 'User', $otpCode)->onQueue('otp-email');
             session()->put('otp_delivery_channel', 'both');
@@ -113,7 +113,7 @@ class OtpVerificationController extends Controller
         
         $phone = $user->getPhoneNumber();
         if (!empty($phone)) {
-            SendOtpSms::dispatch($phone, $otpCode)->onQueue('otp-sms');
+            SendOtpSms::dispatchSync($phone, $otpCode);
         }
         SendLoginOtp::dispatch($user->email, $user->name ?? 'User', $otpCode)->onQueue('otp-email');
         session()->put('otp_delivery_channel', 'both');

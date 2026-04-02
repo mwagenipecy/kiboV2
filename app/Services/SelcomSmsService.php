@@ -28,8 +28,8 @@ class SelcomSmsService
 
         try {
             $response = Http::withoutVerifying()
-                ->withOptions(['allow_redirects' => true])
-                ->timeout(15)
+                ->connectTimeout(5)
+                ->timeout(10)
                 ->get($baseUrl . '/bin/send.json', [
                     'USERNAME' => $username,
                     'PASSWORD' => $password,
