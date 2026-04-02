@@ -206,6 +206,7 @@ class AgentForm extends Component
                 $user = User::create([
                     'name' => $this->name,
                     'email' => $this->email,
+                    'phone_number' => $this->phoneNumber,
                     'password' => Hash::make($password),
                     'role' => 'agent',
                 ]);

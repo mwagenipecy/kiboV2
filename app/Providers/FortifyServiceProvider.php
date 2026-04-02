@@ -39,11 +39,11 @@ class FortifyServiceProvider extends ServiceProvider
                     'otp_expires_at' => now()->addMinutes(5),
                 ]);
 
-                $phone = optional($user->customer)->phone_number;
-                SendLoginOtp::dispatch($user->email, $user->name ?? 'User', $otpCode)->onQueue('otp-email');
+                $phone = $user->getPhoneNumber();
                 if (!empty($phone)) {
                     SendOtpSms::dispatch($phone, $otpCode)->onQueue('otp-sms');
                 }
+                SendLoginOtp::dispatch($user->email, $user->name ?? 'User', $otpCode)->onQueue('otp-email');
                 session()->put('otp_delivery_channel', 'both');
                 
                 // Store intended URL in session for after OTP verification
@@ -76,11 +76,11 @@ class FortifyServiceProvider extends ServiceProvider
                         'otp_expires_at' => now()->addMinutes(5),
                     ]);
 
-                    $phone = $request->input('phone_number') ?: optional($user->customer)->phone_number;
-                    SendLoginOtp::dispatch($user->email, $user->name, $otpCode)->onQueue('otp-email');
+                    $phone = $request->input('phone_number') ?: $user->getPhoneNumber();
                     if (!empty($phone)) {
                         SendOtpSms::dispatch($phone, $otpCode)->onQueue('otp-sms');
                     }
+                    SendLoginOtp::dispatch($user->email, $user->name, $otpCode)->onQueue('otp-email');
                     session()->put('otp_delivery_channel', 'both');
                     
                     // Store intended URL in session for after OTP verification

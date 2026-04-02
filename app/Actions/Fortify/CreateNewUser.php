@@ -29,7 +29,7 @@ class CreateNewUser implements CreatesNewUsers
                 Rule::unique(User::class),
             ],
             'nida_number' => ['required', 'string', 'size:20', 'regex:/^[0-9]{20}$/'],
-            'phone_number' => ['required', 'string', 'max:20'],
+            'phone_number' => ['required', 'string', 'max:20', Rule::unique(User::class, 'phone_number')],
             'password' => $this->passwordRules(),
         ], [
             'nida_number.required' => 'NIDA number is required.',
@@ -41,8 +41,9 @@ class CreateNewUser implements CreatesNewUsers
         $user = User::create([
             'name' => $input['name'],
             'email' => $input['email'],
+            'phone_number' => $input['phone_number'],
             'password' => $input['password'],
-            'role' => 'customer', // Set role as customer by default
+            'role' => 'customer',
         ]);
 
         // Create customer record for the new user

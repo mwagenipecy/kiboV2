@@ -62,6 +62,7 @@ class LenderList extends Component
             $user = User::create([
                 'name' => $primaryUserName,
                 'email' => $primaryUserEmail,
+                'phone_number' => $entity->phone,
                 'password' => Hash::make($password),
                 'role' => 'lender',
                 'entity_id' => $entity->id,

@@ -36,11 +36,11 @@ class OtpVerificationController extends Controller
                 'otp_expires_at' => now()->addMinutes(5),
             ]);
             
-            $phone = optional($user->customer)->phone_number;
-            SendLoginOtp::dispatch($user->email, $user->name ?? 'User', $otpCode)->onQueue('otp-email');
+            $phone = $user->getPhoneNumber();
             if (!empty($phone)) {
                 SendOtpSms::dispatch($phone, $otpCode)->onQueue('otp-sms');
             }
+            SendLoginOtp::dispatch($user->email, $user->name ?? 'User', $otpCode)->onQueue('otp-email');
             session()->put('otp_delivery_channel', 'both');
         }
 
@@ -111,11 +111,11 @@ class OtpVerificationController extends Controller
             'otp_expires_at' => now()->addMinutes(5),
         ]);
         
-        $phone = optional($user->customer)->phone_number;
-        SendLoginOtp::dispatch($user->email, $user->name ?? 'User', $otpCode)->onQueue('otp-email');
+        $phone = $user->getPhoneNumber();
         if (!empty($phone)) {
             SendOtpSms::dispatch($phone, $otpCode)->onQueue('otp-sms');
         }
+        SendLoginOtp::dispatch($user->email, $user->name ?? 'User', $otpCode)->onQueue('otp-email');
         session()->put('otp_delivery_channel', 'both');
 
         // Determine redirect based on user role

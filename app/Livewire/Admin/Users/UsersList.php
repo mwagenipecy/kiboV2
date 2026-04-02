@@ -19,6 +19,7 @@ class UsersList extends Component
     public $showAddAdminModal = false;
     public $adminName = '';
     public $adminEmail = '';
+    public $adminPhone = '';
     
     public $showResetPasswordModal = false;
     public $resetUserId = null;
@@ -64,6 +65,7 @@ class UsersList extends Component
         $this->showAddAdminModal = true;
         $this->adminName = '';
         $this->adminEmail = '';
+        $this->adminPhone = '';
     }
 
     public function closeAddAdminModal()
@@ -71,6 +73,7 @@ class UsersList extends Component
         $this->showAddAdminModal = false;
         $this->adminName = '';
         $this->adminEmail = '';
+        $this->adminPhone = '';
         $this->resetValidation();
     }
 
@@ -88,6 +91,7 @@ class UsersList extends Component
                     }
                 },
             ],
+            'adminPhone' => ['nullable', 'string', 'max:20', 'unique:users,phone_number'],
         ]);
 
         try {
@@ -96,6 +100,7 @@ class UsersList extends Component
             $user = User::create([
                 'name' => $this->adminName,
                 'email' => $this->adminEmail,
+                'phone_number' => $this->adminPhone ?: null,
                 'password' => Hash::make($password),
                 'role' => 'admin',
                 'email_verified_at' => now(),

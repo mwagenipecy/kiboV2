@@ -270,6 +270,13 @@
                                         placeholder="admin@example.com">
                                     @error('adminEmail') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                                 </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+                                    <input type="text" wire:model="adminPhone" 
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                        placeholder="e.g. 0758238772">
+                                    @error('adminPhone') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                                </div>
                                 <div class="bg-blue-50 border-l-4 border-blue-400 p-3 rounded">
                                     <p class="text-sm text-blue-700">
                                         A random password will be generated and sent to the admin's email address.

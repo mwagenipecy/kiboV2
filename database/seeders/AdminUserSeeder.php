@@ -20,9 +20,10 @@ class AdminUserSeeder extends Seeder
             User::create([
                 'name' => 'System Administrator',
                 'email' => 'admin@kibo.com',
-                'password' => Hash::make('password'), // Default password
+                'phone_number' => '255700000000',
+                'password' => Hash::make('password'),
                 'role' => 'admin',
-                'entity_id' => null, // Admins don't belong to any entity
+                'entity_id' => null,
                 'email_verified_at' => now(),
             ]);
 

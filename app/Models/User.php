@@ -24,6 +24,7 @@ class User extends Authenticatable implements CanResetPassword
     protected $fillable = [
         'name',
         'email',
+        'phone_number',
         'password',
         'role',
         'status',
@@ -100,6 +101,42 @@ class User extends Authenticatable implements CanResetPassword
     public function customer()
     {
         return $this->hasOne(Customer::class);
+    }
+
+    /**
+     * Get the agent profile for this user
+     */
+    public function agent()
+    {
+        return $this->hasOne(Agent::class);
+    }
+
+    /**
+     * Get the CFC profile for this user
+     */
+    public function cfc()
+    {
+        return $this->hasOne(Cfc::class);
+    }
+
+    /**
+     * Resolve the user's phone number — prefers users.phone_number,
+     * falls back to the role-specific profile table.
+     */
+    public function getPhoneNumber(): ?string
+    {
+        if (!empty($this->phone_number)) {
+            return $this->phone_number;
+        }
+
+        return match ($this->role) {
+            'customer' => optional($this->customer)->phone_number,
+            'dealer', 'lender', 'manufacturer', 'insurance', 'service_center'
+                       => optional($this->entity)->phone,
+            'agent'    => optional($this->agent)->phone_number,
+            'cfc'      => optional($this->cfc)->phone_number,
+            default    => null,
+        };
     }
 
     /**

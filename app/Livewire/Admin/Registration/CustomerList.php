@@ -52,6 +52,7 @@ class CustomerList extends Component
             $user = User::create([
                 'name' => $customer->name,
                 'email' => $customer->email,
+                'phone_number' => $customer->phone_number,
                 'password' => Hash::make($password),
                 'role' => 'customer',
             ]);

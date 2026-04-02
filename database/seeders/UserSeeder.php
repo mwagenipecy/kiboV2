@@ -18,6 +18,7 @@ class UserSeeder extends Seeder
         User::create([
             'name' => 'Admin User',
             'email' => 'admin@autotrader.com',
+            'phone_number' => '255700000001',
             'password' => Hash::make('password'),
             'role' => 'admin',
             'email_verified_at' => now(),
@@ -27,6 +28,7 @@ class UserSeeder extends Seeder
         User::create([
             'name' => 'John Doe',
             'email' => 'user@autotrader.com',
+            'phone_number' => '255700000002',
             'password' => Hash::make('password'),
             'role' => 'user',
             'email_verified_at' => now(),

@@ -77,6 +77,7 @@ class AgentList extends Component
             $user = User::create([
                 'name' => $agent->name,
                 'email' => $agent->email,
+                'phone_number' => $agent->phone_number,
                 'password' => Hash::make($password),
                 'role' => 'agent',
             ]);

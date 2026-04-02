@@ -27,26 +27,42 @@ class SelcomSmsService
         }
 
         try {
-            $response = Http::timeout(15)->get($baseUrl . '/bin/send.json', [
-                'USERNAME' => $username,
-                'PASSWORD' => $password,
-                'DESTADDR' => $normalized,
-                'MESSAGE' => $message,
-            ]);
+            $response = Http::withoutVerifying()
+                ->withOptions(['allow_redirects' => true])
+                ->timeout(15)
+                ->get($baseUrl . '/bin/send.json', [
+                    'USERNAME' => $username,
+                    'PASSWORD' => $password,
+                    'DESTADDR' => $normalized,
+                    'MESSAGE' => $message,
+                ]);
 
-            if ($response->successful()) {
+            if (!$response->successful()) {
+                Log::error('Selcom SMS HTTP error', [
+                    'to' => $normalized,
+                    'http_status' => $response->status(),
+                    'body' => $response->body(),
+                ]);
+                return false;
+            }
+
+            $data = $response->json();
+            $smsStatus = $data['results'][0]['status'] ?? null;
+
+            if ($smsStatus === '0') {
                 Log::info('Selcom SMS sent', [
                     'to' => $normalized,
-                    'status' => $response->status(),
-                    'body' => $response->body(),
+                    'msgid' => $data['results'][0]['msgid'] ?? null,
+                    'balance' => $data['balance'] ?? null,
                 ]);
                 return true;
             }
 
-            Log::error('Selcom SMS failed', [
+            Log::error('Selcom SMS rejected by gateway', [
                 'to' => $normalized,
-                'status' => $response->status(),
-                'body' => $response->body(),
+                'status' => $smsStatus,
+                'statustext' => $data['results'][0]['statustext'] ?? 'unknown',
+                'response' => $data,
             ]);
         } catch (\Throwable $e) {
             Log::error('Selcom SMS exception', [

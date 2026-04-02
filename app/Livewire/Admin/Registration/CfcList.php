@@ -74,6 +74,7 @@ class CfcList extends Component
                 $user = User::create([
                     'name' => $cfc->name,
                     'email' => $cfc->email,
+                    'phone_number' => $cfc->phone_number,
                     'password' => Hash::make($password),
                     'role' => 'cfc',
                 ]);
