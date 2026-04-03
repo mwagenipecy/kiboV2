@@ -5,10 +5,12 @@ namespace App\Livewire\Admin\Registration;
 use App\Models\Customer;
 use App\Models\User;
 use App\Jobs\SendRegistrationCredentials;
+use App\Services\SelcomSmsService;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 
 class CustomerList extends Component
 {
@@ -65,16 +67,20 @@ class CustomerList extends Component
                 'approved_by' => auth()->id(),
             ]);
 
-            // Dispatch queued job to send credentials email
-            SendRegistrationCredentials::dispatch(
-                $customer->email,
-                $customer->name,
-                $password,
-                'customer',
-                $customer->phone_number
-            );
+            if (!empty($customer->phone_number)) {
+                try {
+                    app(SelcomSmsService::class)->send(
+                        $customer->phone_number,
+                        "Welcome to Kibo Auto! Your account has been approved. Email: {$customer->email} Password: {$password}"
+                    );
+                } catch (\Throwable $e) {
+                    Log::error('Customer approval SMS failed', ['to' => $customer->phone_number, 'error' => $e->getMessage()]);
+                }
+            }
 
-            session()->flash('success', 'Customer approved successfully! Credentials have been sent via email.');
+            SendRegistrationCredentials::dispatch($customer->email, $customer->name, $password, 'customer');
+
+            session()->flash('success', 'Customer approved successfully! Credentials have been sent.');
         } catch (\Exception $e) {
             session()->flash('error', 'An error occurred: ' . $e->getMessage());
         }

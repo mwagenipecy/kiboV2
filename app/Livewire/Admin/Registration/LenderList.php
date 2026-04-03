@@ -7,8 +7,10 @@ use App\Enums\EntityType;
 use App\Jobs\SendEntityUserCredentials;
 use App\Models\Entity;
 use App\Models\User;
+use App\Services\SelcomSmsService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -71,12 +73,22 @@ class LenderList extends Component
             // Update entity status to active
             $entity->update(['status' => EntityStatus::ACTIVE]);
 
-            // Dispatch job to send credentials
+            if (!empty($entity->phone)) {
+                try {
+                    app(SelcomSmsService::class)->send(
+                        $entity->phone,
+                        "Welcome to Kibo Auto! Your lender account has been approved. Email: {$primaryUserEmail} Password: {$password}"
+                    );
+                } catch (\Throwable $e) {
+                    Log::error('Lender approval SMS failed', ['to' => $entity->phone, 'error' => $e->getMessage()]);
+                }
+            }
+
             SendEntityUserCredentials::dispatch($user, $entity, $password);
 
             DB::commit();
 
-            session()->flash('message', 'Lender approved successfully! Credentials have been sent to their email.');
+            session()->flash('message', 'Lender approved successfully! Credentials have been sent.');
         } catch (\Exception $e) {
             DB::rollBack();
             session()->flash('error', 'Failed to approve lender: ' . $e->getMessage());

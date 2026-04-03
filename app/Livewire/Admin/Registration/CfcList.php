@@ -5,10 +5,12 @@ namespace App\Livewire\Admin\Registration;
 use App\Models\Cfc;
 use App\Models\User;
 use App\Jobs\SendRegistrationCredentials;
+use App\Services\SelcomSmsService;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Database\QueryException;
 
 class CfcList extends Component
@@ -89,13 +91,18 @@ class CfcList extends Component
             ]);
 
             // Send credentials email immediately (synchronously)
-            SendRegistrationCredentials::dispatchSync(
-                $cfc->email,
-                $cfc->name,
-                $password,
-                'cfc',
-                $cfc->phone_number
-            );
+            if (!empty($cfc->phone_number)) {
+                try {
+                    app(SelcomSmsService::class)->send(
+                        $cfc->phone_number,
+                        "Welcome to Kibo Auto! Your CFC account has been approved. Email: {$cfc->email} Password: {$password}"
+                    );
+                } catch (\Throwable $e) {
+                    Log::error('CFC approval SMS failed', ['to' => $cfc->phone_number, 'error' => $e->getMessage()]);
+                }
+            }
+
+            SendRegistrationCredentials::dispatch($cfc->email, $cfc->name, $password, 'cfc');
 
             session()->flash('success', 'CFC approved successfully! Login credentials have been sent via email.');
         } catch (QueryException $e) {

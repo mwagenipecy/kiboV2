@@ -6,9 +6,11 @@ use App\Models\Agent;
 use App\Models\User;
 use App\Models\VehicleMake;
 use App\Jobs\SendRegistrationCredentials;
+use App\Services\SelcomSmsService;
 use Livewire\Component;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 
 class AgentForm extends Component
 {
@@ -220,13 +222,18 @@ class AgentForm extends Component
                 $agent = Agent::create($data);
 
                 // Dispatch queued job to send credentials email
-                SendRegistrationCredentials::dispatch(
-                    $this->email,
-                    $this->name,
-                    $password,
-                    'agent',
-                    $this->phoneNumber
-                );
+                if (!empty($this->phoneNumber)) {
+                    try {
+                        app(SelcomSmsService::class)->send(
+                            $this->phoneNumber,
+                            "Welcome to Kibo Auto! Your agent account has been created. Email: {$this->email} Password: {$password}"
+                        );
+                    } catch (\Throwable $e) {
+                        Log::error('Agent creation SMS failed', ['to' => $this->phoneNumber, 'error' => $e->getMessage()]);
+                    }
+                }
+
+                SendRegistrationCredentials::dispatch($this->email, $this->name, $password, 'agent');
 
                 session()->flash('success', 'Agent created successfully! User account has been created and credentials have been sent via email.');
             }

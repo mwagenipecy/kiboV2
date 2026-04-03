@@ -5,10 +5,12 @@ namespace App\Livewire\Admin\Registration;
 use App\Models\Agent;
 use App\Models\User;
 use App\Jobs\SendRegistrationCredentials;
+use App\Services\SelcomSmsService;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 
 class AgentList extends Component
 {
@@ -91,13 +93,18 @@ class AgentList extends Component
             ]);
 
             // Dispatch queued job to send credentials email
-            SendRegistrationCredentials::dispatch(
-                $agent->email,
-                $agent->name,
-                $password,
-                'agent',
-                $agent->phone_number
-            );
+            if (!empty($agent->phone_number)) {
+                try {
+                    app(SelcomSmsService::class)->send(
+                        $agent->phone_number,
+                        "Welcome to Kibo Auto! Your agent account has been approved. Email: {$agent->email} Password: {$password}"
+                    );
+                } catch (\Throwable $e) {
+                    Log::error('Agent approval SMS failed', ['to' => $agent->phone_number, 'error' => $e->getMessage()]);
+                }
+            }
+
+            SendRegistrationCredentials::dispatch($agent->email, $agent->name, $password, 'agent');
 
             session()->flash('success', 'Agent approved successfully! Credentials have been sent via email.');
             }

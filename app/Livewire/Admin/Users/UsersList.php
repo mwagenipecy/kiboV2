@@ -4,7 +4,9 @@ namespace App\Livewire\Admin\Users;
 
 use App\Jobs\SendPasswordResetEmail;
 use App\Models\User;
+use App\Services\SelcomSmsService;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -160,9 +162,21 @@ class UsersList extends Component
                 'password' => Hash::make($newPassword),
             ]);
 
-            SendPasswordResetEmail::dispatch($user->name, $user->email, $newPassword, $user->getPhoneNumber());
+            $phone = $user->getPhoneNumber();
+            if (!empty($phone)) {
+                try {
+                    app(SelcomSmsService::class)->send(
+                        $phone,
+                        "Your Kibo Auto password has been reset. New password: {$newPassword}"
+                    );
+                } catch (\Throwable $e) {
+                    Log::error('Password reset SMS failed', ['to' => $phone, 'error' => $e->getMessage()]);
+                }
+            }
 
-            session()->flash('message', 'Password reset successfully! New credentials will be sent to ' . $user->email . ($user->getPhoneNumber() ? ' and phone.' : '.'));
+            SendPasswordResetEmail::dispatch($user->name, $user->email, $newPassword);
+
+            session()->flash('message', 'Password reset successfully! New credentials will be sent to ' . $user->email . ($phone ? ' and phone.' : '.'));
             $this->closeResetPasswordModal();
         } catch (\Exception $e) {
             session()->flash('error', 'Failed to reset password: ' . $e->getMessage());
