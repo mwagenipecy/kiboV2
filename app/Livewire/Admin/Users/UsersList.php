@@ -160,9 +160,9 @@ class UsersList extends Component
                 'password' => Hash::make($newPassword),
             ]);
 
-            SendPasswordResetEmail::dispatch($user->name, $user->email, $newPassword);
+            SendPasswordResetEmail::dispatch($user->name, $user->email, $newPassword, $user->getPhoneNumber());
 
-            session()->flash('message', 'Password reset successfully! New credentials will be sent to ' . $user->email);
+            session()->flash('message', 'Password reset successfully! New credentials will be sent to ' . $user->email . ($user->getPhoneNumber() ? ' and phone.' : '.'));
             $this->closeResetPasswordModal();
         } catch (\Exception $e) {
             session()->flash('error', 'Failed to reset password: ' . $e->getMessage());

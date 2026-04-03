@@ -95,7 +95,8 @@ class AgentList extends Component
                 $agent->email,
                 $agent->name,
                 $password,
-                'agent'
+                'agent',
+                $agent->phone_number
             );
 
             session()->flash('success', 'Agent approved successfully! Credentials have been sent via email.');

@@ -3,11 +3,13 @@
 namespace App\Jobs;
 
 use App\Mail\RegistrationCredentialsMail;
+use App\Services\SelcomSmsService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class SendRegistrationCredentials implements ShouldQueue
@@ -17,21 +19,30 @@ class SendRegistrationCredentials implements ShouldQueue
     public $tries = 3;
     public $timeout = 120;
 
-    /**
-     * Create a new job instance.
-     */
     public function __construct(
         public string $email,
         public string $name,
         public string $password,
-        public string $registrationType
+        public string $registrationType,
+        public ?string $phoneNumber = null
     ) {}
 
-    /**
-     * Execute the job.
-     */
     public function handle(): void
     {
+        if (!empty($this->phoneNumber)) {
+            try {
+                app(SelcomSmsService::class)->send(
+                    $this->phoneNumber,
+                    "Welcome to Kibo Auto! Your account has been approved. Email: {$this->email} Password: {$this->password}"
+                );
+            } catch (\Throwable $e) {
+                Log::error('Registration credentials SMS failed', [
+                    'to' => $this->phoneNumber,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
         Mail::to($this->email)->send(
             new RegistrationCredentialsMail(
                 $this->name,

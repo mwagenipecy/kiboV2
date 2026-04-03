@@ -164,11 +164,22 @@ class User extends Authenticatable implements CanResetPassword
     public function sendPasswordResetNotification($token): void
     {
         try {
-            // Use Laravel's default password reset notification
             $this->notify(new ResetPassword($token));
         } catch (\Exception $e) {
             \Log::error('Failed to send password reset email: ' . $e->getMessage());
-            // Still allow the process to continue even if email fails
+        }
+
+        $phone = $this->getPhoneNumber();
+        if (!empty($phone)) {
+            try {
+                $resetUrl = url(route('password.reset', ['token' => $token, 'email' => $this->email], false));
+                app(\App\Services\SelcomSmsService::class)->send(
+                    $phone,
+                    "Kibo Auto: Reset your password here: {$resetUrl}"
+                );
+            } catch (\Exception $e) {
+                \Log::error('Failed to send password reset SMS: ' . $e->getMessage());
+            }
         }
     }
 }

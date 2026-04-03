@@ -93,7 +93,8 @@ class CfcList extends Component
                 $cfc->email,
                 $cfc->name,
                 $password,
-                'cfc'
+                'cfc',
+                $cfc->phone_number
             );
 
             session()->flash('success', 'CFC approved successfully! Login credentials have been sent via email.');

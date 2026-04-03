@@ -70,7 +70,8 @@ class CustomerList extends Component
                 $customer->email,
                 $customer->name,
                 $password,
-                'customer'
+                'customer',
+                $customer->phone_number
             );
 
             session()->flash('success', 'Customer approved successfully! Credentials have been sent via email.');

@@ -224,7 +224,8 @@ class AgentForm extends Component
                     $this->email,
                     $this->name,
                     $password,
-                    'agent'
+                    'agent',
+                    $this->phoneNumber
                 );
 
                 session()->flash('success', 'Agent created successfully! User account has been created and credentials have been sent via email.');
