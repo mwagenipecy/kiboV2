@@ -110,7 +110,7 @@ class FortifyServiceProvider extends ServiceProvider
                 // Redirect back to home page with success message
                 // The message will be shown in the forgot password modal
                 return redirect()->route('cars.index')
-                    ->with('status', __('We have emailed your password reset link.'))
+                    ->with('status', __('We have emailed your password reset link and sent it by SMS (if your phone number is available).'))
                     ->with('showForgotPassword', true);
             }
         });
