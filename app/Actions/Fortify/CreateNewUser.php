@@ -29,13 +29,15 @@ class CreateNewUser implements CreatesNewUsers
                 Rule::unique(User::class),
             ],
             'nida_number' => ['required', 'string', 'size:20', 'regex:/^[0-9]{20}$/'],
-            'phone_number' => ['required', 'string', 'max:20', Rule::unique(User::class, 'phone_number')],
+            'phone_number' => ['required', 'string', 'regex:/^\+255[0-9]{9}$/', Rule::unique(User::class, 'phone_number')],
             'password' => $this->passwordRules(),
         ], [
             'nida_number.required' => 'NIDA number is required.',
             'nida_number.size' => 'NIDA number must be exactly 20 digits.',
             'nida_number.regex' => 'NIDA number must contain only numbers.',
             'phone_number.required' => 'Phone number is required.',
+            'phone_number.regex' => 'Phone number must be in the format +255XXXXXXXXX (9 digits after +255).',
+            'phone_number.unique' => 'This phone number is already registered.',
         ])->validate();
 
         $user = User::create([

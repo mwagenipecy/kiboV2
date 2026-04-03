@@ -216,19 +216,25 @@
                     <!-- Phone Number -->
                     <div class="mb-4">
                         <label for="reg_phone_number" class="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
-                        <input 
-                            type="tel" 
-                            id="reg_phone_number" 
-                            name="phone_number" 
-                            value="{{ old('phone_number') }}"
-                            required
-                            maxlength="20"
-                            class="w-full px-4 py-3 border {{ (isset($errors) && $errors->has('phone_number')) ? 'border-red-300' : 'border-gray-300' }} rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent"
-                            placeholder="Enter phone number"
-                        >
+                        <div class="flex">
+                            <span class="inline-flex items-center px-4 py-3 bg-gray-100 border border-r-0 border-gray-300 rounded-l-lg text-gray-600 text-sm font-medium">+255</span>
+                            <input 
+                                type="tel" 
+                                id="reg_phone_number_input" 
+                                maxlength="9"
+                                pattern="[0-9]{9}"
+                                required
+                                oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 9); document.getElementById('reg_phone_number').value = '+255' + this.value;"
+                                value="{{ old('phone_number') ? preg_replace('/^\+?255/', '', old('phone_number')) : '' }}"
+                                class="w-full px-4 py-3 border {{ (isset($errors) && $errors->has('phone_number')) ? 'border-red-300' : 'border-gray-300' }} rounded-r-lg focus:ring-2 focus:ring-green-600 focus:border-transparent"
+                                placeholder="7XXXXXXXX"
+                            >
+                            <input type="hidden" id="reg_phone_number" name="phone_number" value="{{ old('phone_number', '+255') }}">
+                        </div>
                         @if (isset($errors) && $errors->has('phone_number'))
                             <p class="mt-1 text-sm text-red-600">{{ $errors->first('phone_number') }}</p>
                         @endif
+                        <p class="mt-1 text-xs text-gray-500">Enter 9 digits after +255</p>
                     </div>
 
                     <!-- Password -->
