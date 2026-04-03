@@ -15,6 +15,7 @@ use Laravel\Fortify\Fortify;
 use Laravel\Fortify\Contracts\LoginResponse;
 use Laravel\Fortify\Contracts\LogoutResponse;
 use Laravel\Fortify\Contracts\RegisterResponse;
+use App\Http\Responses\SuccessfulPasswordResetLinkSentResponse;
 use Laravel\Fortify\Contracts\SuccessfulPasswordResetLinkRequestResponse;
 
 class FortifyServiceProvider extends ServiceProvider
@@ -103,17 +104,9 @@ class FortifyServiceProvider extends ServiceProvider
             }
         });
 
-        // Register custom successful password reset link request response
-        $this->app->instance(SuccessfulPasswordResetLinkRequestResponse::class, new class implements SuccessfulPasswordResetLinkRequestResponse {
-            public function toResponse($request)
-            {
-                // Redirect back to home page with success message
-                // The message will be shown in the forgot password modal
-                return redirect()->route('cars.index')
-                    ->with('status', __('We have emailed your password reset link and sent it by SMS (if your phone number is available).'))
-                    ->with('showForgotPassword', true);
-            }
-        });
+        // Fortify resolves this with ['status' => Password::RESET_LINK_SENT] — use bind + concrete class
+        // so constructor injection works (instance() anonymous classes ignore that).
+        $this->app->bind(SuccessfulPasswordResetLinkRequestResponse::class, SuccessfulPasswordResetLinkSentResponse::class);
     }
 
     /**

@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use App\Models\Customer;
-use App\Notifications\QueuedResetPassword;
+use Illuminate\Auth\Notifications\ResetPassword;
 use App\Services\SelcomSmsService;
 use Illuminate\Support\Str;
 use Laravel\Fortify\TwoFactorAuthenticatable;
@@ -166,7 +166,7 @@ class User extends Authenticatable implements CanResetPassword
     public function sendPasswordResetNotification($token): void
     {
         try {
-            $this->notify(new QueuedResetPassword($token));
+            $this->notify(new ResetPassword($token));
         } catch (\Exception $e) {
             \Log::error('Failed to queue password reset email: ' . $e->getMessage());
         }
