@@ -20,7 +20,7 @@ class SelcomSmsService
                 'base_url_set' => !empty($baseUrl),
                 'username_set' => !empty($username),
                 'password_set' => !empty($password),
-                'phone' => $phoneNumber,
+                'phone_raw' => $phoneNumber,
                 'normalized' => $normalized,
             ]);
             return false;
@@ -81,12 +81,20 @@ class SelcomSmsService
             return '';
         }
 
-        // Handle +255XXXXXXXXX or 255XXXXXXXXX
+        // Handle +255 / 255 prefix (12 digits: 255 + 9-digit national number)
         if (str_starts_with($digits, '255')) {
-            return strlen($digits) === 12 ? $digits : '';
+            if (strlen($digits) === 12) {
+                return $digits;
+            }
+            // Strip duplicate country code (e.g. 2552557xxxxxxxx mistyped)
+            if (str_starts_with($digits, '255255') && strlen($digits) === 15) {
+                return substr($digits, 3);
+            }
+
+            return '';
         }
 
-        // Handle 0XXXXXXXXX
+        // Handle 0XXXXXXXXX (10 digits total)
         if (str_starts_with($digits, '0')) {
             $local = substr($digits, 1);
             return strlen($local) === 9 ? '255' . $local : '';
@@ -97,7 +105,6 @@ class SelcomSmsService
             return '255' . $digits;
         }
 
-        // Reject unsupported formats explicitly
         return '';
     }
 }

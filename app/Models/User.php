@@ -7,7 +7,9 @@ use Illuminate\Contracts\Auth\CanResetPassword;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use App\Models\Customer;
 use App\Notifications\QueuedResetPassword;
+use App\Services\SelcomSmsService;
 use Illuminate\Support\Str;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 
@@ -166,20 +168,67 @@ class User extends Authenticatable implements CanResetPassword
         try {
             $this->notify(new QueuedResetPassword($token));
         } catch (\Exception $e) {
-            \Log::error('Failed to send password reset email: ' . $e->getMessage());
+            \Log::error('Failed to queue password reset email: ' . $e->getMessage());
         }
 
+        $this->loadMissing(['customer', 'entity', 'agent', 'cfc']);
+
+        $phone = $this->resolvePhoneForPasswordResetSms();
+        if (empty($phone)) {
+            \Log::warning('Password reset SMS skipped: no phone resolved for user', [
+                'user_id' => $this->id,
+                'email' => $this->email,
+                'role' => $this->role,
+            ]);
+
+            return;
+        }
+
+        $resetUrl = url(route('password.reset', [
+            'token' => $token,
+            'email' => $this->getEmailForPasswordReset(),
+        ], false));
+
+        try {
+            $sent = app(SelcomSmsService::class)->send(
+                $phone,
+                "Kibo Auto: Reset password {$resetUrl}"
+            );
+
+            if (!$sent) {
+                \Log::error('Password reset SMS failed (Selcom did not accept message)', [
+                    'user_id' => $this->id,
+                    'phone_raw' => $phone,
+                ]);
+            }
+        } catch (\Throwable $e) {
+            \Log::error('Password reset SMS exception: ' . $e->getMessage(), [
+                'user_id' => $this->id,
+                'phone_raw' => $phone,
+            ]);
+        }
+    }
+
+    /**
+     * Best-effort phone for forgot-password SMS (user column, role profile, then customer by link/email).
+     */
+    private function resolvePhoneForPasswordResetSms(): ?string
+    {
         $phone = $this->getPhoneNumber();
         if (!empty($phone)) {
-            try {
-                $resetUrl = url(route('password.reset', ['token' => $token, 'email' => $this->email], false));
-                app(\App\Services\SelcomSmsService::class)->send(
-                    $phone,
-                    "Kibo Auto: Reset your password here: {$resetUrl}"
-                );
-            } catch (\Exception $e) {
-                \Log::error('Failed to send password reset SMS: ' . $e->getMessage());
-            }
+            return $phone;
         }
+
+        $fromCustomer = Customer::query()
+            ->where('user_id', $this->id)
+            ->value('phone_number');
+
+        if (!empty($fromCustomer)) {
+            return $fromCustomer;
+        }
+
+        return Customer::query()
+            ->where('email', $this->email)
+            ->value('phone_number');
     }
 }
