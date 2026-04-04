@@ -3,31 +3,39 @@
 namespace App\Livewire\Customer;
 
 use App\Jobs\SendNewCarRequestEmail;
-use App\Mail\NewCarRequestMail;
 use App\Models\CarRequest;
-use App\Models\Entity;
 use App\Models\Customer;
+use App\Models\Entity;
 use App\Models\VehicleMake;
 use App\Models\VehicleModel;
-use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Livewire\Component;
 
 class FindMeACar extends Component
 {
     public $vehicle_make_id = '';
+
     public $vehicle_model_id = '';
 
     public $min_year = '';
+
     public $max_year = '';
+
     public $min_budget = '';
+
     public $max_budget = '';
 
     public $fuel_type = '';
+
     public $transmission = '';
+
     public $body_type = '';
+
     public $color = '';
+
     public $location = '';
+
     public $notes = '';
 
     public $models = [];
@@ -43,6 +51,32 @@ class FindMeACar extends Component
                 $this->location = $customer->address;
             }
         }
+    }
+
+    public function updatedMaxBudget(mixed $value): void
+    {
+        if ($value === null || $value === '') {
+            $this->max_budget = '';
+
+            return;
+        }
+        $digits = preg_replace('/\D/', '', (string) $value);
+        if ($digits === '') {
+            $this->max_budget = '';
+
+            return;
+        }
+        $this->max_budget = number_format((int) $digits, 0, '.', ',');
+    }
+
+    private function parseMoneyToNullableInt(mixed $value): ?int
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+        $digits = preg_replace('/\D/', '', (string) $value);
+
+        return $digits === '' ? null : (int) $digits;
     }
 
     public function updatedVehicleMakeId(): void
@@ -61,11 +95,30 @@ class FindMeACar extends Component
 
     public function submit()
     {
-        $validated = $this->validate([
+        $data = array_merge(
+            $this->only([
+                'vehicle_make_id',
+                'vehicle_model_id',
+                'min_year',
+                'max_year',
+                'fuel_type',
+                'transmission',
+                'body_type',
+                'color',
+                'location',
+                'notes',
+            ]),
+            [
+                'min_budget' => $this->parseMoneyToNullableInt($this->min_budget),
+                'max_budget' => $this->parseMoneyToNullableInt($this->max_budget),
+            ]
+        );
+
+        $validated = Validator::make($data, [
             'vehicle_make_id' => ['nullable', 'integer', 'exists:vehicle_makes,id'],
             'vehicle_model_id' => ['nullable', 'integer', 'exists:vehicle_models,id'],
-            'min_year' => ['nullable', 'integer', 'min:1950', 'max:' . (date('Y') + 1)],
-            'max_year' => ['nullable', 'integer', 'min:1950', 'max:' . (date('Y') + 1)],
+            'min_year' => ['nullable', 'integer', 'min:1950', 'max:'.(date('Y') + 1)],
+            'max_year' => ['nullable', 'integer', 'min:1950', 'max:'.(date('Y') + 1)],
             'min_budget' => ['nullable', 'integer', 'min:0'],
             'max_budget' => ['nullable', 'integer', 'min:0'],
             'fuel_type' => ['nullable', 'string', 'max:50'],
@@ -74,41 +127,46 @@ class FindMeACar extends Component
             'color' => ['nullable', 'string', 'max:50'],
             'location' => ['required', 'string', 'max:255'],
             'notes' => ['nullable', 'string', 'max:2000'],
-        ]);
+        ])->validate();
 
-        if (!empty($validated['min_year']) && !empty($validated['max_year']) && $validated['min_year'] > $validated['max_year']) {
+        if (! empty($validated['min_year']) && ! empty($validated['max_year']) && $validated['min_year'] > $validated['max_year']) {
             $this->addError('min_year', 'Min year cannot be greater than max year.');
+
             return;
         }
 
-        if (!empty($validated['min_budget']) && !empty($validated['max_budget']) && $validated['min_budget'] > $validated['max_budget']) {
+        if (! empty($validated['min_budget']) && ! empty($validated['max_budget']) && $validated['min_budget'] > $validated['max_budget']) {
             $this->addError('min_budget', 'Min budget cannot be greater than max budget.');
+
             return;
         }
 
         // Validate that model belongs to selected make
-        if (!empty($validated['vehicle_model_id']) && !empty($validated['vehicle_make_id'])) {
+        if (! empty($validated['vehicle_model_id']) && ! empty($validated['vehicle_make_id'])) {
             $model = VehicleModel::where('id', $validated['vehicle_model_id'])
                 ->where('vehicle_make_id', $validated['vehicle_make_id'])
                 ->exists();
-            
-            if (!$model) {
+
+            if (! $model) {
                 $this->addError('vehicle_model_id', 'The selected model does not belong to the selected make.');
+
                 return;
             }
         }
 
         // If model is selected but make is not, that's invalid
-        if (!empty($validated['vehicle_model_id']) && empty($validated['vehicle_make_id'])) {
+        if (! empty($validated['vehicle_model_id']) && empty($validated['vehicle_make_id'])) {
             $this->addError('vehicle_model_id', 'Please select a make first.');
+
             return;
         }
 
         $user = auth()->user();
-        if (!$user) {
+        if (! $user) {
             // Dispatch browser event to open auth modal
             $this->dispatch('open-auth-modal');
             $this->addError('auth', 'Please sign in or create an account before sending your request to dealers.');
+
             return;
         }
 
@@ -136,7 +194,7 @@ class FindMeACar extends Component
             ->with('users:id,entity_id,email')
             ->get()
             ->flatMap(fn ($e) => $e->users)
-            ->filter(fn ($u) => !empty($u->email));
+            ->filter(fn ($u) => ! empty($u->email));
 
         // Send emails asynchronously via queue
         foreach ($dealerUsers as $dealerUser) {
@@ -151,11 +209,11 @@ class FindMeACar extends Component
     public function render()
     {
         $makes = VehicleMake::where('status', 'active')->orderBy('name')->get(['id', 'name']);
+        $years = range((int) date('Y') + 1, 1950);
 
         return view('livewire.customer.find-me-a-car', [
             'makes' => $makes,
+            'years' => $years,
         ])->layout('layouts.customer');
     }
 }
-
-

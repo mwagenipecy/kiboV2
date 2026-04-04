@@ -47,6 +47,13 @@
     }
 }
 
+/* Fortify / Flux auth screens (layouts.auth.simple): Kibo green, no default Laravel styling */
+.auth-layout {
+    --color-accent: #009866;
+    --color-accent-content: #007a52;
+    --color-accent-foreground: #ffffff;
+}
+
 [data-flux-field]:not(ui-radio, ui-checkbox) {
     @apply grid gap-2;
 }

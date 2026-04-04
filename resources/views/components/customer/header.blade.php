@@ -1,11 +1,54 @@
 @props(['vehicleType' => 'cars'])
 
-{{-- Sticky wrapper so both category nav and main header stay visible on scroll (e.g. cars/search) --}}
-<div class="sticky top-0 z-[100] bg-white shadow-sm">
+{{-- Sticky wrapper: category nav + header + global track modal (same on every section) --}}
+<div
+    class="sticky top-0 z-[100] bg-white shadow-sm"
+    x-data="{
+        mobileMenuOpen: false,
+        trackModalOpen: false,
+        trackInput: '',
+        trackError: '',
+        openTrack() {
+            this.trackModalOpen = true;
+            this.trackError = '';
+            this.trackInput = '';
+            this.$nextTick(() => this.$refs.trackInputField?.focus());
+        },
+        closeTrack() {
+            this.trackModalOpen = false;
+        },
+        submitTrack() {
+            this.trackError = '';
+            const v = (this.trackInput || '').trim();
+            const orderNorm = v.replace(/\s+/g, '').toUpperCase();
+            if (/^SPO-\d{8}-[A-Z0-9]+$/.test(orderNorm)) {
+                window.location.href = '{{ rtrim(url('/spare-parts/track/order'), '/') }}/' + encodeURIComponent(orderNorm);
+                return;
+            }
+            let token = null;
+            const urlMatch = v.match(/\/spare-parts\/track\/([a-f0-9]{40})/i);
+            if (urlMatch) {
+                token = urlMatch[1].toLowerCase();
+            } else {
+                const hex = v.replace(/[^a-f0-9]/gi, '');
+                if (hex.length === 40) {
+                    token = hex.toLowerCase();
+                }
+            }
+            if (!token) {
+                this.trackError = 'Enter your order number (e.g. SPO-20260404-9E2D2A), or paste the link / 40-character code from your SMS.';
+                return;
+            }
+            window.location.href = '{{ rtrim(url('/spare-parts/track'), '/') }}/' + token;
+        }
+    }"
+    @keydown.escape.window="closeTrack()"
+>
     <!-- Top Category Navigation -->
     <nav class="bg-white border-b border-gray-200 hidden md:block">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-start space-x-4 h-12 flex-1">
+            <div class="flex items-center justify-between gap-4 h-12 w-full">
+                <div class="flex flex-wrap items-center gap-x-4 gap-y-1 min-w-0">
                 <a href="{{ route('cars.index') }}" class="text-sm font-medium {{ $vehicleType === 'cars' || request()->routeIs('cars.*') ? 'text-gray-900 font-semibold border-b-2 border-green-600 pb-1' : 'text-gray-600' }} hover:text-green-700 transition-colors">{{ __('vehicles.cars') }}</a>
                 <a href="{{ route('trucks.index') }}" class="text-sm font-medium {{ $vehicleType === 'trucks' || request()->routeIs('trucks.*') ? 'text-gray-900 font-semibold border-b-2 border-green-600 pb-1' : 'text-gray-600' }} hover:text-green-700 transition-colors">{{ __('vehicles.trucks') }}</a>
                 <a href="{{ route('spare-parts.index') }}" class="text-sm font-medium {{ $vehicleType === 'spare-parts' || request()->routeIs('spare-parts.*') ? 'text-gray-900 font-semibold border-b-2 border-green-600 pb-1' : 'text-gray-600' }} hover:text-green-700 transition-colors">Spare Parts</a>
@@ -13,6 +56,14 @@
                 <a href="{{ route('import-financing.index') }}" class="text-sm font-medium {{ $vehicleType === 'financing' || request()->routeIs('loan-calculator.*') || request()->routeIs('import-financing.*') ? 'text-gray-900 font-semibold border-b-2 border-green-600 pb-1' : 'text-gray-600' }} hover:text-green-700 transition-colors">Financing</a>
                 <a href="{{ route('agiza-import.index') }}" class="text-sm font-medium {{ $vehicleType === 'agiza-import' || request()->routeIs('agiza-import.*') ? 'text-gray-900 font-semibold border-b-2 border-green-600 pb-1' : 'text-gray-600' }} hover:text-green-700 transition-colors">Agiza/Import</a>
                 <a href="{{ route('car-exchange.index') }}" class="text-sm font-medium {{ $vehicleType === 'car-exchange' || request()->routeIs('car-exchange.*') ? 'text-gray-900 font-semibold border-b-2 border-green-600 pb-1' : 'text-gray-600' }} hover:text-green-700 transition-colors">Car Exchange</a>
+                </div>
+                <button
+                    type="button"
+                    @click="openTrack()"
+                    class="shrink-0 text-sm font-semibold px-3 py-1.5 rounded-lg border border-emerald-600 text-emerald-700 hover:bg-emerald-50 transition-colors"
+                >
+                    Track order
+                </button>
                 <!-- <a href="{{ route('cars.complaints') }}" class="ml-auto px-4 py-1.5 rounded-lg text-sm font-semibold text-white hover:opacity-90 transition-opacity" style="background-color: #009866;">Complaints</a> -->
                 {{-- Hidden menus --}}
                 {{-- <a href="{{ route('vans.index') }}" class="text-sm font-medium {{ $vehicleType === 'vans' ? 'text-gray-900' : 'text-gray-600' }} hover:text-green-700">{{ __('vehicles.vans') }}</a> --}}
@@ -27,7 +78,7 @@
     </nav>
 
     <!-- Main Navigation -->
-    <header class="bg-white" x-data="{ mobileMenuOpen: false }">
+    <header class="bg-white">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16">
             <!-- Logo and Mobile Menu Button -->
@@ -53,7 +104,14 @@
             </nav>
 
             <!-- Right Side Icons -->
-            <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-3 sm:space-x-4">
+                <button
+                    type="button"
+                    @click="openTrack()"
+                    class="md:hidden shrink-0 text-sm font-semibold text-emerald-700 hover:text-emerald-800 px-2 py-1 rounded-lg hover:bg-emerald-50"
+                >
+                    Track
+                </button>
                 <!-- Language Switcher -->
                 <!-- <x-language-switcher-simple /> -->
                 
@@ -134,6 +192,13 @@
                     <a href="{{ route('car-exchange.index') }}" @click="mobileMenuOpen = false" class="block px-3 py-2 rounded-lg text-sm font-medium {{ $vehicleType === 'car-exchange' || request()->routeIs('car-exchange.*') ? 'bg-green-50 text-green-700' : 'text-gray-700 hover:bg-gray-50' }} transition-colors">
                         Car Exchange
                     </a>
+                    <button
+                        type="button"
+                        @click="mobileMenuOpen = false; openTrack()"
+                        class="w-full text-left block px-3 py-2 rounded-lg text-sm font-semibold text-emerald-700 border border-emerald-200 hover:bg-emerald-50 transition-colors mt-1"
+                    >
+                        Track order
+                    </button>
                     <a href="{{ route('cars.complaints') }}" @click="mobileMenuOpen = false" class="block px-4 py-3 rounded-lg text-sm font-semibold text-white text-center mt-3 transition-opacity hover:opacity-90" style="background-color: #009866;">
                         Complaints
                     </a>
@@ -207,6 +272,36 @@
         </div>
     </div>
 </header>
+
+    {{-- Global track modal (spare parts order — same from any category) --}}
+    <div
+        x-show="trackModalOpen"
+        x-cloak
+        class="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 p-4"
+        @click.self="closeTrack()"
+    >
+        <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl" @click.stop role="dialog" aria-modal="true" aria-labelledby="track-modal-title">
+            <h2 id="track-modal-title" class="text-lg font-bold text-gray-900 mb-1">Track spare part order</h2>
+            <p class="text-sm text-gray-600 mb-4">Use your <strong>order number</strong> (e.g. SPO-20260404-9E2D2A), or paste the link / code from your SMS.</p>
+            <input
+                x-ref="trackInputField"
+                type="text"
+                x-model="trackInput"
+                @keydown.enter.prevent="submitTrack()"
+                placeholder="SPO-20260404-9E2D2A or link…"
+                class="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm text-gray-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/25 outline-none mb-2"
+                autocomplete="off"
+            />
+            <p x-show="trackError" x-text="trackError" class="text-sm text-red-600 mb-3"></p>
+            <div class="flex flex-col gap-2 sm:flex-row sm:justify-end">
+                <button type="button" @click="closeTrack()" class="rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 order-2 sm:order-1">Cancel</button>
+                <button type="button" @click="submitTrack()" class="rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 order-1 sm:order-2">View order</button>
+            </div>
+            <p class="mt-4 text-xs text-gray-500">
+                <a href="{{ route('spare-parts.track-landing') }}" class="text-emerald-700 font-medium hover:underline">More about tracking</a>
+            </p>
+        </div>
+    </div>
 </div>
 
 <!-- Auth Modal Component -->

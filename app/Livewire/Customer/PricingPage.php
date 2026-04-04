@@ -9,9 +9,35 @@ class PricingPage extends Component
 {
     public $category = 'cars';
 
+    public bool $showPricingAccessModal = false;
+
+    /** @var array<string, mixed>|null */
+    public ?array $pricingAccessModal = null;
+
     public function mount($category = 'cars')
     {
         $this->category = $category;
+
+        if ($category === 'cars') {
+            $payload = session()->pull('pricing_cars_modal');
+            if (is_array($payload) && $payload !== []) {
+                $this->pricingAccessModal = $payload;
+                $this->showPricingAccessModal = true;
+            }
+        }
+    }
+
+    public function dismissPricingModal(): void
+    {
+        $this->showPricingAccessModal = false;
+        $this->pricingAccessModal = null;
+    }
+
+    public function openSignInFromPricingModal(): void
+    {
+        $this->showPricingAccessModal = false;
+        $this->pricingAccessModal = null;
+        $this->js('setTimeout(function(){ document.getElementById("openAuthModal")?.click(); }, 50);');
     }
 
     public function render()
@@ -21,7 +47,7 @@ class PricingPage extends Component
             ->ordered()
             ->get();
 
-        $categoryName = match($this->category) {
+        $categoryName = match ($this->category) {
             'cars' => 'Cars',
             'trucks' => 'Trucks',
             'garage' => 'Garage Services',

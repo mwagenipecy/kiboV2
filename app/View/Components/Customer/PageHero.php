@@ -14,8 +14,19 @@ class PageHero extends Component
     public function __construct(
         public string $slug,
         public string $variant = 'floating_overlay',
+        public ?string $heroHeadline = null,
+        public ?string $heroSubheadline = null,
     ) {
         $this->slides = $this->resolveSlides();
+
+        if (($this->heroHeadline !== null || $this->heroSubheadline !== null) && isset($this->slides[0])) {
+            if ($this->heroHeadline !== null) {
+                $this->slides[0]['headline'] = $this->heroHeadline;
+            }
+            if ($this->heroSubheadline !== null) {
+                $this->slides[0]['subheadline'] = $this->heroSubheadline;
+            }
+        }
     }
 
     /**

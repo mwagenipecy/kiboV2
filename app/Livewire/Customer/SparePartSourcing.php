@@ -2,10 +2,13 @@
 
 namespace App\Livewire\Customer;
 
+use App\Jobs\SendOtpSms;
+use App\Jobs\SendSparePartOrderPlacedSms;
 use App\Models\SparePartOrder;
 use App\Models\VehicleMake;
 use App\Models\VehicleModel;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -56,6 +59,21 @@ class SparePartSourcing extends Component
     public $errorMessage = '';
 
     public $createdOrderNumbers = [];
+
+    /** @var list<array{number: string, url: string}> */
+    public array $createdOrderTrackLinks = [];
+
+    /** When true (spare-parts home only), guests may verify phone with OTP instead of logging in. */
+    public bool $offerGuestPhoneOtp = false;
+
+    // Guest one-time phone sign-in
+    public bool $guestAccessVerified = false;
+
+    public string $guestModalStep = 'choose';
+
+    public string $guestOtpPhone = '';
+
+    public string $guestOtpCode = '';
 
     // Customer information
     public $customerName = '';
@@ -142,6 +160,15 @@ class SparePartSourcing extends Component
     public function mount()
     {
         $this->isLoggedIn = Auth::check();
+
+        if (Auth::check()) {
+            session()->forget('spare_parts_guest_phone');
+        }
+
+        $this->guestAccessVerified = ! Auth::check() && session()->has('spare_parts_guest_phone');
+        if ($this->guestAccessVerified) {
+            $this->customerPhone = (string) session('spare_parts_guest_phone');
+        }
 
         $this->tanzaniaRegions = [
             'Arusha',
@@ -264,20 +291,142 @@ class SparePartSourcing extends Component
         $this->dispatch('open-auth-modal');
     }
 
-    public function submitOrders()
+    public function startGuestPhoneFlow(): void
     {
+        if (! $this->offerGuestPhoneOtp) {
+            return;
+        }
+        $this->guestModalStep = 'phone';
+        $this->resetValidation();
+    }
 
-        // Check if user is logged in
-        if (! Auth::check()) {
-            $this->openAuthModal();
+    public function backToGuestChoose(): void
+    {
+        $this->guestModalStep = 'choose';
+        $this->guestOtpCode = '';
+        $this->resetValidation();
+    }
+
+    public function sendSparePartsGuestOtp(): void
+    {
+        if (! $this->offerGuestPhoneOtp) {
+            return;
+        }
+        $this->validate([
+            'guestOtpPhone' => ['required', 'regex:/^0\d{9}$/'],
+        ], [
+            'guestOtpPhone.regex' => 'Phone must start with 0 and be 10 digits (e.g. 0712345678).',
+        ]);
+
+        $normalized = $this->normalizeLocalPhone($this->guestOtpPhone);
+        if (! $normalized) {
+            $this->addError('guestOtpPhone', 'Invalid phone number.');
 
             return;
         }
 
-        // Ensure name/email are always taken from the logged-in user
-        $user = Auth::user();
-        $this->customerName = $user->name;
-        $this->customerEmail = $user->email;
+        $sendKey = 'spare_parts_otp_sends:'.$normalized;
+        $attempts = (int) Cache::get($sendKey, 0);
+        if ($attempts >= 5) {
+            $this->addError('guestOtpPhone', 'Too many code requests. Please try again in an hour.');
+
+            return;
+        }
+
+        $otpCode = str_pad((string) random_int(0, 9999), 4, '0', STR_PAD_LEFT);
+        Cache::put($this->guestOtpCacheKey($normalized), $otpCode, now()->addMinutes(5));
+        Cache::put($sendKey, $attempts + 1, now()->addHour());
+
+        SendOtpSms::dispatchSync($normalized, $otpCode);
+
+        $this->guestModalStep = 'otp';
+        $this->guestOtpCode = '';
+        $this->resetValidation();
+    }
+
+    public function verifySparePartsGuestOtp(): void
+    {
+        if (! $this->offerGuestPhoneOtp) {
+            return;
+        }
+        $this->validate([
+            'guestOtpCode' => ['required', 'digits:4'],
+            'guestOtpPhone' => ['required', 'regex:/^0\d{9}$/'],
+        ]);
+
+        $normalized = $this->normalizeLocalPhone($this->guestOtpPhone);
+        if (! $normalized) {
+            $this->addError('guestOtpCode', 'Invalid phone.');
+
+            return;
+        }
+
+        $verifyKey = 'spare_parts_otp_verify:'.$normalized;
+        if ((int) Cache::get($verifyKey, 0) >= 20) {
+            $this->addError('guestOtpCode', 'Too many attempts. Request a new code.');
+
+            return;
+        }
+        Cache::put($verifyKey, (int) Cache::get($verifyKey, 0) + 1, now()->addHour());
+
+        $expected = Cache::get($this->guestOtpCacheKey($normalized));
+        if (! $expected || $expected !== $this->guestOtpCode) {
+            $this->addError('guestOtpCode', 'That code is incorrect or expired.');
+
+            return;
+        }
+
+        Cache::forget($this->guestOtpCacheKey($normalized));
+        Cache::forget('spare_parts_otp_verify:'.$normalized);
+        session()->put('spare_parts_guest_phone', $normalized);
+        $this->guestAccessVerified = true;
+        $this->customerPhone = $normalized;
+        $this->guestModalStep = 'choose';
+        $this->guestOtpCode = '';
+    }
+
+    protected function guestOtpCacheKey(string $normalizedLocalPhone): string
+    {
+        return 'spare_parts_guest_otp:'.hash('sha256', $normalizedLocalPhone);
+    }
+
+    protected function normalizeLocalPhone(?string $phone): ?string
+    {
+        if ($phone === null || $phone === '') {
+            return null;
+        }
+        $digits = preg_replace('/\D/', '', $phone);
+
+        return preg_match('/^0\d{9}$/', $digits) ? $digits : null;
+    }
+
+    public function canAccessSourcing(): bool
+    {
+        return Auth::check() || ($this->offerGuestPhoneOtp && $this->guestAccessVerified);
+    }
+
+    public function submitOrders()
+    {
+        if (! Auth::check()) {
+            if (! $this->offerGuestPhoneOtp) {
+                $this->errorMessage = 'Please sign in to submit a spare parts request.';
+                $this->showErrorModal = true;
+
+                return;
+            }
+            $sessionPhone = session('spare_parts_guest_phone');
+            $normalizedFormPhone = $this->normalizeLocalPhone($this->customerPhone);
+            if (! $sessionPhone || $normalizedFormPhone !== $sessionPhone) {
+                $this->errorMessage = 'Please sign in with your account or verify your phone with a one-time code.';
+                $this->showErrorModal = true;
+
+                return;
+            }
+        } else {
+            $user = Auth::user();
+            $this->customerName = $user->name;
+            $this->customerEmail = $user->email;
+        }
 
         // Normalize into the structure used for validation + persistence
         $count = count($this->orderItemIds);
@@ -348,7 +497,7 @@ class SparePartSourcing extends Component
 
             $order = SparePartOrder::create([
                 'order_number' => SparePartOrder::generateOrderNumber(),
-                'order_channel' => 'portal',
+                'order_channel' => Auth::check() ? 'portal' : 'guest_phone',
                 'user_id' => Auth::id(),
                 'customer_name' => $this->customerName,
                 'customer_email' => $this->customerEmail,
@@ -380,9 +529,22 @@ class SparePartSourcing extends Component
 
         $this->submitted = true;
         $this->createdOrderNumbers = array_column($createdOrders, 'order_number');
+        $this->createdOrderTrackLinks = [];
+        foreach ($createdOrders as $order) {
+            $this->createdOrderTrackLinks[] = [
+                'number' => $order->order_number,
+                'url' => route('spare-parts.track', ['token' => $order->public_token], absolute: true),
+            ];
+            if (! Auth::check() && $this->offerGuestPhoneOtp) {
+                SendSparePartOrderPlacedSms::dispatch($order->id);
+            }
+        }
         $this->successMessage = count($createdOrders) > 1
             ? 'Your spare part requests have been submitted successfully!'
             : 'Your spare part request has been submitted successfully!';
+        if (! Auth::check() && $this->offerGuestPhoneOtp) {
+            $this->successMessage .= ' We sent tracking link(s) to your phone by SMS.';
+        }
         $this->showSuccessModal = true;
         $this->resetForm();
     }
@@ -392,6 +554,7 @@ class SparePartSourcing extends Component
         $this->showSuccessModal = false;
         $this->successMessage = '';
         $this->createdOrderNumbers = [];
+        $this->createdOrderTrackLinks = [];
     }
 
     public function closeErrorModal()
@@ -428,10 +591,12 @@ class SparePartSourcing extends Component
         $this->vehicleModels = [];
 
         // Re-populate user info if logged in
-        if ($this->isLoggedIn) {
+        if (Auth::check()) {
             $user = Auth::user();
             $this->customerName = $user->name;
             $this->customerEmail = $user->email;
+        } elseif ($this->guestAccessVerified && session()->has('spare_parts_guest_phone')) {
+            $this->customerPhone = (string) session('spare_parts_guest_phone');
         }
     }
 

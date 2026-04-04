@@ -12,21 +12,21 @@ class PricingPlanSeeder extends Seeder
      */
     public function run(): void
     {
-        // Cars Pricing Plans
+        // Cars: monthly dealer subscription (TZS). max_listings = uploads allowed per billing period.
         $carsPlans = [
             [
-                'name' => 'Basic Listing',
+                'name' => 'Basic Plan',
                 'category' => 'cars',
-                'description' => 'Perfect for getting started with your car listing',
-                'price' => 29.99,
-                'currency' => 'GBP',
+                'description' => 'Ideal for smaller dealers — list up to 10 cars every month.',
+                'price' => 30000,
+                'currency' => 'TZS',
                 'duration_days' => 30,
+                'max_listings' => 10,
                 'features' => [
-                    'Up to 10 photos',
-                    'Basic listing placement',
-                    'Contact form enabled',
+                    'Upload up to 10 cars per month',
+                    '30-day billing period',
+                    'Standard listing tools',
                     'Email support',
-                    '30 days listing duration'
                 ],
                 'is_featured' => false,
                 'is_popular' => false,
@@ -34,21 +34,18 @@ class PricingPlanSeeder extends Seeder
                 'sort_order' => 1,
             ],
             [
-                'name' => 'Premium Listing',
+                'name' => 'Premium Plan',
                 'category' => 'cars',
-                'description' => 'Get maximum visibility with our premium package',
-                'price' => 59.99,
-                'currency' => 'GBP',
-                'duration_days' => 60,
+                'description' => 'More capacity for growing inventory — up to 30 cars per month.',
+                'price' => 60000,
+                'currency' => 'TZS',
+                'duration_days' => 30,
+                'max_listings' => 30,
                 'features' => [
-                    'Up to 30 photos',
-                    'Featured placement in search results',
-                    'Priority listing position',
-                    'Contact form + phone number',
+                    'Upload up to 30 cars per month',
+                    '30-day billing period',
+                    'Priority placement options',
                     'Email & phone support',
-                    '60 days listing duration',
-                    'Highlighted listing badge',
-                    'Social media promotion'
                 ],
                 'is_featured' => true,
                 'is_popular' => true,
@@ -56,23 +53,18 @@ class PricingPlanSeeder extends Seeder
                 'sort_order' => 2,
             ],
             [
-                'name' => 'Ultimate Listing',
+                'name' => 'Ultimate Plan',
                 'category' => 'cars',
-                'description' => 'The complete package for serious sellers',
-                'price' => 99.99,
-                'currency' => 'GBP',
-                'duration_days' => 90,
+                'description' => 'Maximum volume — up to 60 cars per month for high-throughput dealers.',
+                'price' => 90000,
+                'currency' => 'TZS',
+                'duration_days' => 30,
+                'max_listings' => 60,
                 'features' => [
-                    'Unlimited photos',
-                    'Top placement in search results',
-                    'Homepage featured spot',
-                    'All contact methods enabled',
-                    '24/7 priority support',
-                    '90 days listing duration',
-                    'Premium highlighted badge',
-                    'Social media & email promotion',
-                    'Analytics dashboard',
-                    'Lead management tools'
+                    'Upload up to 60 cars per month',
+                    '30-day billing period',
+                    'Top-tier visibility',
+                    'Priority support',
                 ],
                 'is_featured' => true,
                 'is_popular' => false,
@@ -96,7 +88,7 @@ class PricingPlanSeeder extends Seeder
                     'Contact form enabled',
                     'Email support',
                     '30 days listing duration',
-                    'Truck specifications display'
+                    'Truck specifications display',
                 ],
                 'is_featured' => false,
                 'is_popular' => false,
@@ -119,7 +111,7 @@ class PricingPlanSeeder extends Seeder
                     '60 days listing duration',
                     'Professional badge',
                     'Commercial vehicle promotion',
-                    'Specifications & documentation'
+                    'Specifications & documentation',
                 ],
                 'is_featured' => true,
                 'is_popular' => true,
@@ -144,7 +136,7 @@ class PricingPlanSeeder extends Seeder
                     'Multi-channel promotion',
                     'Advanced analytics',
                     'Bulk listing tools',
-                    'Fleet management features'
+                    'Fleet management features',
                 ],
                 'is_featured' => true,
                 'is_popular' => false,
@@ -168,7 +160,7 @@ class PricingPlanSeeder extends Seeder
                     'Contact information',
                     'Service listings',
                     'Basic search visibility',
-                    '30 days active listing'
+                    '30 days active listing',
                 ],
                 'is_featured' => false,
                 'is_popular' => false,
@@ -192,7 +184,7 @@ class PricingPlanSeeder extends Seeder
                     'Customer reviews enabled',
                     'Booking system integration',
                     '60 days active listing',
-                    'Email & phone support'
+                    'Email & phone support',
                 ],
                 'is_featured' => true,
                 'is_popular' => true,
@@ -219,7 +211,7 @@ class PricingPlanSeeder extends Seeder
                     'Lead management tools',
                     'Social media integration',
                     '90 days active listing',
-                    '24/7 priority support'
+                    '24/7 priority support',
                 ],
                 'is_featured' => true,
                 'is_popular' => false,
@@ -228,17 +220,41 @@ class PricingPlanSeeder extends Seeder
             ],
         ];
 
-        // Insert all plans
+        $carPlanNames = collect($carsPlans)->pluck('name')->all();
+
         foreach ($carsPlans as $plan) {
-            PricingPlan::create($plan);
+            PricingPlan::updateOrCreate(
+                [
+                    'category' => 'cars',
+                    'name' => $plan['name'],
+                ],
+                $plan
+            );
         }
 
+        PricingPlan::query()
+            ->where('category', 'cars')
+            ->whereNotIn('name', $carPlanNames)
+            ->delete();
+
         foreach ($trucksPlans as $plan) {
-            PricingPlan::create($plan);
+            PricingPlan::updateOrCreate(
+                [
+                    'category' => 'trucks',
+                    'name' => $plan['name'],
+                ],
+                $plan
+            );
         }
 
         foreach ($garagePlans as $plan) {
-            PricingPlan::create($plan);
+            PricingPlan::updateOrCreate(
+                [
+                    'category' => 'garage',
+                    'name' => $plan['name'],
+                ],
+                $plan
+            );
         }
     }
 }

@@ -37,11 +37,6 @@
 
     <!-- Pricing Plans -->
     <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-        @if (session()->has('error'))
-            <div class="mb-6 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-red-800 text-sm">
-                {{ session('error') }}
-            </div>
-        @endif
         @if($plans->count() > 0)
             <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                 @foreach($plans as $plan)
@@ -170,4 +165,79 @@
             </div>
         </div>
     </section>
+
+    @if($category === 'cars' && $showPricingAccessModal && $pricingAccessModal)
+        <div
+            class="fixed inset-0 z-[10000] flex items-center justify-center p-4"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="pricing-access-modal-title"
+            wire:keydown.escape="dismissPricingModal"
+        >
+            <div
+                class="absolute inset-0 cursor-pointer bg-black/50"
+                aria-hidden="true"
+                wire:click="dismissPricingModal"
+            ></div>
+            <div class="relative z-10 w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+                @php
+                    $variant = $pricingAccessModal['variant'] ?? 'access';
+                    $reason = $pricingAccessModal['reason'] ?? null;
+                    $contactEmail = config('kibo.contact.email', 'info@kiboauto.co.tz');
+                    $contactPhone = config('kibo.contact.phone', '');
+                @endphp
+
+                @if($variant === 'plan_missing')
+                    <div class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-amber-50">
+                        <svg class="h-6 w-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                        </svg>
+                    </div>
+                    <h3 id="pricing-access-modal-title" class="mb-2 text-center text-xl font-bold text-gray-900">Plan unavailable</h3>
+                    <p class="mb-6 text-center text-sm text-gray-600">This plan is not available or has been removed. Please choose another plan below.</p>
+                    <button type="button" wire:click="dismissPricingModal" class="w-full rounded-xl bg-gray-900 px-4 py-3 text-center text-sm font-semibold text-white hover:bg-gray-800">
+                        OK
+                    </button>
+                @else
+                    <div class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-50">
+                        <svg class="h-6 w-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <h3 id="pricing-access-modal-title" class="mb-2 text-center text-xl font-bold text-gray-900">Dealer listing plans</h3>
+                    <div class="mb-6 space-y-3 text-center text-sm text-gray-600">
+                        @guest
+                            <p>Sign in if you already have an account.</p>
+                        @endguest
+                        @auth
+                            @if($reason === 'not_dealer')
+                                <p>Your account is not enabled for dealer vehicle listings.</p>
+                            @else
+                                <p>Link your dealer profile to subscribe to a plan.</p>
+                            @endif
+                        @endauth
+                        <p>
+                            If you do not have a dealer account, contact <strong>Kibo Auto</strong> for onboarding:
+                            @if($contactEmail)
+                                <a href="mailto:{{ $contactEmail }}" class="font-semibold text-emerald-700 underline hover:text-emerald-800">{{ $contactEmail }}</a>
+                            @endif
+                            @if($contactPhone)
+                                <span class="block mt-1">Phone: <a href="tel:{{ preg_replace('/\s+/', '', $contactPhone) }}" class="font-semibold text-emerald-700 underline hover:text-emerald-800">{{ $contactPhone }}</a></span>
+                            @endif
+                        </p>
+                    </div>
+                    <div class="flex flex-col gap-3 sm:flex-row sm:justify-center">
+                        @guest
+                            <button type="button" wire:click="openSignInFromPricingModal" class="rounded-xl bg-emerald-600 px-5 py-2.5 text-center text-sm font-semibold text-white hover:bg-emerald-700">
+                                Sign in
+                            </button>
+                        @endguest
+                        <button type="button" wire:click="dismissPricingModal" class="rounded-xl border border-gray-300 px-5 py-2.5 text-center text-sm font-medium text-gray-700 hover:bg-gray-50">
+                            Close
+                        </button>
+                    </div>
+                @endif
+            </div>
+        </div>
+    @endif
 </div>

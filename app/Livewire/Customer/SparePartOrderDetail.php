@@ -3,11 +3,9 @@
 namespace App\Livewire\Customer;
 
 use App\Models\SparePartOrder;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithFileUploads;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 
 class SparePartOrderDetail extends Component
 {
@@ -16,37 +14,56 @@ class SparePartOrderDetail extends Component
     public $order;
 
     public string $publicToken;
+
+    /** When true, order loads by public_token only (SMS / guest tracking link). */
+    public bool $allowGuestTrack = false;
+
     public $messages = [];
+
     public $newMessage = '';
-    
+
     // Quote Response
     public $showQuoteResponseModal = false;
+
     public $selectedQuotationId = null;
-    
+
     // Payment Modal
     public $showPaymentModal = false;
+
     public $paymentProof;
+
     public $paymentNotes = '';
-    
+
     // Success/Error Modals
     public $showSuccessModal = false;
+
     public $showErrorModal = false;
+
     public $successMessage = '';
+
     public $errorMessage = '';
 
-    public function mount(string $publicToken): void
+    public function mount(string $publicToken, bool $allowGuestTrack = false): void
     {
         $this->publicToken = $publicToken;
+        $this->allowGuestTrack = $allowGuestTrack;
         $this->loadOrder();
         $this->loadMessages();
     }
 
     public function loadOrder(): void
     {
-        $this->order = SparePartOrder::with(['vehicleMake', 'vehicleModel', 'user', 'assignedTo', 'quotations.agent', 'acceptedQuotation.agent'])
-            ->where('public_token', $this->publicToken)
-            ->where('user_id', Auth::id())
-            ->firstOrFail();
+        $query = SparePartOrder::with(['vehicleMake', 'vehicleModel', 'user', 'assignedTo', 'quotations.agent', 'acceptedQuotation.agent'])
+            ->where('public_token', $this->publicToken);
+
+        if (! $this->allowGuestTrack) {
+            if (! Auth::check()) {
+                abort(403);
+            }
+            $query->where('user_id', Auth::id());
+        }
+
+        $this->order = $query->firstOrFail();
     }
 
     public function loadMessages()
@@ -57,6 +74,10 @@ class SparePartOrderDetail extends Component
 
     public function sendMessage()
     {
+        if (! Auth::check() && ! $this->allowGuestTrack) {
+            return;
+        }
+
         $this->validate([
             'newMessage' => 'required|string|max:1000',
         ]);
@@ -64,7 +85,7 @@ class SparePartOrderDetail extends Component
         $message = [
             'id' => uniqid(),
             'user_id' => Auth::id(),
-            'user_name' => Auth::user()->name,
+            'user_name' => Auth::check() ? Auth::user()->name : ($this->order->contact_name ?? 'Customer'),
             'message' => $this->newMessage,
             'created_at' => now()->toDateTimeString(),
         ];
@@ -73,7 +94,7 @@ class SparePartOrderDetail extends Component
         $currentMessages[] = $message;
 
         $this->order->update([
-            'chat_messages' => $currentMessages
+            'chat_messages' => $currentMessages,
         ]);
 
         $this->newMessage = '';
@@ -83,7 +104,7 @@ class SparePartOrderDetail extends Component
 
     public function getStatusColor($status)
     {
-        return match($status) {
+        return match ($status) {
             'pending' => 'bg-yellow-100 text-yellow-800',
             'processing' => 'bg-blue-100 text-blue-800',
             'quoted' => 'bg-purple-100 text-purple-800',
@@ -119,9 +140,10 @@ class SparePartOrderDetail extends Component
             ->where('spare_part_order_id', $this->order->id)
             ->firstOrFail();
 
-        if (!$this->order->isOpenForQuotations() && $this->order->status !== 'quoted') {
+        if (! $this->order->isOpenForQuotations() && $this->order->status !== 'quoted') {
             $this->errorMessage = 'This order is no longer accepting quotations.';
             $this->showErrorModal = true;
+
             return;
         }
 
@@ -162,6 +184,7 @@ class SparePartOrderDetail extends Component
         if ($this->order->status !== 'quoted') {
             $this->errorMessage = 'This order cannot be rejected at this time.';
             $this->showErrorModal = true;
+
             return;
         }
 
@@ -207,6 +230,7 @@ class SparePartOrderDetail extends Component
         if ($this->order->status !== 'awaiting_payment') {
             $this->errorMessage = 'Payment cannot be submitted at this time.';
             $this->showErrorModal = true;
+
             return;
         }
 
@@ -243,4 +267,3 @@ class SparePartOrderDetail extends Component
         return view('livewire.customer.spare-part-order-detail');
     }
 }
-

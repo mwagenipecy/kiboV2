@@ -104,8 +104,8 @@
   @endif
 
   <div class="max-w-[700px] mx-auto">
-    <div class="text-center mb-8">
-      <h1 class="text-2xl font-bold text-gray-900" style="font-family: 'Syne', sans-serif;">Import Your Dream Car</h1>
+    <div class="text-center mb-8 mt-4">
+      <h1 class="text-2xl font-bold text-gray-900 mt-4 " style="font-family: 'Syne', sans-serif;">Import Your Dream Car</h1>
       <p class="mt-1.5 text-sm text-gray-500">We'll help you bring your vehicle to Tanzania — hassle-free.</p>
     </div>
 
@@ -251,9 +251,9 @@
       {{-- SUBMIT --}}
       <div class="p-6 sm:p-8">
         <button type="submit" wire:loading.attr="disabled" class="w-full py-4 rounded-xl text-white font-bold text-base flex items-center justify-center gap-2 transition-all disabled:opacity-50 hover:shadow-lg hover:-translate-y-px" style="background: #009866; font-family: 'Syne', sans-serif; box-shadow: 0 4px 20px rgba(0,152,102,0.35);">
-          <span wire:loading.remove>
+          <span  class="flex" wire:loading.remove>
             <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"/></svg>
-            Submit Import Request
+          <div>Submit Import Request    </div>
           </span>
           <span wire:loading>Processing…</span>
         </button>

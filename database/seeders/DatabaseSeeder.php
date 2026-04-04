@@ -19,8 +19,8 @@ class DatabaseSeeder extends Seeder
         $this->call([
             AdminUserSeeder::class,
             VehicleMakeModelSeeder::class,
-          //  AgentSeeder::class,
-          //  PricingPlanSeeder::class,
+            PricingPlanSeeder::class,
+            // AgentSeeder::class,
         ]);
     }
 }

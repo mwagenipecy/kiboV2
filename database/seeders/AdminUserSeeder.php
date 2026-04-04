@@ -16,11 +16,11 @@ class AdminUserSeeder extends Seeder
         // Check if admin user already exists
         $adminExists = User::where('email', 'admin@kibo.com')->exists();
 
-        if (!$adminExists) {
+        if (! $adminExists) {
             User::create([
                 'name' => 'System Administrator',
                 'email' => 'admin@kibo.com',
-                'phone_number' => '255700000000',
+                'phone_number' => '255767582837',
                 'password' => Hash::make('password'),
                 'role' => 'admin',
                 'entity_id' => null,

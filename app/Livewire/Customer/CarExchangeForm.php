@@ -6,6 +6,7 @@ use App\Models\CarExchangeRequest as ExchangeRequest;
 use App\Models\Customer;
 use App\Models\VehicleMake;
 use App\Models\VehicleModel;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -98,6 +99,32 @@ class CarExchangeForm extends Component
         }
     }
 
+    public function updatedMaxBudget(mixed $value): void
+    {
+        if ($value === null || $value === '') {
+            $this->max_budget = '';
+
+            return;
+        }
+        $digits = preg_replace('/\D/', '', (string) $value);
+        if ($digits === '') {
+            $this->max_budget = '';
+
+            return;
+        }
+        $this->max_budget = number_format((int) $digits, 0, '.', ',');
+    }
+
+    private function parseMoneyToNullableInt(mixed $value): ?int
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+        $digits = preg_replace('/\D/', '', (string) $value);
+
+        return $digits === '' ? null : (int) $digits;
+    }
+
     public function updatedCurrentVehicleImageUpload(): void
     {
         if (! $this->current_vehicle_image_upload) {
@@ -136,7 +163,32 @@ class CarExchangeForm extends Component
 
     public function submit()
     {
-        $validated = $this->validate([
+        $data = array_merge(
+            $this->only([
+                'current_vehicle_make_id',
+                'current_vehicle_model_id',
+                'current_vehicle_year',
+                'current_vehicle_registration',
+                'current_vehicle_mileage',
+                'current_vehicle_condition',
+                'current_vehicle_description',
+                'current_vehicle_images',
+                'desired_vehicle_make_id',
+                'desired_vehicle_model_id',
+                'desired_min_year',
+                'desired_max_year',
+                'desired_fuel_type',
+                'desired_transmission',
+                'desired_body_type',
+                'notes',
+                'location',
+            ]),
+            [
+                'max_budget' => $this->parseMoneyToNullableInt($this->max_budget),
+            ]
+        );
+
+        $validated = Validator::make($data, [
             // Current vehicle
             'current_vehicle_make_id' => ['required', 'integer', 'exists:vehicle_makes,id'],
             'current_vehicle_model_id' => ['required', 'integer', 'exists:vehicle_models,id'],
@@ -161,7 +213,7 @@ class CarExchangeForm extends Component
             // Additional
             'notes' => ['nullable', 'string', 'max:2000'],
             'location' => ['required', 'string', 'max:255'],
-        ]);
+        ])->validate();
 
         if (! empty($validated['desired_min_year']) && ! empty($validated['desired_max_year']) && $validated['desired_min_year'] > $validated['desired_max_year']) {
             $this->addError('desired_min_year', 'Min year cannot be greater than max year.');

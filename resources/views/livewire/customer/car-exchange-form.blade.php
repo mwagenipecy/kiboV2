@@ -321,11 +321,43 @@
 
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Maximum Budget</label>
-                <input 
-                    type="number" 
-                    wire:model.defer="max_budget" 
-                    class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent" 
-                    placeholder="e.g., 25000000"
+                <input
+                    type="text"
+                    inputmode="numeric"
+                    autocomplete="off"
+                    class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    placeholder="e.g., 25,000,000"
+                    value="{{ $max_budget }}"
+                    x-on:input="
+                        (function (el, wire) {
+                            const start = el.selectionStart;
+                            const before = el.value;
+                            const digitsBefore = before.slice(0, start).replace(/\D/g, '').length;
+                            const allDigits = before.replace(/\D/g, '');
+                            const formatted = allDigits === '' ? '' : Number(allDigits).toLocaleString('en-US');
+                            el.value = formatted;
+                            let pos = 0;
+                            if (digitsBefore === 0) {
+                                pos = 0;
+                            } else {
+                                let seen = 0;
+                                for (; pos < formatted.length; pos++) {
+                                    if (/\d/.test(formatted[pos])) {
+                                        seen++;
+                                        if (seen === digitsBefore) {
+                                            pos++;
+                                            break;
+                                        }
+                                    }
+                                }
+                                if (seen < digitsBefore) {
+                                    pos = formatted.length;
+                                }
+                            }
+                            el.setSelectionRange(pos, pos);
+                            wire.$set('max_budget', formatted);
+                        })($event.target, $wire);
+                    "
                 >
                 @error('max_budget') <p class="text-sm text-red-600 mt-1">{{ $message }}</p> @enderror
             </div>

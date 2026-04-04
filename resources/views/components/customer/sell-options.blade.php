@@ -14,7 +14,7 @@
                     </div>
                 </div>
             </div>
-
+            
             <!-- Cards Container with negative margin to overlap -->
             <div class="max-w-6xl mx-auto px-4 -mt-56 mb-16">
     <div class="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
@@ -113,9 +113,9 @@
                         Sell for free
                     </button>
                 @endauth
-                <a href="{{ route('my-auctions') }}" class="font-medium underline text-sm" style="color: #009866;">
+                <!-- <a href="{{ route('my-auctions') }}" class="font-medium underline text-sm" style="color: #009866;">
                     View my auctions
-                </a>
+                </a> -->
             </div>
         </div>
     </div>

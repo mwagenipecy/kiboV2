@@ -29,26 +29,61 @@ class SubscriptionCheckout extends Component
         $this->planId = (int) $plan;
         $this->plan = PricingPlan::active()->byCategory('cars')->find($this->planId);
 
-        if (!$this->plan) {
-            session()->flash('error', 'Plan not found or no longer available.');
+        if (! $this->plan) {
+            session()->flash('pricing_cars_modal', [
+                'variant' => 'plan_missing',
+            ]);
+
             return $this->redirect(route('pricing.show', ['category' => 'cars']), navigate: true);
         }
 
         $user = auth()->user();
-        if (!$user || !$user->entity_id) {
-            session()->flash('error', 'You must be signed in as a dealer to subscribe. Register or sign in with your dealer account.');
+        if (! $user || ! $user->entity_id) {
+            session()->flash('pricing_cars_modal', [
+                'variant' => 'access',
+                'reason' => 'guest_or_no_entity',
+            ]);
+
             return $this->redirect(route('pricing.show', ['category' => 'cars']), navigate: true);
         }
 
         $this->entity = Entity::with('pricingPlan')->find($user->entity_id);
-        if (!$this->entity || $this->entity->type->value !== 'dealer') {
-            session()->flash('error', 'Only dealer accounts can subscribe to listing plans.');
+        if (! $this->entity || $this->entity->type->value !== 'dealer') {
+            session()->flash('pricing_cars_modal', [
+                'variant' => 'access',
+                'reason' => 'not_dealer',
+            ]);
+
             return $this->redirect(route('pricing.show', ['category' => 'cars']), navigate: true);
         }
     }
 
     public function proceedToPayment()
     {
+        if (! auth()->check()) {
+            session()->flash('pricing_cars_modal', [
+                'variant' => 'access',
+                'reason' => 'guest_or_no_entity',
+            ]);
+
+            return $this->redirect(route('pricing.show', ['category' => 'cars']), navigate: true);
+        }
+
+        if (! session('otp_verified')) {
+            session()->put('otp_intended_url', request()->fullUrl());
+
+            return $this->redirect(route('otp.verify.show'), navigate: true);
+        }
+
+        if (! $this->plan || ! $this->entity || $this->entity->type->value !== 'dealer') {
+            session()->flash('pricing_cars_modal', [
+                'variant' => 'access',
+                'reason' => 'not_dealer',
+            ]);
+
+            return $this->redirect(route('pricing.show', ['category' => 'cars']), navigate: true);
+        }
+
         $subscription = DealerSubscription::create([
             'entity_id' => $this->entity->id,
             'pricing_plan_id' => $this->plan->id,

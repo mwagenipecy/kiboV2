@@ -57,8 +57,8 @@ class PageHero extends Model
             ]],
             'spare_parts' => [[
                 'image_url' => asset('hero/spare/spareHero.png'),
-                'headline' => 'Spare Parts',
-                'subheadline' => 'Find genuine and quality spare parts for your vehicle',
+                'headline' => 'Order Spare Parts',
+                'subheadline' => 'Fill in the details below — we\'ll find the best match for you.',
                 'cta_label' => null,
                 'cta_url' => null,
                 'overlay_style' => 'gradient_emerald',
