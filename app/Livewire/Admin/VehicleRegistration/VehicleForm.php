@@ -2,13 +2,12 @@
 
 namespace App\Livewire\Admin\VehicleRegistration;
 
-use App\Enums\VehicleStatus;
 use App\Models\Entity;
 use App\Models\Vehicle;
 use App\Models\VehicleMake;
 use App\Models\VehicleModel;
+use App\Services\ImageCompressionService;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
@@ -18,67 +17,99 @@ class VehicleForm extends Component
 
     // Basic Information
     public $description;
+
     public $origin = 'local';
+
     public $registration_number;
+
     public $condition = 'used';
-    
+
     // Make and Model
     public $vehicle_make_id;
+
     public $vehicle_model_id;
+
     public $variant;
+
     public $year;
-    
+
     // Specifications
     public $body_type;
+
     public $fuel_type;
+
     public $transmission;
+
     public $engine_capacity;
+
     public $engine_cc;
+
     public $drive_type;
+
     public $color_exterior;
+
     public $color_interior;
+
     public $doors;
+
     public $seats;
+
     public $mileage;
+
     public $vin;
-    
+
     // Pricing
     public $price;
+
     public $currency = 'TZS';
+
     public $original_price;
+
     public $negotiable = true;
-    
+
     // Features
     public $features = [];
+
     public $safety_features = [];
-    
+
     // Images
     public $image_front;
+
     public $image_side;
+
     public $image_back;
+
     public $other_images = [];
+
     public $new_other_images = [];
-    
+
     // Ownership
     public $entity_id;
-    
+
     // Status
     public $status = 'pending';
+
     public $notes;
-    
+
     // Edit mode
     public $vehicleId;
+
     public $editMode = false;
-    
+
     // Data for dropdowns
     public $makes = [];
+
     public $models = [];
+
     public $dealers = [];
-    
+
     // Temporary images for preview
     public $tempImageFront;
+
     public $tempImageSide;
+
     public $tempImageBack;
+
     public $tempOtherImages = [];
 
     /**
@@ -88,7 +119,7 @@ class VehicleForm extends Component
     {
         $user = Auth::user();
         $userRole = $user->role ?? null;
-        
+
         $rules = [
             'description' => 'nullable|string',
             'origin' => 'required|in:local,international',
@@ -97,7 +128,7 @@ class VehicleForm extends Component
             'vehicle_make_id' => 'required|exists:vehicle_makes,id',
             'vehicle_model_id' => 'required|exists:vehicle_models,id',
             'variant' => 'nullable|string|max:255',
-            'year' => 'required|integer|min:1900|max:' . (date('Y') + 2),
+            'year' => 'required|integer|min:1900|max:'.(date('Y') + 2),
             'body_type' => 'nullable|string|max:255',
             'fuel_type' => 'nullable|string|max:255',
             'transmission' => 'nullable|string|max:255',
@@ -122,14 +153,14 @@ class VehicleForm extends Component
             'other_images.*' => 'nullable|image|max:5120',
             'new_other_images.*' => 'nullable|image|max:5120',
         ];
-        
+
         // Entity validation: required for non-admin users, optional for admin
         if ($userRole === 'admin') {
             $rules['entity_id'] = 'nullable|exists:entities,id';
         } else {
             $rules['entity_id'] = 'required|exists:entities,id';
         }
-        
+
         return $rules;
     }
 
@@ -137,7 +168,7 @@ class VehicleForm extends Component
     {
         $this->loadMakes();
         $this->loadDealers();
-        
+
         if ($vehicleId) {
             $this->editMode = true;
             $this->vehicleId = $vehicleId;
@@ -155,14 +186,14 @@ class VehicleForm extends Component
                 }
             }
         }
-        
+
         $this->year = date('Y');
     }
 
     public function loadVehicle()
     {
         $vehicle = Vehicle::findOrFail($this->vehicleId);
-        
+
         $this->description = $vehicle->description;
         $this->origin = $vehicle->origin;
         $this->registration_number = $vehicle->registration_number;
@@ -192,7 +223,7 @@ class VehicleForm extends Component
         $this->entity_id = $vehicle->entity_id;
         $this->status = $vehicle->status->value;
         $this->notes = $vehicle->notes;
-        
+
         $this->loadModels();
     }
 
@@ -231,7 +262,7 @@ class VehicleForm extends Component
 
     public function updatedNewOtherImages()
     {
-        if (!empty($this->new_other_images)) {
+        if (! empty($this->new_other_images)) {
             // Merge new images with existing ones
             $this->other_images = array_merge($this->other_images, $this->new_other_images);
             // Clear the new images input
@@ -251,11 +282,12 @@ class VehicleForm extends Component
     {
         $user = Auth::user();
         $userRole = $user->role ?? null;
-        
+
         // For non-admin users, ensure entity_id is set from user
         if ($userRole !== 'admin') {
-            if (!$user->entity_id) {
+            if (! $user->entity_id) {
                 session()->flash('error', 'You cannot register a vehicle without an associated entity. Please contact an administrator.');
+
                 return;
             }
             // Force entity_id to user's entity_id (prevent tampering)
@@ -263,24 +295,25 @@ class VehicleForm extends Component
         }
 
         $entity = $this->entity_id ? Entity::with('pricingPlan')->find($this->entity_id) : null;
-        if ($entity && !$this->editMode) {
-            if (!$entity->canAddVehicle()) {
+        if ($entity && ! $this->editMode) {
+            if (! $entity->canAddVehicle()) {
                 $max = $entity->max_allowed_cars;
                 $current = $entity->vehiclesCountExcludingSold();
                 session()->flash('error', "Your package allows up to {$max} car listing(s) (excluding sold). You currently have {$current}. Please upgrade your plan to add more.");
+
                 return;
             }
         }
-        
+
         $this->validate();
 
         // Auto-generate title from make, model, and year
         $make = VehicleMake::find($this->vehicle_make_id);
         $model = VehicleModel::find($this->vehicle_model_id);
-        $title = ($make ? $make->name : '') . ' ' . ($model ? $model->name : '') . ' ' . $this->year;
+        $title = ($make ? $make->name : '').' '.($model ? $model->name : '').' '.$this->year;
         $title = trim($title);
         if (empty($title)) {
-            $title = 'Vehicle ' . date('Y');
+            $title = 'Vehicle '.date('Y');
         }
 
         $data = [
@@ -316,24 +349,26 @@ class VehicleForm extends Component
             'notes' => $this->notes,
         ];
 
+        $compress = app(ImageCompressionService::class);
+
         // Handle image uploads
         if ($this->image_front) {
-            $data['image_front'] = $this->image_front->store('vehicles', 'public');
+            $data['image_front'] = $compress->storeCompressed($this->image_front, 'vehicles', 1200);
         }
-        
+
         if ($this->image_side) {
-            $data['image_side'] = $this->image_side->store('vehicles', 'public');
+            $data['image_side'] = $compress->storeCompressed($this->image_side, 'vehicles', 1200);
         }
-        
+
         if ($this->image_back) {
-            $data['image_back'] = $this->image_back->store('vehicles', 'public');
+            $data['image_back'] = $compress->storeCompressed($this->image_back, 'vehicles', 1200);
         }
-        
-        if (!empty($this->other_images)) {
+
+        if (! empty($this->other_images)) {
             $otherImagePaths = [];
             foreach ($this->other_images as $image) {
                 if ($image) {
-                    $otherImagePaths[] = $image->store('vehicles', 'public');
+                    $otherImagePaths[] = $compress->storeCompressed($image, 'vehicles', 1200);
                 }
             }
             $data['other_images'] = $otherImagePaths;
@@ -342,12 +377,12 @@ class VehicleForm extends Component
         if ($this->editMode) {
             $vehicle = Vehicle::findOrFail($this->vehicleId);
             $vehicle->update($data);
-            
+
             session()->flash('success', 'Vehicle updated successfully!');
         } else {
             $data['registered_by'] = Auth::id();
             Vehicle::create($data);
-            
+
             session()->flash('success', 'Vehicle registered successfully!');
         }
 

@@ -6,8 +6,8 @@ use App\Enums\OrderStatus;
 use App\Enums\OrderType;
 use App\Models\Order;
 use App\Models\VehicleLease;
+use App\Services\ImageCompressionService;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
@@ -16,39 +16,67 @@ class LeasingCarDetail extends Component
     use WithFileUploads;
 
     public $lease;
+
     public $leaseId;
+
     public $isSaved = false;
+
     public $expandedSections = [];
+
     public $showImageModal = false;
+
     public $currentImage = null;
+
     public $allImages = [];
+
     public $existingOrder = null;
+
     public $canApply = true;
+
     public $applicationStatus = null;
 
     // Modal state
     public $showModal = false;
-    
+
     // Form fields
     public $full_name = '';
+
     public $email = '';
+
     public $phone = '';
+
     public $date_of_birth = '';
+
     public $address = '';
+
     public $city = '';
+
     public $postal_code = '';
+
     public $monthly_income = '';
+
     public $employment_status = '';
+
     public $employer_name = '';
+
     public $employment_months = '';
+
     public $current_lease = false;
+
     public $id_document;
+
     public $proof_of_income;
+
     public $proof_of_address;
+
     public $driving_license;
+
     public $additional_documents = [];
+
     public $notes = '';
+
     public $agreeToTerms = false;
+
     public $agreeToCreditCheck = false;
 
     public function mount($id)
@@ -57,16 +85,16 @@ class LeasingCarDetail extends Component
         $this->lease = VehicleLease::with(['entity'])
             ->active()
             ->findOrFail($id);
-        
+
         // Check if lease is saved
         $savedLeases = session()->get('saved_leases', []);
         $this->isSaved = in_array($id, $savedLeases);
-        
+
         // Check for existing applications if user is logged in
         if (Auth::check()) {
             $this->checkExistingApplication();
         }
-        
+
         // Prepare all images for gallery
         $this->allImages = [];
         if ($this->lease->image_front) {
@@ -81,17 +109,17 @@ class LeasingCarDetail extends Component
         if ($this->lease->other_images && is_array($this->lease->other_images) && count($this->lease->other_images) > 0) {
             $this->allImages = array_merge($this->allImages, $this->lease->other_images);
         }
-        
+
         // Initialize expanded sections
         $this->expandedSections = [
             'fullDescription' => false,
         ];
     }
-    
+
     public function toggleSave()
     {
         $savedLeases = session()->get('saved_leases', []);
-        
+
         if ($this->isSaved) {
             $savedLeases = array_diff($savedLeases, [$this->leaseId]);
             $this->isSaved = false;
@@ -99,13 +127,13 @@ class LeasingCarDetail extends Component
             $savedLeases[] = $this->leaseId;
             $this->isSaved = true;
         }
-        
+
         session()->put('saved_leases', $savedLeases);
     }
 
     public function toggleSection($section)
     {
-        $this->expandedSections[$section] = !$this->expandedSections[$section];
+        $this->expandedSections[$section] = ! $this->expandedSections[$section];
     }
 
     public function openImageModal($imageIndex)
@@ -138,16 +166,17 @@ class LeasingCarDetail extends Component
     public function openModal()
     {
         \Log::info('openModal called', ['leaseId' => $this->leaseId, 'auth' => Auth::check()]);
-        
-        if (!Auth::check()) {
+
+        if (! Auth::check()) {
             session()->flash('error', 'Please login to apply for leasing.');
+
             return;
         }
-        
+
         // Pre-fill user information
         $user = Auth::user();
         if ($user->customer) {
-            $this->full_name = $user->customer->first_name . ' ' . $user->customer->last_name;
+            $this->full_name = $user->customer->first_name.' '.$user->customer->last_name;
             $this->email = $user->email;
             $this->phone = $user->customer->phone ?? '';
             $this->address = $user->customer->address ?? '';
@@ -155,17 +184,17 @@ class LeasingCarDetail extends Component
             $this->full_name = $user->name;
             $this->email = $user->email;
         }
-        
+
         $this->showModal = true;
         \Log::info('showModal set to true', ['showModal' => $this->showModal]);
     }
-    
+
     public function closeModal()
     {
         $this->showModal = false;
         $this->resetForm();
     }
-    
+
     public function resetForm()
     {
         $this->full_name = '';
@@ -192,8 +221,9 @@ class LeasingCarDetail extends Component
 
     public function submitApplication()
     {
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             session()->flash('error', 'Please login to apply for leasing.');
+
             return redirect()->route('login');
         }
 
@@ -205,7 +235,7 @@ class LeasingCarDetail extends Component
             'address' => 'required|string|max:500',
             'city' => 'required|string|max:100',
             'postal_code' => 'nullable|string|max:20',
-            'monthly_income' => 'required|numeric|min:' . ($this->lease->min_monthly_income ?? 0),
+            'monthly_income' => 'required|numeric|min:'.($this->lease->min_monthly_income ?? 0),
             'employment_status' => 'required|in:employed,self_employed,unemployed,retired,student',
             'employer_name' => 'required_if:employment_status,employed,self_employed|string|max:255',
             'employment_months' => 'nullable|integer|min:0',
@@ -219,34 +249,37 @@ class LeasingCarDetail extends Component
             'agreeToCreditCheck' => 'accepted',
         ], [
             'date_of_birth.before' => 'You must be at least 18 years old to apply for leasing.',
-            'monthly_income.min' => 'Minimum monthly income required is $' . number_format($this->lease->min_monthly_income ?? 0),
+            'monthly_income.min' => 'Minimum monthly income required is $'.number_format($this->lease->min_monthly_income ?? 0),
         ]);
 
         try {
+            $compress = app(ImageCompressionService::class);
+            $docFolder = 'leasing-documents/'.Auth::id();
+
             // Upload documents
             $documents = [];
-            
+
             if ($this->id_document) {
-                $documents['id_document'] = $this->id_document->store('leasing-documents/' . Auth::id(), 'public');
+                $documents['id_document'] = $compress->storeCompressedIfImage($this->id_document, $docFolder, 1200);
             }
-            
+
             if ($this->proof_of_income) {
-                $documents['proof_of_income'] = $this->proof_of_income->store('leasing-documents/' . Auth::id(), 'public');
+                $documents['proof_of_income'] = $compress->storeCompressedIfImage($this->proof_of_income, $docFolder, 1200);
             }
-            
+
             if ($this->proof_of_address) {
-                $documents['proof_of_address'] = $this->proof_of_address->store('leasing-documents/' . Auth::id(), 'public');
+                $documents['proof_of_address'] = $compress->storeCompressedIfImage($this->proof_of_address, $docFolder, 1200);
             }
-            
+
             if ($this->driving_license) {
-                $documents['driving_license'] = $this->driving_license->store('leasing-documents/' . Auth::id(), 'public');
+                $documents['driving_license'] = $compress->storeCompressedIfImage($this->driving_license, $docFolder, 1200);
             }
-            
-            if (!empty($this->additional_documents)) {
+
+            if (! empty($this->additional_documents)) {
                 $additionalDocs = [];
                 foreach ($this->additional_documents as $doc) {
                     if (is_object($doc)) {
-                        $additionalDocs[] = $doc->store('leasing-documents/' . Auth::id(), 'public');
+                        $additionalDocs[] = $compress->storeCompressedIfImage($doc, $docFolder, 1200);
                     }
                 }
                 $documents['additional_documents'] = $additionalDocs;
@@ -305,20 +338,21 @@ class LeasingCarDetail extends Component
             ]);
 
             session()->flash('success', 'Your leasing application has been submitted successfully! We will review your application and contact you soon.');
-            
+
             $this->closeModal();
             $this->checkExistingApplication();
 
         } catch (\Exception $e) {
-            session()->flash('error', 'Failed to submit application. Please try again. ' . $e->getMessage());
-            \Log::error('Leasing application error: ' . $e->getMessage());
+            session()->flash('error', 'Failed to submit application. Please try again. '.$e->getMessage());
+            \Log::error('Leasing application error: '.$e->getMessage());
         }
     }
 
     protected function checkExistingApplication()
     {
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             $this->canApply = true;
+
             return;
         }
 
@@ -331,12 +365,13 @@ class LeasingCarDetail extends Component
 
         if ($existingOrders->isEmpty()) {
             $this->canApply = true;
+
             return;
         }
 
         // Get the most recent order
         $this->existingOrder = $existingOrders->first();
-        
+
         // Determine if user can apply based on order status
         $status = $this->existingOrder->status;
         $orderData = $this->existingOrder->order_data ?? [];
@@ -353,10 +388,10 @@ class LeasingCarDetail extends Component
         } elseif ($status === OrderStatus::PENDING) {
             $this->canApply = false;
             $this->applicationStatus = 'pending';
-        } elseif ($status === OrderStatus::APPROVED && $approvalStatus === 'approved' && !$leaseStarted) {
+        } elseif ($status === OrderStatus::APPROVED && $approvalStatus === 'approved' && ! $leaseStarted) {
             $this->canApply = false;
             $this->applicationStatus = 'approved';
-        } elseif ($leaseStarted && !$leaseTerminated) {
+        } elseif ($leaseStarted && ! $leaseTerminated) {
             $this->canApply = false;
             $this->applicationStatus = 'active';
         } else {

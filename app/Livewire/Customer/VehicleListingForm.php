@@ -5,8 +5,8 @@ namespace App\Livewire\Customer;
 use App\Models\Vehicle;
 use App\Models\VehicleMake;
 use App\Models\VehicleModel;
+use App\Services\ImageCompressionService;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
@@ -16,41 +16,59 @@ class VehicleListingForm extends Component
 
     // Basic Information
     public $description;
+
     public $condition = 'used';
+
     public $registration_number;
-    
+
     // Make and Model
     public $vehicle_make_id;
+
     public $vehicle_model_id;
+
     public $variant;
+
     public $year;
-    
+
     // Specifications
     public $body_type;
+
     public $fuel_type;
+
     public $transmission;
+
     public $engine_capacity;
+
     public $color_exterior;
+
     public $doors;
+
     public $seats;
+
     public $mileage;
-    
+
     // Pricing
     public $price;
+
     public $currency = 'TZS';
+
     public $negotiable = true;
-    
+
     // Images
     public $image_front;
+
     public $other_images = [];
+
     public $newPhotos = [];
-    
+
     // Data for dropdowns
     public $makes = [];
+
     public $models = [];
-    
+
     // UI State
     public $currentStep = 1;
+
     public $totalSteps = 3;
 
     protected function rules()
@@ -60,7 +78,7 @@ class VehicleListingForm extends Component
             'condition' => 'required|in:new,used',
             'vehicle_make_id' => 'required|exists:vehicle_makes,id',
             'vehicle_model_id' => 'required|exists:vehicle_models,id',
-            'year' => 'required|integer|min:1900|max:' . (date('Y') + 1),
+            'year' => 'required|integer|min:1900|max:'.(date('Y') + 1),
             'price' => 'required|numeric|min:0',
             'currency' => 'required|string|max:3',
             'negotiable' => 'boolean',
@@ -86,7 +104,7 @@ class VehicleListingForm extends Component
 
     public function updatedNewPhotos()
     {
-        if (!empty($this->newPhotos)) {
+        if (! empty($this->newPhotos)) {
             foreach ($this->newPhotos as $photo) {
                 if ($photo) {
                     $this->other_images[] = $photo;
@@ -106,10 +124,10 @@ class VehicleListingForm extends Component
 
     public function mount()
     {
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             return redirect()->route('cars.sell');
         }
-        
+
         $this->loadMakes();
     }
 
@@ -145,12 +163,12 @@ class VehicleListingForm extends Component
                 'condition' => 'required|in:new,used',
                 'vehicle_make_id' => 'required|exists:vehicle_makes,id',
                 'vehicle_model_id' => 'required|exists:vehicle_models,id',
-                'year' => 'required|integer|min:1900|max:' . (date('Y') + 1),
+                'year' => 'required|integer|min:1900|max:'.(date('Y') + 1),
                 'price' => 'required|numeric|min:0',
                 'currency' => 'required|string|max:3',
             ]);
         }
-        
+
         if ($this->currentStep < $this->totalSteps) {
             $this->currentStep++;
         }
@@ -199,25 +217,27 @@ class VehicleListingForm extends Component
             'status' => 'pending',
         ];
 
+        $compress = app(ImageCompressionService::class);
+
         // Handle image uploads
         if ($this->image_front) {
-            $data['image_front'] = $this->image_front->store('vehicles', 'public');
+            $data['image_front'] = $compress->storeCompressed($this->image_front, 'vehicles', 1200);
         }
-        
-        if (!empty($this->other_images)) {
+
+        if (! empty($this->other_images)) {
             $otherImagePaths = [];
             foreach ($this->other_images as $image) {
                 if ($image) {
-                    $otherImagePaths[] = $image->store('vehicles', 'public');
+                    $otherImagePaths[] = $compress->storeCompressed($image, 'vehicles', 1200);
                 }
             }
             $data['other_images'] = $otherImagePaths;
         }
 
         Vehicle::create($data);
-        
+
         session()->flash('success', 'Your vehicle listing has been submitted successfully! It will be reviewed and published soon.');
-        
+
         return redirect()->route('my-adverts');
     }
 

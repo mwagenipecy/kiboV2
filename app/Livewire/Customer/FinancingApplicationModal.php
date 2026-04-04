@@ -7,6 +7,7 @@ use App\Enums\OrderType;
 use App\Models\LendingCriteria;
 use App\Models\Order;
 use App\Models\Vehicle;
+use App\Services\ImageCompressionService;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -17,25 +18,37 @@ class FinancingApplicationModal extends Component
     use WithFileUploads;
 
     public $show = false;
+
     public $vehicleId;
+
     public $vehicle;
+
     public $matchingCriteria = [];
+
     public $selectedCriteriaId = null;
+
     public $selectedCriteria = null;
-    
+
     // Form fields
     public $loanAmount = '';
+
     public $loanTermMonths = 36;
+
     public $downPaymentAmount = '';
+
     public $monthlyIncome = '';
+
     public $employmentMonths = '';
+
     public $creditScore = '';
+
     public $notes = '';
+
     public $agreeToTerms = false;
-    
+
     // Documents - dynamic based on required_documents
     public $documents = [];
-    
+
     public $step = 1; // 1 = select lender, 2 = application form
 
     #[On('open-financing-modal')]
@@ -43,32 +56,32 @@ class FinancingApplicationModal extends Component
     {
         $this->vehicleId = $vehicleId;
         $this->vehicle = Vehicle::with(['make', 'model'])->find($vehicleId);
-        
+
         // Get all active lending criteria that match this vehicle
         $allCriteria = LendingCriteria::with('entity')
             ->active()
             ->orderBy('priority', 'desc')
             ->get();
-        
+
         $this->matchingCriteria = $allCriteria->filter(function ($criterion) {
             return $criterion->vehicleMeetsCriteria($this->vehicle);
         })->values();
-        
+
         $this->show = true;
         $this->step = 1;
         $this->resetForm();
     }
-    
+
     public function selectLender($criteriaId)
     {
         $this->selectedCriteriaId = $criteriaId;
         $this->selectedCriteria = LendingCriteria::with('entity')->findOrFail($criteriaId);
-        
+
         // Pre-fill some values based on the criteria
         $this->loanAmount = $this->vehicle->price;
         $this->calculateDownPayment();
         $this->loanTermMonths = $this->selectedCriteria->min_loan_term_months;
-        
+
         // Initialize document fields based on required_documents
         $this->documents = [];
         if ($this->selectedCriteria->required_documents && is_array($this->selectedCriteria->required_documents)) {
@@ -76,17 +89,17 @@ class FinancingApplicationModal extends Component
                 $this->documents[$docType] = null;
             }
         }
-        
+
         $this->step = 2;
     }
-    
+
     public function backToLenderSelection()
     {
         $this->step = 1;
         $this->selectedCriteriaId = null;
         $this->selectedCriteria = null;
     }
-    
+
     public function calculateDownPayment()
     {
         if ($this->selectedCriteria && $this->vehicle) {
@@ -100,7 +113,7 @@ class FinancingApplicationModal extends Component
         $this->step = 1;
         $this->resetForm();
     }
-    
+
     public function resetForm()
     {
         $this->loanAmount = '';
@@ -118,48 +131,56 @@ class FinancingApplicationModal extends Component
 
     public function submit()
     {
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             session()->flash('error', 'Please login to apply for financing.');
+
             return redirect()->route('login');
         }
 
         // Build validation rules dynamically
         $rules = [
             'loanAmount' => 'required|numeric|min:0',
-            'loanTermMonths' => 'required|integer|min:' . $this->selectedCriteria->min_loan_term_months . '|max:' . $this->selectedCriteria->max_loan_term_months,
+            'loanTermMonths' => 'required|integer|min:'.$this->selectedCriteria->min_loan_term_months.'|max:'.$this->selectedCriteria->max_loan_term_months,
             'downPaymentAmount' => 'required|numeric|min:0',
-            'monthlyIncome' => 'required|numeric|min:' . ($this->selectedCriteria->min_monthly_income ?? 0),
-            'employmentMonths' => 'required|integer|min:' . ($this->selectedCriteria->min_employment_months ?? 0),
+            'monthlyIncome' => 'required|numeric|min:'.($this->selectedCriteria->min_monthly_income ?? 0),
+            'employmentMonths' => 'required|integer|min:'.($this->selectedCriteria->min_employment_months ?? 0),
             'creditScore' => 'nullable|integer|min:300|max:850',
             'agreeToTerms' => 'accepted',
         ];
 
         $messages = [
-            'loanTermMonths.min' => 'Minimum loan term is ' . $this->selectedCriteria->min_loan_term_months . ' months',
-            'loanTermMonths.max' => 'Maximum loan term is ' . $this->selectedCriteria->max_loan_term_months . ' months',
-            'monthlyIncome.min' => 'Minimum monthly income required is TZS ' . number_format($this->selectedCriteria->min_monthly_income ?? 0),
-            'employmentMonths.min' => 'Minimum employment duration is ' . ($this->selectedCriteria->min_employment_months ?? 0) . ' months',
+            'loanTermMonths.min' => 'Minimum loan term is '.$this->selectedCriteria->min_loan_term_months.' months',
+            'loanTermMonths.max' => 'Maximum loan term is '.$this->selectedCriteria->max_loan_term_months.' months',
+            'monthlyIncome.min' => 'Minimum monthly income required is TZS '.number_format($this->selectedCriteria->min_monthly_income ?? 0),
+            'employmentMonths.min' => 'Minimum employment duration is '.($this->selectedCriteria->min_employment_months ?? 0).' months',
         ];
 
         // Add document validation if required_documents exist
         if ($this->selectedCriteria->required_documents && is_array($this->selectedCriteria->required_documents)) {
             foreach ($this->selectedCriteria->required_documents as $docType) {
-                $rules['documents.' . $docType] = 'required|file|mimes:pdf,jpg,jpeg,png|max:5120';
-                $messages['documents.' . $docType . '.required'] = ucwords(str_replace('_', ' ', $docType)) . ' is required.';
-                $messages['documents.' . $docType . '.mimes'] = ucwords(str_replace('_', ' ', $docType)) . ' must be a PDF, JPG, JPEG, or PNG file.';
-                $messages['documents.' . $docType . '.max'] = ucwords(str_replace('_', ' ', $docType)) . ' must not exceed 5MB.';
+                $rules['documents.'.$docType] = 'required|file|mimes:pdf,jpg,jpeg,png|max:5120';
+                $messages['documents.'.$docType.'.required'] = ucwords(str_replace('_', ' ', $docType)).' is required.';
+                $messages['documents.'.$docType.'.mimes'] = ucwords(str_replace('_', ' ', $docType)).' must be a PDF, JPG, JPEG, or PNG file.';
+                $messages['documents.'.$docType.'.max'] = ucwords(str_replace('_', ' ', $docType)).' must not exceed 5MB.';
             }
         }
 
         $this->validate($rules, $messages);
 
         try {
+            $compress = app(ImageCompressionService::class);
+            $docFolder = 'financing-documents/'.Auth::id();
+
             // Upload documents
             $uploadedDocuments = [];
             if ($this->selectedCriteria->required_documents && is_array($this->selectedCriteria->required_documents)) {
                 foreach ($this->selectedCriteria->required_documents as $docType) {
                     if (isset($this->documents[$docType]) && $this->documents[$docType]) {
-                        $uploadedDocuments[$docType] = $this->documents[$docType]->store('financing-documents/' . Auth::id(), 'public');
+                        $uploadedDocuments[$docType] = $compress->storeCompressedIfImage(
+                            $this->documents[$docType],
+                            $docFolder,
+                            1200
+                        );
                     }
                 }
             }
@@ -198,7 +219,7 @@ class FinancingApplicationModal extends Component
             ]);
 
             session()->flash('success', 'Your financing application has been submitted successfully!');
-            
+
             $this->dispatch('order-created');
             $this->close();
 

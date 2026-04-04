@@ -3,6 +3,7 @@
 namespace App\Livewire\Customer;
 
 use App\Models\SparePartOrder;
+use App\Services\ImageCompressionService;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -234,8 +235,11 @@ class SparePartOrderDetail extends Component
             return;
         }
 
-        // Store the payment proof
-        $path = $this->paymentProof->store('payment-proofs', 'public');
+        $path = app(ImageCompressionService::class)->storeCompressedIfImage(
+            $this->paymentProof,
+            'payment-proofs',
+            1200
+        );
 
         $this->order->update([
             'payment_proof' => $path,

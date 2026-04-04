@@ -4,6 +4,7 @@ namespace App\Livewire\Admin;
 
 use App\Models\CarRequest;
 use App\Models\DealerCarOffer;
+use App\Services\ImageCompressionService;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -15,7 +16,9 @@ class CarRequestDetail extends Component
     public CarRequest $request;
 
     public $price = '';
+
     public $message = '';
+
     public $image;
 
     public function mount(int $id): void
@@ -42,8 +45,8 @@ class CarRequestDetail extends Component
         }, $validated);
 
         $imagePath = null;
-        if (!empty($this->image)) {
-            $imagePath = $this->image->store('car-request-offers', 'public');
+        if (! empty($this->image)) {
+            $imagePath = app(ImageCompressionService::class)->storeCompressed($this->image, 'car-request-offers', 1200);
         }
 
         // Prevent duplicates (double-click / double submit):
@@ -74,5 +77,3 @@ class CarRequestDetail extends Component
         ])->layout('layouts.admin');
     }
 }
-
-

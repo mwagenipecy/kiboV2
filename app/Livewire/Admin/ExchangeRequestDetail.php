@@ -8,6 +8,7 @@ use App\Models\CarExchangeRequest;
 use App\Models\DealerExchangeQuotation;
 use App\Models\Entity;
 use App\Models\Vehicle;
+use App\Services\ImageCompressionService;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -17,30 +18,38 @@ class ExchangeRequestDetail extends Component
     use WithFileUploads;
 
     public CarExchangeRequest $request;
+
     public $sendToAll = false;
+
     public $selectedDealerIds = [];
+
     public $dealerSearch = '';
-    
+
     // Quotation form properties
     public $showQuotationForm = false;
+
     public $current_vehicle_valuation = '';
+
     public $desired_vehicle_price = '';
+
     public $offered_vehicle_id = '';
+
     public $message = '';
+
     public $quotation_documents = [];
 
     public function mount(int $id): void
     {
         $user = Auth::user();
         $isAdmin = $user->isAdmin();
-        
+
         $query = CarExchangeRequest::with(['desiredMake', 'desiredModel', 'quotations.entity', 'quotations.user', 'user']);
-        
+
         // If dealer, only allow access to requests with status 'sent_to_dealers'
-        if (!$isAdmin && $user->isDealer()) {
+        if (! $isAdmin && $user->isDealer()) {
             $query->where('status', 'sent_to_dealers');
         }
-        
+
         $this->request = $query->findOrFail($id);
     }
 
@@ -102,6 +111,7 @@ class ExchangeRequestDetail extends Component
 
         if ($dealers->isEmpty()) {
             session()->flash('error', 'No valid dealers selected.');
+
             return;
         }
 
@@ -119,7 +129,7 @@ class ExchangeRequestDetail extends Component
 
         $dealerCount = $dealers->count();
         session()->flash('success', "Exchange request sent to {$dealerCount} dealer(s) successfully.");
-        
+
         // Reset form
         $this->sendToAll = false;
         $this->selectedDealerIds = [];
@@ -129,28 +139,32 @@ class ExchangeRequestDetail extends Component
     public function submitQuotation()
     {
         $user = Auth::user();
-        
+
         // Check if request is already completed
         if ($this->request->status === 'completed') {
             session()->flash('error', 'This exchange request has been completed. No further quotations can be submitted.');
+
             return;
         }
 
         // Check if a quotation has already been accepted
         if ($this->request->accepted_quotation_id) {
             session()->flash('error', 'A quotation has already been accepted for this request. No further quotations can be submitted.');
+
             return;
         }
-        
+
         // Only dealers can submit quotations
-        if (!$user->isDealer() && !$user->isAdmin()) {
+        if (! $user->isDealer() && ! $user->isAdmin()) {
             session()->flash('error', 'Only dealers can submit quotations.');
+
             return;
         }
 
         // If admin, they need to be acting as a dealer (have entity_id)
-        if ($user->isAdmin() && !$user->entity_id) {
+        if ($user->isAdmin() && ! $user->entity_id) {
             session()->flash('error', 'Admin users need to be associated with a dealer entity to submit quotations.');
+
             return;
         }
 
@@ -165,17 +179,18 @@ class ExchangeRequestDetail extends Component
         // Calculate price difference
         $priceDifference = $validated['desired_vehicle_price'] - $validated['current_vehicle_valuation'];
 
+        $compress = app(ImageCompressionService::class);
+
         // Handle document uploads
         $documentPaths = [];
-        if (!empty($this->quotation_documents)) {
+        if (! empty($this->quotation_documents)) {
             foreach ($this->quotation_documents as $doc) {
-                $path = $doc->store('exchange-quotations', 'public');
-                $documentPaths[] = $path;
+                $documentPaths[] = $compress->storeCompressedIfImage($doc, 'exchange-quotations', 1200);
             }
         }
 
         // Convert empty string to null for offered_vehicle_id
-        $offeredVehicleId = !empty($validated['offered_vehicle_id']) ? $validated['offered_vehicle_id'] : null;
+        $offeredVehicleId = ! empty($validated['offered_vehicle_id']) ? $validated['offered_vehicle_id'] : null;
 
         $quotation = DealerExchangeQuotation::create([
             'exchange_request_id' => $this->request->id,
@@ -186,7 +201,7 @@ class ExchangeRequestDetail extends Component
             'price_difference' => $priceDifference,
             'currency' => 'TZS',
             'offered_vehicle_id' => $offeredVehicleId,
-            'message' => !empty($validated['message']) ? $validated['message'] : null,
+            'message' => ! empty($validated['message']) ? $validated['message'] : null,
             'quotation_documents' => $documentPaths,
             'status' => 'pending',
         ]);
@@ -197,7 +212,7 @@ class ExchangeRequestDetail extends Component
             session()->flash('success', 'Quotation created successfully! The email will be sent to the customer shortly.');
         } catch (\Exception $e) {
             // Even if queuing fails, quotation is saved
-            \Log::error('Failed to queue exchange quotation email: ' . $e->getMessage(), [
+            \Log::error('Failed to queue exchange quotation email: '.$e->getMessage(), [
                 'quotation_id' => $quotation->id,
             ]);
             session()->flash('success', 'Quotation created successfully! However, there was an issue queuing the email. The quotation has been saved and can be viewed by the customer.');
@@ -210,7 +225,7 @@ class ExchangeRequestDetail extends Component
         $this->offered_vehicle_id = '';
         $this->message = '';
         $this->quotation_documents = [];
-        
+
         // Refresh request to show new quotation
         $this->request->refresh();
     }
@@ -221,12 +236,12 @@ class ExchangeRequestDetail extends Component
             ->where('status', 'active');
 
         // Apply search filter
-        if (!empty($this->dealerSearch)) {
+        if (! empty($this->dealerSearch)) {
             $search = $this->dealerSearch;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%")
-                  ->orWhere('phone', 'like', "%{$search}%");
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$search}%");
             });
         }
 
@@ -242,7 +257,7 @@ class ExchangeRequestDetail extends Component
                 ->with(['make', 'model'])
                 ->get();
         }
-        
+
         return view('livewire.admin.exchange-request-detail', [
             'dealers' => $dealers,
             'availableVehicles' => $availableVehicles,

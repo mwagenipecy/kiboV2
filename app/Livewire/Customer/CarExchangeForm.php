@@ -6,6 +6,7 @@ use App\Models\CarExchangeRequest as ExchangeRequest;
 use App\Models\Customer;
 use App\Models\VehicleMake;
 use App\Models\VehicleModel;
+use App\Services\ImageCompressionService;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Livewire\Component;
@@ -261,12 +262,13 @@ class CarExchangeForm extends Component
             return;
         }
 
+        $compress = app(ImageCompressionService::class);
+
         // Handle image uploads
         $imagePaths = [];
         if (! empty($this->current_vehicle_images)) {
             foreach ($this->current_vehicle_images as $image) {
-                $path = $image->store('car-exchange-requests', 'public');
-                $imagePaths[] = $path;
+                $imagePaths[] = $compress->storeCompressed($image, 'car-exchange-requests', 1200);
             }
         }
 

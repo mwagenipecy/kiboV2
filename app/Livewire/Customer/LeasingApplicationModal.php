@@ -6,8 +6,8 @@ use App\Enums\OrderStatus;
 use App\Enums\OrderType;
 use App\Models\Order;
 use App\Models\VehicleLease;
+use App\Services\ImageCompressionService;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -17,42 +17,65 @@ class LeasingApplicationModal extends Component
     use WithFileUploads;
 
     public $show = false;
+
     public $leaseId;
+
     public $lease;
-    
+
     // Personal Information
     public $full_name = '';
+
     public $email = '';
+
     public $phone = '';
+
     public $date_of_birth = '';
+
     public $address = '';
+
     public $city = '';
+
     public $postal_code = '';
-    
+
     // Financial Information
     public $monthly_income = '';
+
     public $employment_status = '';
+
     public $employer_name = '';
+
     public $employment_months = '';
+
     public $credit_score = '';
+
     public $current_lease = false;
-    
+
     // Documents
     public $id_document;
+
     public $proof_of_income;
+
     public $proof_of_address;
+
     public $driving_license;
+
     public $additional_documents = [];
-    
+
     // Temporary previews
     public $tempIdDocument;
+
     public $tempProofOfIncome;
+
     public $tempProofOfAddress;
+
     public $tempDrivingLicense;
+
     public $tempAdditionalDocuments = [];
-    
+
     public $notes = '';
+
     public $agreeToTerms = false;
+
     public $agreeToCreditCheck = false;
 
     #[On('open-leasing-modal')]
@@ -61,8 +84,8 @@ class LeasingApplicationModal extends Component
         // Extract leaseId from event parameters
         // Livewire 3 passes event data as parameters
         $leaseId = null;
-        
-        if (!empty($params)) {
+
+        if (! empty($params)) {
             $firstParam = $params[0];
             if (is_numeric($firstParam)) {
                 $leaseId = (int) $firstParam;
@@ -78,17 +101,19 @@ class LeasingApplicationModal extends Component
                 }
             }
         }
-        
-        if (!$leaseId || $leaseId <= 0) {
+
+        if (! $leaseId || $leaseId <= 0) {
             \Log::error('Leasing modal: No leaseId provided', ['params' => $params, 'first_param' => $params[0] ?? null]);
             session()->flash('error', 'Invalid lease ID.');
+
             return;
         }
-        
+
         \Log::info('Leasing modal opening', ['leaseId' => $leaseId, 'params' => $params]);
 
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             session()->flash('error', 'Please login to apply for leasing.');
+
             return redirect()->route('login');
         }
 
@@ -97,14 +122,15 @@ class LeasingApplicationModal extends Component
             $this->lease = VehicleLease::with('entity')->findOrFail($this->leaseId);
         } catch (\Exception $e) {
             session()->flash('error', 'Lease not found.');
-            \Log::error('Leasing modal error: ' . $e->getMessage());
+            \Log::error('Leasing modal error: '.$e->getMessage());
+
             return;
         }
-        
+
         // Pre-fill user information if available
         $user = Auth::user();
         if ($user->customer) {
-            $this->full_name = $user->customer->first_name . ' ' . $user->customer->last_name;
+            $this->full_name = $user->customer->first_name.' '.$user->customer->last_name;
             $this->email = $user->email;
             $this->phone = $user->customer->phone ?? '';
             $this->address = $user->customer->address ?? '';
@@ -112,24 +138,24 @@ class LeasingApplicationModal extends Component
             $this->full_name = $user->name;
             $this->email = $user->email;
         }
-        
+
         // Always show modal - validation will happen on submit
         $this->show = true;
         $this->resetDocuments();
-        
+
         // Debug: Log that we're setting show to true
         \Log::info('Modal show set to true', ['show' => $this->show, 'leaseId' => $this->leaseId, 'lease' => $this->lease ? $this->lease->id : null]);
-        
+
         // Force a re-render
         $this->js('window.dispatchEvent(new CustomEvent("leasing-modal-opened"))');
     }
-    
+
     public function close()
     {
         $this->show = false;
         $this->resetForm();
     }
-    
+
     public function resetForm()
     {
         $this->full_name = '';
@@ -150,7 +176,7 @@ class LeasingApplicationModal extends Component
         $this->agreeToCreditCheck = false;
         $this->resetDocuments();
     }
-    
+
     public function resetDocuments()
     {
         $this->id_document = null;
@@ -167,8 +193,9 @@ class LeasingApplicationModal extends Component
 
     public function submit()
     {
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             session()->flash('error', 'Please login to apply for leasing.');
+
             return redirect()->route('login');
         }
 
@@ -181,28 +208,28 @@ class LeasingApplicationModal extends Component
             'address' => 'required|string|max:500',
             'city' => 'required|string|max:100',
             'postal_code' => 'nullable|string|max:20',
-            
+
             // Financial Information
-            'monthly_income' => 'required|numeric|min:' . ($this->lease->min_monthly_income ?? 0),
+            'monthly_income' => 'required|numeric|min:'.($this->lease->min_monthly_income ?? 0),
             'employment_status' => 'required|in:employed,self_employed,unemployed,retired,student',
             'employer_name' => 'required_if:employment_status,employed,self_employed|string|max:255',
             'employment_months' => 'nullable|integer|min:0',
             'credit_score' => 'nullable|integer|min:300|max:850',
             'current_lease' => 'boolean',
-            
+
             // Documents
             'id_document' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
             'proof_of_income' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
             'proof_of_address' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
             'driving_license' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
             'additional_documents.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
-            
+
             // Agreements
             'agreeToTerms' => 'accepted',
             'agreeToCreditCheck' => 'accepted',
         ], [
             'date_of_birth.before' => 'You must be at least 18 years old to apply for leasing.',
-            'monthly_income.min' => 'Minimum monthly income required is $' . number_format($this->lease->min_monthly_income ?? 0),
+            'monthly_income.min' => 'Minimum monthly income required is $'.number_format($this->lease->min_monthly_income ?? 0),
             'id_document.required' => 'ID document is required for application.',
             'proof_of_income.required' => 'Proof of income is required for application.',
             'proof_of_address.required' => 'Proof of address is required for application.',
@@ -210,30 +237,33 @@ class LeasingApplicationModal extends Component
         ]);
 
         try {
+            $compress = app(ImageCompressionService::class);
+            $docFolder = 'leasing-documents/'.Auth::id();
+
             // Upload documents
             $documents = [];
-            
+
             if ($this->id_document) {
-                $documents['id_document'] = $this->id_document->store('leasing-documents/' . Auth::id(), 'public');
+                $documents['id_document'] = $compress->storeCompressedIfImage($this->id_document, $docFolder, 1200);
             }
-            
+
             if ($this->proof_of_income) {
-                $documents['proof_of_income'] = $this->proof_of_income->store('leasing-documents/' . Auth::id(), 'public');
+                $documents['proof_of_income'] = $compress->storeCompressedIfImage($this->proof_of_income, $docFolder, 1200);
             }
-            
+
             if ($this->proof_of_address) {
-                $documents['proof_of_address'] = $this->proof_of_address->store('leasing-documents/' . Auth::id(), 'public');
+                $documents['proof_of_address'] = $compress->storeCompressedIfImage($this->proof_of_address, $docFolder, 1200);
             }
-            
+
             if ($this->driving_license) {
-                $documents['driving_license'] = $this->driving_license->store('leasing-documents/' . Auth::id(), 'public');
+                $documents['driving_license'] = $compress->storeCompressedIfImage($this->driving_license, $docFolder, 1200);
             }
-            
-            if (!empty($this->additional_documents)) {
+
+            if (! empty($this->additional_documents)) {
                 $additionalDocs = [];
                 foreach ($this->additional_documents as $doc) {
                     if (is_object($doc)) {
-                        $additionalDocs[] = $doc->store('leasing-documents/' . Auth::id(), 'public');
+                        $additionalDocs[] = $compress->storeCompressedIfImage($doc, $docFolder, 1200);
                     }
                 }
                 $documents['additional_documents'] = $additionalDocs;
@@ -259,7 +289,7 @@ class LeasingApplicationModal extends Component
                     'vehicle_year' => $this->lease->vehicle_year,
                     'entity_id' => $this->lease->entity_id,
                     'entity_name' => $this->lease->entity->name ?? null,
-                    
+
                     // Lease Terms
                     'monthly_payment' => $this->lease->monthly_payment,
                     'lease_term_months' => $this->lease->lease_term_months,
@@ -270,7 +300,7 @@ class LeasingApplicationModal extends Component
                     'total_lease_cost' => $totalLeaseCost,
                     'mileage_limit_per_year' => $this->lease->mileage_limit_per_year,
                     'excess_mileage_charge' => $this->lease->excess_mileage_charge,
-                    
+
                     // Applicant Information
                     'full_name' => $this->full_name,
                     'email' => $this->email,
@@ -279,7 +309,7 @@ class LeasingApplicationModal extends Component
                     'address' => $this->address,
                     'city' => $this->city,
                     'postal_code' => $this->postal_code,
-                    
+
                     // Financial Information
                     'monthly_income' => $this->monthly_income,
                     'employment_status' => $this->employment_status,
@@ -287,10 +317,10 @@ class LeasingApplicationModal extends Component
                     'employment_months' => $this->employment_months,
                     'credit_score' => $this->credit_score,
                     'current_lease' => $this->current_lease,
-                    
+
                     // Documents
                     'documents' => $documents,
-                    
+
                     // Workflow Status
                     'approval_status' => 'pending',
                     'quotation_sent' => false,
@@ -303,23 +333,22 @@ class LeasingApplicationModal extends Component
             ]);
 
             session()->flash('success', 'Your leasing application has been submitted successfully! We will review your application and contact you soon.');
-            
+
             $this->dispatch('order-created');
             $this->close();
 
         } catch (\Exception $e) {
-            session()->flash('error', 'Failed to submit application. Please try again. ' . $e->getMessage());
-            \Log::error('Leasing application error: ' . $e->getMessage());
+            session()->flash('error', 'Failed to submit application. Please try again. '.$e->getMessage());
+            \Log::error('Leasing application error: '.$e->getMessage());
         }
     }
 
     public function render()
     {
-        if ($this->show && $this->leaseId && !$this->lease) {
+        if ($this->show && $this->leaseId && ! $this->lease) {
             $this->lease = VehicleLease::with('entity')->find($this->leaseId);
         }
 
         return view('livewire.customer.leasing-application-modal');
     }
 }
-

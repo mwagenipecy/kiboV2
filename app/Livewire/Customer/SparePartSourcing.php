@@ -7,6 +7,7 @@ use App\Jobs\SendSparePartOrderPlacedSms;
 use App\Models\SparePartOrder;
 use App\Models\VehicleMake;
 use App\Models\VehicleModel;
+use App\Services\ImageCompressionService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
@@ -476,6 +477,8 @@ class SparePartSourcing extends Component
             'customerPhone.regex' => 'Phone number must start with 0 and be 10 digits (e.g. 0712345678).',
         ]);
 
+        $compress = app(ImageCompressionService::class);
+
         $createdOrders = [];
         foreach ($this->orderItems as $item) {
             $condition = ($item['condition'] ?? 'any') === 'any' ? 'new' : $item['condition'];
@@ -483,14 +486,14 @@ class SparePartSourcing extends Component
             if (! empty($item['images']) && is_array($item['images'])) {
                 foreach ($item['images'] as $image) {
                     if ($image) {
-                        $storedImages[] = $image->store('spare-part-orders', 'public');
+                        $storedImages[] = $compress->storeCompressed($image, 'spare-part-orders', 1200);
                     }
                 }
             }
             if (empty($storedImages) && is_array($this->images)) {
                 foreach ($this->images as $image) {
                     if ($image) {
-                        $storedImages[] = $image->store('spare-part-orders', 'public');
+                        $storedImages[] = $compress->storeCompressed($image, 'spare-part-orders', 1200);
                     }
                 }
             }

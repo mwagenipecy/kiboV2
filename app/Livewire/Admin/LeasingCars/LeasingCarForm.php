@@ -6,8 +6,8 @@ use App\Models\Entity;
 use App\Models\LeasingCar;
 use App\Models\VehicleMake;
 use App\Models\VehicleModel;
+use App\Services\ImageCompressionService;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
@@ -17,80 +17,122 @@ class LeasingCarForm extends Component
 
     // Basic Information
     public $title;
+
     public $description;
+
     public $registration_number;
+
     public $condition = 'used';
-    
+
     // Make and Model
     public $vehicle_make_id;
+
     public $vehicle_model_id;
+
     public $variant;
+
     public $year;
-    
+
     // Specifications
     public $body_type;
+
     public $fuel_type;
+
     public $transmission;
+
     public $engine_capacity;
+
     public $engine_cc;
+
     public $drive_type;
+
     public $color_exterior;
+
     public $color_interior;
+
     public $doors;
+
     public $seats;
+
     public $mileage;
+
     public $vin;
-    
+
     // Leasing Pricing
     public $daily_rate;
+
     public $weekly_rate;
+
     public $monthly_rate;
+
     public $security_deposit;
+
     public $currency = 'TZS';
+
     public $negotiable = false;
-    
+
     // Leasing Terms
     public $min_lease_days = 1;
+
     public $max_lease_days;
+
     public $mileage_limit_per_day;
+
     public $excess_mileage_charge;
+
     public $min_driver_age = 21;
+
     public $insurance_included = true;
+
     public $fuel_included = false;
+
     public $lease_terms;
-    
+
     // Features
     public $features = [];
+
     public $safety_features = [];
-    
+
     // Images
     public $image_front;
+
     public $image_side;
+
     public $image_back;
+
     public $image_interior;
+
     public $other_images = [];
-    
+
     // Ownership
     public $entity_id;
-    
+
     // Status
     public $status = 'pending';
+
     public $notes;
-    
+
     // Edit mode
     public $carId;
+
     public $editMode = false;
-    
+
     // Data for dropdowns
     public $makes = [];
+
     public $models = [];
+
     public $dealers = [];
-    
+
     // Temporary images
     public $tempImageFront;
+
     public $tempImageSide;
+
     public $tempImageBack;
+
     public $tempImageInterior;
+
     public $tempOtherImages = [];
 
     protected function rules()
@@ -103,7 +145,7 @@ class LeasingCarForm extends Component
             'vehicle_make_id' => 'required|exists:vehicle_makes,id',
             'vehicle_model_id' => 'required|exists:vehicle_models,id',
             'variant' => 'nullable|string|max:255',
-            'year' => 'required|integer|min:1900|max:' . (date('Y') + 2),
+            'year' => 'required|integer|min:1900|max:'.(date('Y') + 2),
             'body_type' => 'nullable|string|max:255',
             'fuel_type' => 'nullable|string|max:255',
             'transmission' => 'nullable|string|max:255',
@@ -145,7 +187,7 @@ class LeasingCarForm extends Component
     {
         $this->loadMakes();
         $this->loadDealers();
-        
+
         if ($carId) {
             $this->editMode = true;
             $this->carId = $carId;
@@ -157,24 +199,24 @@ class LeasingCarForm extends Component
                 $this->entity_id = $user->entity_id;
             }
         }
-        
+
         $this->year = date('Y');
     }
 
     public function loadCar()
     {
         $car = LeasingCar::findOrFail($this->carId);
-        
+
         $this->title = $car->title;
         $this->description = $car->description;
         $this->registration_number = $car->registration_number;
         $this->condition = $car->condition;
         $this->vehicle_make_id = $car->vehicle_make_id;
         $this->vehicle_model_id = $car->vehicle_model_id;
-        
+
         // Load models for this make
         $this->updatedVehicleMakeId();
-        
+
         $this->variant = $car->variant;
         $this->year = $car->year;
         $this->body_type = $car->body_type;
@@ -208,7 +250,7 @@ class LeasingCarForm extends Component
         $this->entity_id = $car->entity_id;
         $this->status = $car->status;
         $this->notes = $car->notes;
-        
+
         // Store existing image paths for preview
         $this->tempImageFront = $car->image_front;
         $this->tempImageSide = $car->image_side;
@@ -232,9 +274,9 @@ class LeasingCarForm extends Component
         $this->models = VehicleModel::where('vehicle_make_id', $this->vehicle_make_id)
             ->orderBy('name')
             ->get();
-        
+
         // Reset model selection if make changes
-        if (!$this->editMode) {
+        if (! $this->editMode) {
             $this->vehicle_model_id = null;
         }
     }
@@ -286,18 +328,20 @@ class LeasingCarForm extends Component
                 'notes' => $this->notes,
             ];
 
+            $compress = app(ImageCompressionService::class);
+
             // Handle image uploads
             if ($this->image_front && is_object($this->image_front)) {
-                $data['image_front'] = $this->image_front->store('leasing-cars', 'public');
+                $data['image_front'] = $compress->storeCompressed($this->image_front, 'leasing-cars', 1200);
             }
             if ($this->image_side && is_object($this->image_side)) {
-                $data['image_side'] = $this->image_side->store('leasing-cars', 'public');
+                $data['image_side'] = $compress->storeCompressed($this->image_side, 'leasing-cars', 1200);
             }
             if ($this->image_back && is_object($this->image_back)) {
-                $data['image_back'] = $this->image_back->store('leasing-cars', 'public');
+                $data['image_back'] = $compress->storeCompressed($this->image_back, 'leasing-cars', 1200);
             }
             if ($this->image_interior && is_object($this->image_interior)) {
-                $data['image_interior'] = $this->image_interior->store('leasing-cars', 'public');
+                $data['image_interior'] = $compress->storeCompressed($this->image_interior, 'leasing-cars', 1200);
             }
 
             // Handle other images
@@ -305,7 +349,7 @@ class LeasingCarForm extends Component
                 $otherImagePaths = [];
                 foreach ($this->other_images as $image) {
                     if (is_object($image)) {
-                        $otherImagePaths[] = $image->store('leasing-cars', 'public');
+                        $otherImagePaths[] = $compress->storeCompressed($image, 'leasing-cars', 1200);
                     }
                 }
                 if (count($otherImagePaths) > 0) {
@@ -324,6 +368,7 @@ class LeasingCarForm extends Component
             }
 
             session()->flash('success', $message);
+
             return redirect()->route('admin.leasing-cars.index');
 
         } catch (\Exception $e) {

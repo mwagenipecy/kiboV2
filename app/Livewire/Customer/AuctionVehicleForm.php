@@ -5,6 +5,7 @@ namespace App\Livewire\Customer;
 use App\Models\AuctionVehicle;
 use App\Models\VehicleMake;
 use App\Models\VehicleModel;
+use App\Services\ImageCompressionService;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -17,52 +18,75 @@ class AuctionVehicleForm extends Component
 
     // Basic Information
     public $description;
+
     public $condition = 'used';
+
     public $registration_number;
+
     public $vin;
-    
+
     // Make and Model
     public $vehicle_make_id;
+
     public $vehicle_model_id;
+
     public $variant;
+
     public $year;
-    
+
     // Specifications
     public $body_type;
+
     public $fuel_type;
+
     public $transmission;
+
     public $engine_capacity;
+
     public $color_exterior;
+
     public $doors;
+
     public $seats;
+
     public $mileage;
-    
+
     // Pricing
     public $asking_price;
+
     public $minimum_price;
+
     public $currency = 'TZS';
-    
+
     // Images
     public $image_front;
+
     public $other_images = [];
+
     public $newImages = []; // Temporary property for new uploads
-    
+
     // Location
     public $location;
+
     public $city;
+
     public $region;
-    
+
     // Contact
     public $contact_name;
+
     public $contact_phone;
+
     public $contact_email;
-    
+
     // Data for dropdowns
     public $makes = [];
+
     public $models = [];
-    
+
     // UI State
     public $currentStep = 1;
+
     public $totalSteps = 4;
 
     protected function rules()
@@ -72,7 +96,7 @@ class AuctionVehicleForm extends Component
             'condition' => 'required|in:new,used',
             'vehicle_make_id' => 'required|exists:vehicle_makes,id',
             'vehicle_model_id' => 'required|exists:vehicle_models,id',
-            'year' => 'required|integer|min:1900|max:' . (date('Y') + 1),
+            'year' => 'required|integer|min:1900|max:'.(date('Y') + 1),
             'asking_price' => 'nullable|numeric|min:0',
             'minimum_price' => 'nullable|numeric|min:0',
             'currency' => 'required|string|max:3',
@@ -89,29 +113,29 @@ class AuctionVehicleForm extends Component
     public function getGeneratedTitleProperty()
     {
         $parts = [];
-        
+
         if ($this->year) {
             $parts[] = $this->year;
         }
-        
+
         if ($this->vehicle_make_id) {
             $make = $this->makes->firstWhere('id', $this->vehicle_make_id);
             if ($make) {
                 $parts[] = $make->name;
             }
         }
-        
+
         if ($this->vehicle_model_id) {
             $model = $this->models->firstWhere('id', $this->vehicle_model_id);
             if ($model) {
                 $parts[] = $model->name;
             }
         }
-        
+
         if ($this->variant) {
             $parts[] = $this->variant;
         }
-        
+
         return implode(' ', $parts) ?: 'Vehicle Listing';
     }
 
@@ -150,15 +174,15 @@ class AuctionVehicleForm extends Component
 
     public function mount()
     {
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             return redirect()->route('cars.sell');
         }
-        
+
         $user = Auth::user();
         $this->contact_name = $user->name;
         $this->contact_email = $user->email;
         $this->contact_phone = $user->phone ?? '';
-        
+
         $this->loadMakes();
     }
 
@@ -178,6 +202,7 @@ class AuctionVehicleForm extends Component
         for ($y = date('Y') + 1; $y >= 1900; $y--) {
             $years[] = $y;
         }
+
         return $years;
     }
 
@@ -206,7 +231,7 @@ class AuctionVehicleForm extends Component
                 'condition' => 'required|in:new,used',
                 'vehicle_make_id' => 'required|exists:vehicle_makes,id',
                 'vehicle_model_id' => 'required|exists:vehicle_models,id',
-                'year' => 'required|integer|min:1900|max:' . (date('Y') + 1),
+                'year' => 'required|integer|min:1900|max:'.(date('Y') + 1),
             ]);
         } elseif ($this->currentStep === 2) {
             // Optional fields, no strict validation
@@ -215,7 +240,7 @@ class AuctionVehicleForm extends Component
                 'image_front' => 'required|image|max:5120',
             ]);
         }
-        
+
         if ($this->currentStep < $this->totalSteps) {
             $this->currentStep++;
         }
@@ -263,25 +288,27 @@ class AuctionVehicleForm extends Component
             'status' => 'pending',
         ];
 
+        $compress = app(ImageCompressionService::class);
+
         // Handle image uploads
         if ($this->image_front) {
-            $data['image_front'] = $this->image_front->store('auction-vehicles', 'public');
+            $data['image_front'] = $compress->storeCompressed($this->image_front, 'auction-vehicles', 1200);
         }
-        
-        if (!empty($this->other_images)) {
+
+        if (! empty($this->other_images)) {
             $otherImagePaths = [];
             foreach ($this->other_images as $image) {
                 if ($image) {
-                    $otherImagePaths[] = $image->store('auction-vehicles', 'public');
+                    $otherImagePaths[] = $compress->storeCompressed($image, 'auction-vehicles', 1200);
                 }
             }
             $data['other_images'] = $otherImagePaths;
         }
 
         AuctionVehicle::create($data);
-        
+
         session()->flash('success', 'Your vehicle has been submitted for auction! It will be reviewed and activated soon. Dealers will start making offers once approved.');
-        
+
         return redirect()->route('my-auctions');
     }
 
@@ -290,4 +317,3 @@ class AuctionVehicleForm extends Component
         return view('livewire.customer.auction-vehicle-form');
     }
 }
-

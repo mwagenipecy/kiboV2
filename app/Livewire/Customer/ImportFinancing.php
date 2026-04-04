@@ -5,6 +5,7 @@ namespace App\Livewire\Customer;
 use App\Models\ImportFinancingRequest;
 use App\Models\VehicleMake;
 use App\Models\VehicleModel;
+use App\Services\ImageCompressionService;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Validate;
@@ -369,11 +370,12 @@ class ImportFinancing extends Component
         try {
             $this->validateCurrentStep();
 
+            $compress = app(ImageCompressionService::class);
+
             $documentPaths = [];
             if (! empty($this->documents)) {
                 foreach ($this->documents as $document) {
-                    $path = $document->store('import-financing-documents', 'public');
-                    $documentPaths[] = $path;
+                    $documentPaths[] = $compress->storeCompressedIfImage($document, 'import-financing-documents', 1200);
                 }
             }
 

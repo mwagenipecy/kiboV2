@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin\VehicleSettings;
 
 use App\Models\VehicleMake;
+use App\Services\ImageCompressionService;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
@@ -11,8 +12,11 @@ class MakeForm extends Component
     use WithFileUploads;
 
     public $name = '';
+
     public $icon;
+
     public $status = 'active';
+
     public $editingId = null;
 
     protected $listeners = ['editMake', 'resetForm'];
@@ -49,18 +53,21 @@ class MakeForm extends Component
             ];
 
             if ($this->icon) {
-                $iconPath = $this->icon->store('vehicle-icons', 'public');
-                $data['icon'] = $iconPath;
+                $data['icon'] = app(ImageCompressionService::class)->storeCompressed(
+                    $this->icon,
+                    'vehicle-icons',
+                    1200
+                );
             }
 
             if ($this->editingId) {
                 $make = VehicleMake::findOrFail($this->editingId);
-                
+
                 // Delete old icon if new one is uploaded
                 if ($this->icon && $make->icon) {
                     \Storage::disk('public')->delete($make->icon);
                 }
-                
+
                 $make->update($data);
                 session()->flash('success', 'Make updated successfully!');
             } else {
@@ -71,7 +78,7 @@ class MakeForm extends Component
             $this->resetForm();
             $this->dispatch('makeUpdated');
         } catch (\Exception $e) {
-            session()->flash('error', 'An error occurred: ' . $e->getMessage());
+            session()->flash('error', 'An error occurred: '.$e->getMessage());
         }
     }
 

@@ -4,36 +4,50 @@ namespace App\Livewire\Admin\VehicleSettings;
 
 use App\Models\VehicleMake;
 use App\Models\VehicleModel;
+use App\Services\ImageCompressionService;
 use Livewire\Component;
-use Livewire\WithPagination;
 use Livewire\WithFileUploads;
+use Livewire\WithPagination;
 
 class UnifiedList extends Component
 {
-    use WithPagination, WithFileUploads;
+    use WithFileUploads, WithPagination;
 
     public $activeTab = 'makes'; // 'makes' or 'models'
+
     public $search = '';
+
     public $filterMake = '';
-    
+
     // Make fields
     public $makeId = null;
+
     public $makeName = '';
+
     public $makeIcon;
+
     public $makeStatus = 'active';
+
     public $makeToDelete = null;
-    
+
     // Model fields
     public $modelId = null;
+
     public $modelName = '';
+
     public $modelMakeId = '';
+
     public $modelStatus = 'active';
+
     public $modelToDelete = null;
-    
+
     // Modal states
     public $showMakeModal = false;
+
     public $showMakeDeleteModal = false;
+
     public $showModelModal = false;
+
     public $showModelDeleteModal = false;
 
     protected $queryString = ['activeTab', 'search'];
@@ -55,7 +69,7 @@ class UnifiedList extends Component
         $this->showMakeDeleteModal = false;
         $this->showModelModal = false;
         $this->showModelDeleteModal = false;
-        
+
         $this->activeTab = $tab;
         $this->search = '';
         $this->filterMake = '';
@@ -63,14 +77,14 @@ class UnifiedList extends Component
     }
 
     // ====== MAKE METHODS ======
-    
+
     public function openMakeModal()
     {
         // Close other modals first
         $this->showModelModal = false;
         $this->showMakeDeleteModal = false;
         $this->showModelDeleteModal = false;
-        
+
         $this->resetMakeForm();
         $this->showMakeModal = true;
     }
@@ -92,9 +106,9 @@ class UnifiedList extends Component
                 'required',
                 'string',
                 'max:255',
-                $this->makeId 
-                    ? 'unique:vehicle_makes,name,' . $this->makeId 
-                    : 'unique:vehicle_makes,name'
+                $this->makeId
+                    ? 'unique:vehicle_makes,name,'.$this->makeId
+                    : 'unique:vehicle_makes,name',
             ],
             'makeIcon' => 'nullable|image|max:1024',
             'makeStatus' => 'required|in:active,inactive',
@@ -107,17 +121,20 @@ class UnifiedList extends Component
             ];
 
             if ($this->makeIcon) {
-                $iconPath = $this->makeIcon->store('vehicle-icons', 'public');
-                $data['icon'] = $iconPath;
+                $data['icon'] = app(ImageCompressionService::class)->storeCompressed(
+                    $this->makeIcon,
+                    'vehicle-icons',
+                    1200
+                );
             }
 
             if ($this->makeId) {
                 $make = VehicleMake::findOrFail($this->makeId);
-                
+
                 if ($this->makeIcon && $make->icon) {
                     \Storage::disk('public')->delete($make->icon);
                 }
-                
+
                 $make->update($data);
                 session()->flash('success', 'Make updated successfully!');
             } else {
@@ -128,7 +145,7 @@ class UnifiedList extends Component
             $this->resetMakeForm();
             $this->showMakeModal = false;
         } catch (\Exception $e) {
-            session()->flash('error', 'An error occurred: ' . $e->getMessage());
+            session()->flash('error', 'An error occurred: '.$e->getMessage());
         }
     }
 
@@ -142,15 +159,15 @@ class UnifiedList extends Component
     {
         try {
             $make = VehicleMake::findOrFail($this->makeToDelete);
-            
+
             if ($make->icon) {
                 \Storage::disk('public')->delete($make->icon);
             }
-            
+
             $make->delete();
             session()->flash('success', 'Make deleted successfully!');
         } catch (\Exception $e) {
-            session()->flash('error', 'Cannot delete this make: ' . $e->getMessage());
+            session()->flash('error', 'Cannot delete this make: '.$e->getMessage());
         }
 
         $this->showMakeDeleteModal = false;
@@ -166,14 +183,14 @@ class UnifiedList extends Component
     }
 
     // ====== MODEL METHODS ======
-    
+
     public function openModelModal()
     {
         // Close other modals first
         $this->showMakeModal = false;
         $this->showMakeDeleteModal = false;
         $this->showModelDeleteModal = false;
-        
+
         $this->resetModelForm();
         $this->showModelModal = true;
     }
@@ -210,6 +227,7 @@ class UnifiedList extends Component
 
         if ($existingModel) {
             $this->addError('modelName', 'This model already exists for the selected make.');
+
             return;
         }
 
@@ -232,7 +250,7 @@ class UnifiedList extends Component
             $this->resetModelForm();
             $this->showModelModal = false;
         } catch (\Exception $e) {
-            session()->flash('error', 'An error occurred: ' . $e->getMessage());
+            session()->flash('error', 'An error occurred: '.$e->getMessage());
         }
     }
 
@@ -249,7 +267,7 @@ class UnifiedList extends Component
             $model->delete();
             session()->flash('success', 'Model deleted successfully!');
         } catch (\Exception $e) {
-            session()->flash('error', 'Cannot delete this model: ' . $e->getMessage());
+            session()->flash('error', 'Cannot delete this model: '.$e->getMessage());
         }
 
         $this->showModelDeleteModal = false;
@@ -268,7 +286,7 @@ class UnifiedList extends Component
     {
         $makes = VehicleMake::query()
             ->when($this->search, function ($query) {
-                $query->where('name', 'like', '%' . $this->search . '%');
+                $query->where('name', 'like', '%'.$this->search.'%');
             })
             ->withCount('vehicleModels')
             ->orderBy('created_at', 'desc')
@@ -277,7 +295,7 @@ class UnifiedList extends Component
         $models = VehicleModel::query()
             ->with('vehicleMake')
             ->when($this->search, function ($query) {
-                $query->where('name', 'like', '%' . $this->search . '%');
+                $query->where('name', 'like', '%'.$this->search.'%');
             })
             ->when($this->filterMake, function ($query) {
                 $query->where('vehicle_make_id', $this->filterMake);

@@ -4,6 +4,7 @@ namespace App\Livewire\Admin;
 
 use App\Models\PageHero;
 use App\Models\PageHeroSlide;
+use App\Services\ImageCompressionService;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -131,6 +132,8 @@ class PageHeroManager extends Component
 
         $this->validate($rules);
 
+        $compress = app(ImageCompressionService::class);
+
         if ($this->editingSlideId) {
             $slide = PageHeroSlide::query()->findOrFail($this->editingSlideId);
             if ((int) $slide->page_hero_id !== (int) $hero->id) {
@@ -148,7 +151,7 @@ class PageHeroManager extends Component
 
             if ($this->image) {
                 $this->deleteStoredImageIfLocal($slide->image_path);
-                $data['image_path'] = $this->image->store('page-heroes', 'public');
+                $data['image_path'] = $compress->storeCompressed($this->image, 'page-heroes', 1200);
             }
 
             $slide->update($data);
@@ -158,7 +161,7 @@ class PageHeroManager extends Component
 
             PageHeroSlide::query()->create([
                 'page_hero_id' => $hero->id,
-                'image_path' => $this->image->store('page-heroes', 'public'),
+                'image_path' => $compress->storeCompressed($this->image, 'page-heroes', 1200),
                 'headline' => $this->headline !== '' ? $this->headline : null,
                 'subheadline' => $this->subheadline !== '' ? $this->subheadline : null,
                 'cta_label' => $this->cta_label !== '' ? $this->cta_label : null,

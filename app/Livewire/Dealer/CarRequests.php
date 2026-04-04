@@ -4,6 +4,7 @@ namespace App\Livewire\Dealer;
 
 use App\Models\CarRequest;
 use App\Models\DealerCarOffer;
+use App\Services\ImageCompressionService;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -13,8 +14,11 @@ class CarRequests extends Component
     use WithFileUploads;
 
     public $selectedRequestId = null;
+
     public $price = '';
+
     public $message = '';
+
     public $image;
 
     public function submitOffer(int $requestId)
@@ -31,8 +35,8 @@ class CarRequests extends Component
         ]);
 
         $imagePath = null;
-        if (!empty($this->image)) {
-            $imagePath = $this->image->store('car-request-offers', 'public');
+        if (! empty($this->image)) {
+            $imagePath = app(ImageCompressionService::class)->storeCompressed($this->image, 'car-request-offers', 1200);
         }
 
         DealerCarOffer::updateOrCreate(
@@ -71,5 +75,3 @@ class CarRequests extends Component
         ])->layout('layouts.dealer');
     }
 }
-
-

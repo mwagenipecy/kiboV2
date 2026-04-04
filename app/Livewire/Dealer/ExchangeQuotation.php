@@ -6,6 +6,7 @@ use App\Jobs\SendExchangeQuotationMail;
 use App\Models\CarExchangeRequest;
 use App\Models\DealerExchangeQuotation;
 use App\Models\Vehicle;
+use App\Services\ImageCompressionService;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -15,10 +16,15 @@ class ExchangeQuotation extends Component
     use WithFileUploads;
 
     public CarExchangeRequest $request;
+
     public $current_vehicle_valuation = '';
+
     public $desired_vehicle_price = '';
+
     public $offered_vehicle_id = '';
+
     public $message = '';
+
     public $quotation_documents = [];
 
     public function mount(int $id): void
@@ -46,12 +52,13 @@ class ExchangeQuotation extends Component
         // Calculate price difference
         $priceDifference = $validated['desired_vehicle_price'] - $validated['current_vehicle_valuation'];
 
+        $compress = app(ImageCompressionService::class);
+
         // Handle document uploads
         $documentPaths = [];
-        if (!empty($this->quotation_documents)) {
+        if (! empty($this->quotation_documents)) {
             foreach ($this->quotation_documents as $doc) {
-                $path = $doc->store('exchange-quotations', 'public');
-                $documentPaths[] = $path;
+                $documentPaths[] = $compress->storeCompressedIfImage($doc, 'exchange-quotations', 1200);
             }
         }
 
@@ -75,12 +82,12 @@ class ExchangeQuotation extends Component
             session()->flash('success', 'Quotation created successfully! The email will be sent to the customer shortly.');
         } catch (\Exception $e) {
             // Even if queuing fails, quotation is saved
-            \Log::error('Failed to queue exchange quotation email: ' . $e->getMessage(), [
+            \Log::error('Failed to queue exchange quotation email: '.$e->getMessage(), [
                 'quotation_id' => $quotation->id,
             ]);
             session()->flash('success', 'Quotation created successfully! However, there was an issue queuing the email. The quotation has been saved and can be viewed by the customer.');
         }
-        
+
         return $this->redirect(route('dealer.exchange-requests.index'), navigate: true);
     }
 
