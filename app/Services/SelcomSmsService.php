@@ -47,12 +47,26 @@ class SelcomSmsService
             }
 
             $data = $response->json();
-            $smsStatus = $data['results'][0]['status'] ?? null;
+            if (! is_array($data)) {
+                Log::error('Selcom SMS response was not JSON', [
+                    'to' => $normalized,
+                    'body' => $response->body(),
+                ]);
 
-            if ($smsStatus === '0') {
+                return false;
+            }
+
+            $results = $data['results'] ?? null;
+            $first = is_array($results) && isset($results[0]) && is_array($results[0])
+                ? $results[0]
+                : null;
+            $smsStatus = $first['status'] ?? null;
+
+            // Gateway may return status as JSON number (int) or string — strict === '0' misses int 0.
+            if ((string) $smsStatus === '0') {
                 Log::info('Selcom SMS sent', [
                     'to' => $normalized,
-                    'msgid' => $data['results'][0]['msgid'] ?? null,
+                    'msgid' => $first['msgid'] ?? null,
                     'balance' => $data['balance'] ?? null,
                 ]);
                 return true;
@@ -61,7 +75,7 @@ class SelcomSmsService
             Log::error('Selcom SMS rejected by gateway', [
                 'to' => $normalized,
                 'status' => $smsStatus,
-                'statustext' => $data['results'][0]['statustext'] ?? 'unknown',
+                'statustext' => $first['statustext'] ?? 'unknown',
                 'response' => $data,
             ]);
         } catch (\Throwable $e) {
