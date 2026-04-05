@@ -6,6 +6,7 @@ use App\Models\Vehicle;
 use App\Models\VehicleMake;
 use App\Models\VehicleModel;
 use App\Services\ImageCompressionService;
+use App\Support\VehicleSpecificationCatalog;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -54,6 +55,12 @@ class VehicleListingForm extends Component
 
     public $negotiable = true;
 
+    /** @var list<string> */
+    public array $features = [];
+
+    /** @var list<string> */
+    public array $safety_features = [];
+
     // Images
     public $image_front;
 
@@ -96,6 +103,10 @@ class VehicleListingForm extends Component
                 'doors' => 'nullable|integer|min:2|max:6',
                 'seats' => 'nullable|integer|min:1|max:50',
                 'mileage' => 'nullable|integer|min:0',
+                'features' => 'nullable|array',
+                'features.*' => 'nullable|string|max:255',
+                'safety_features' => 'nullable|array',
+                'safety_features.*' => 'nullable|string|max:255',
             ]);
         }
 
@@ -213,6 +224,8 @@ class VehicleListingForm extends Component
             'price' => $this->price,
             'currency' => $this->currency,
             'negotiable' => $this->negotiable,
+            'features' => VehicleSpecificationCatalog::filterToCatalog($this->features, VehicleSpecificationCatalog::comfort()),
+            'safety_features' => VehicleSpecificationCatalog::filterToCatalog($this->safety_features, VehicleSpecificationCatalog::safety()),
             'registered_by' => Auth::id(),
             'status' => 'pending',
         ];

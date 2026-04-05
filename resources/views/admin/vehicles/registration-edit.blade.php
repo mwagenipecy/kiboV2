@@ -19,6 +19,6 @@
     </div>
 
     <!-- Vehicle Registration Form Component -->
-    @livewire('admin.vehicle-registration.vehicle-form', ['vehicleId' => $id])
+    @livewire('admin.vehicle-registration.vehicle-form', ['vehiclePublicId' => $publicId])
 @endsection
 

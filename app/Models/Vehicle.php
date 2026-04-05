@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Str;
 
 class Vehicle extends Model
 {
@@ -16,6 +17,8 @@ class Vehicle extends Model
         'title',
         'description',
         'origin',
+        'country_id',
+        'location_city',
         'registration_number',
         'condition',
         'vehicle_make_id',
@@ -54,6 +57,15 @@ class Vehicle extends Model
         'approved_by',
         'sold_at',
     ];
+
+    protected static function booted(): void
+    {
+        static::creating(function (Vehicle $vehicle) {
+            if (empty($vehicle->public_id)) {
+                $vehicle->public_id = (string) Str::ulid();
+            }
+        });
+    }
 
     protected $casts = [
         'year' => 'integer',
@@ -96,6 +108,34 @@ class Vehicle extends Model
     public function entity(): BelongsTo
     {
         return $this->belongsTo(Entity::class);
+    }
+
+    /**
+     * Country when origin is international (seeded list); null for local (Tanzania implied).
+     */
+    public function country(): BelongsTo
+    {
+        return $this->belongsTo(Country::class);
+    }
+
+    /**
+     * Human-readable country and city for listings and detail pages.
+     */
+    public function displayLocation(): ?string
+    {
+        $city = $this->location_city;
+        if ($city === null || $city === '') {
+            return null;
+        }
+
+        if ($this->isLocal()) {
+            return 'Tanzania, '.$city;
+        }
+
+        $this->loadMissing('country');
+        $countryName = $this->country?->name;
+
+        return $countryName ? "{$countryName}, {$city}" : $city;
     }
 
     /**
@@ -196,6 +236,7 @@ class Vehicle extends Model
         if ($status instanceof VehicleStatus) {
             return $query->where('status', $status);
         }
+
         return $query->where('status', $status);
     }
 
@@ -267,7 +308,7 @@ class Vehicle extends Model
      */
     public function getFormattedPriceAttribute(): string
     {
-        return number_format($this->price, 2) . ' ' . $this->currency;
+        return number_format($this->price, 2).' '.$this->currency;
     }
 
     /**

@@ -29,7 +29,7 @@
                 <!-- Origin -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Origin <span class="text-red-500">*</span></label>
-                    <select wire:model="origin" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                    <select wire:model.live="origin" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
                         <option value="local">Local (Tanzania)</option>
                         <option value="international">International</option>
                     </select>
@@ -60,6 +60,55 @@
                     <input type="text" wire:model="vin" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="17-character VIN">
                     @error('vin') <span class="text-red-500 text-sm mt-1">{{ $message }}</span> @enderror
                 </div>
+
+                @if($origin === 'local')
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">City <span class="text-red-500">*</span></label>
+                    <input type="text" wire:model="location_city" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="e.g. Dar es Salaam, Arusha">
+                    <p class="text-xs text-gray-500 mt-1">Local listings use Tanzania as the country; enter the city where the vehicle is located.</p>
+                    @error('location_city') <span class="text-red-500 text-sm mt-1">{{ $message }}</span> @enderror
+                </div>
+                @else
+                <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="relative">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Country <span class="text-red-500">*</span></label>
+                        @if($country_id)
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <span class="inline-flex items-center px-3 py-2 rounded-lg bg-gray-100 text-gray-900 text-sm font-medium">{{ $countrySearch }}</span>
+                                <button type="button" wire:click="clearCountry" class="text-sm text-green-600 hover:text-green-800 font-medium">Change</button>
+                            </div>
+                        @else
+                            <input
+                                type="text"
+                                wire:model.live.debounce.150ms="countryQuery"
+                                wire:key="vehicle-form-country-query"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                placeholder="Search by country name or code (e.g. JP, Japan)"
+                                autocomplete="off"
+                            >
+                            @if(count($countryMatchResults) > 0)
+                                <ul class="absolute z-30 mt-1 w-full max-h-56 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg" wire:key="country-results-{{ md5($countryQuery) }}">
+                                    @foreach($countryMatchResults as $row)
+                                        <li wire:key="country-row-{{ $row['id'] }}">
+                                            <button type="button" wire:click.prevent="selectCountry({{ $row['id'] }})" class="w-full text-left px-4 py-2.5 text-sm text-gray-900 hover:bg-green-50 border-b border-gray-100 last:border-0">
+                                                {{ $row['name'] }} <span class="text-gray-500">({{ $row['code'] }})</span>
+                                            </button>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            @elseif(strlen(trim($countryQuery ?? '')) > 0)
+                                <p class="absolute z-30 mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm text-gray-500 shadow-lg">No countries match “{{ $countryQuery }}”. Try another spelling or code.</p>
+                            @endif
+                        @endif
+                        @error('country_id') <span class="text-red-500 text-sm mt-1 block">{{ $message }}</span> @enderror
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">City <span class="text-red-500">*</span></label>
+                        <input type="text" wire:model="location_city" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="Enter city name">
+                        @error('location_city') <span class="text-red-500 text-sm mt-1">{{ $message }}</span> @enderror
+                    </div>
+                </div>
+                @endif
             </div>
         </div>
 
@@ -226,6 +275,8 @@
             </div>
         </div>
 
+        @include('partials.vehicle-specification-checkboxes')
+
         <!-- Pricing -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <h3 class="text-lg font-semibold text-gray-900 mb-4">Pricing</h3>
@@ -273,30 +324,54 @@
                 <!-- Front Image -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Front Image</label>
+                    @if($editMode && $existingImageFront && !$image_front)
+                        <div class="mb-3 rounded-lg border-2 border-dashed border-green-200 bg-green-50/50 p-2">
+                            <p class="text-xs font-medium text-green-800 mb-2">Current</p>
+                            <img src="{{ asset('storage/'.$existingImageFront) }}" alt="Current front" class="w-full h-40 object-cover rounded-lg border border-gray-200">
+                        </div>
+                    @endif
                     <input type="file" wire:model="image_front" accept="image/*" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                    <p class="text-xs text-gray-500 mt-1">@if($editMode) Upload a file to replace the current image. @endif</p>
                     @error('image_front') <span class="text-red-500 text-sm mt-1">{{ $message }}</span> @enderror
                     @if ($image_front)
-                        <img src="{{ $image_front->temporaryUrl() }}" class="mt-2 w-full h-40 object-cover rounded-lg">
+                        <p class="text-xs font-medium text-gray-600 mt-2">New preview</p>
+                        <img src="{{ $image_front->temporaryUrl() }}" class="mt-1 w-full h-40 object-cover rounded-lg border border-green-300">
                     @endif
                 </div>
 
                 <!-- Side Image -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Side Image</label>
+                    @if($editMode && $existingImageSide && !$image_side)
+                        <div class="mb-3 rounded-lg border-2 border-dashed border-green-200 bg-green-50/50 p-2">
+                            <p class="text-xs font-medium text-green-800 mb-2">Current</p>
+                            <img src="{{ asset('storage/'.$existingImageSide) }}" alt="Current side" class="w-full h-40 object-cover rounded-lg border border-gray-200">
+                        </div>
+                    @endif
                     <input type="file" wire:model="image_side" accept="image/*" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                    <p class="text-xs text-gray-500 mt-1">@if($editMode) Upload a file to replace the current image. @endif</p>
                     @error('image_side') <span class="text-red-500 text-sm mt-1">{{ $message }}</span> @enderror
                     @if ($image_side)
-                        <img src="{{ $image_side->temporaryUrl() }}" class="mt-2 w-full h-40 object-cover rounded-lg">
+                        <p class="text-xs font-medium text-gray-600 mt-2">New preview</p>
+                        <img src="{{ $image_side->temporaryUrl() }}" class="mt-1 w-full h-40 object-cover rounded-lg border border-green-300">
                     @endif
                 </div>
 
                 <!-- Back Image -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Back Image</label>
+                    @if($editMode && $existingImageBack && !$image_back)
+                        <div class="mb-3 rounded-lg border-2 border-dashed border-green-200 bg-green-50/50 p-2">
+                            <p class="text-xs font-medium text-green-800 mb-2">Current</p>
+                            <img src="{{ asset('storage/'.$existingImageBack) }}" alt="Current back" class="w-full h-40 object-cover rounded-lg border border-gray-200">
+                        </div>
+                    @endif
                     <input type="file" wire:model="image_back" accept="image/*" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                    <p class="text-xs text-gray-500 mt-1">@if($editMode) Upload a file to replace the current image. @endif</p>
                     @error('image_back') <span class="text-red-500 text-sm mt-1">{{ $message }}</span> @enderror
                     @if ($image_back)
-                        <img src="{{ $image_back->temporaryUrl() }}" class="mt-2 w-full h-40 object-cover rounded-lg">
+                        <p class="text-xs font-medium text-gray-600 mt-2">New preview</p>
+                        <img src="{{ $image_back->temporaryUrl() }}" class="mt-1 w-full h-40 object-cover rounded-lg border border-green-300">
                     @endif
                 </div>
             </div>
@@ -330,6 +405,29 @@
                 <p class="text-sm text-gray-500 mt-2">Click the button above to select multiple images at once</p>
                 
                 @error('other_images.*') <span class="text-red-500 text-sm mt-1 block">{{ $message }}</span> @enderror
+
+                @if($editMode && count($existingOtherImages) > 0)
+                    <div class="mt-6">
+                        <p class="text-sm font-medium text-gray-700 mb-3">Current gallery ({{ count($existingOtherImages) }})</p>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            @foreach ($existingOtherImages as $index => $path)
+                                <div class="relative group" wire:key="existing-other-{{ $index }}-{{ $path }}">
+                                    <img src="{{ asset('storage/'.$path) }}" alt="" class="w-full h-32 object-cover rounded-lg border border-gray-200">
+                                    <button
+                                        type="button"
+                                        wire:click="removeExistingOtherImage({{ $index }})"
+                                        class="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                        title="Remove from listing"
+                                    >
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
                 
                 @if ($other_images && count($other_images) > 0)
                     <div class="mt-4">
@@ -421,14 +519,83 @@
 
         <!-- Form Actions -->
         <div class="flex items-center justify-end space-x-4">
-            <a href="{{ route('admin.vehicles.registration.index') }}" class="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+            <a
+                href="{{ route('admin.vehicles.registration.index') }}"
+                wire:loading.class="pointer-events-none opacity-50"
+                wire:target="save"
+                class="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+            >
                 Cancel
             </a>
-            <button type="submit" class="px-6 py-2.5 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition-all shadow-sm">
-                {{ $editMode ? 'Update Vehicle' : 'Register Vehicle' }}
+            <button
+                type="submit"
+                wire:loading.attr="disabled"
+                wire:target="save"
+                class="min-w-[11rem] inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition-all shadow-sm disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:from-green-500 disabled:hover:to-green-600"
+            >
+                <span wire:loading.remove wire:target="save">{{ $editMode ? 'Update Vehicle' : 'Register Vehicle' }}</span>
+                <span wire:loading wire:target="save" class="inline-flex items-center gap-2">
+                    <svg class="animate-spin h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    {{ $editMode ? 'Saving...' : 'Registering...' }}
+                </span>
             </button>
         </div>
     </form>
+
+    @if($showErrorModal)
+        <div
+            class="fixed inset-0 z-[200] flex items-center justify-center p-4"
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="vehicle-form-error-modal-title"
+        >
+            <div class="absolute inset-0 bg-black/50" wire:click="closeErrorModal"></div>
+            <div class="relative bg-white rounded-xl shadow-2xl border border-gray-200 max-w-lg w-full max-h-[min(80vh,32rem)] flex flex-col overflow-hidden">
+                <div class="px-6 py-4 border-b border-red-100 bg-red-50 flex items-start justify-between gap-4">
+                    <div class="flex items-start gap-3 min-w-0">
+                        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-100 text-red-700">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                            </svg>
+                        </span>
+                        <div class="min-w-0">
+                            <h3 id="vehicle-form-error-modal-title" class="text-lg font-semibold text-red-900">{{ $errorModalTitle }}</h3>
+                            <p class="text-sm text-red-800/90 mt-1">Review the messages below, then correct the form and try again.</p>
+                        </div>
+                    </div>
+                    <button
+                        type="button"
+                        wire:click="closeErrorModal"
+                        class="shrink-0 rounded-lg p-2 text-red-700 hover:bg-red-100 transition-colors"
+                        aria-label="Close"
+                    >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="px-6 py-4 overflow-y-auto">
+                    <ul class="list-disc pl-5 space-y-2 text-sm text-gray-800">
+                        @foreach($errorModalMessages as $msg)
+                            <li>{{ $msg }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+                <div class="px-6 py-4 border-t border-gray-100 bg-gray-50 flex justify-end">
+                    <button
+                        type="button"
+                        wire:click="closeErrorModal"
+                        class="px-5 py-2.5 rounded-lg bg-gray-900 text-white text-sm font-semibold hover:bg-gray-800 transition-colors"
+                    >
+                        OK
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
 </div>
 
 <script>

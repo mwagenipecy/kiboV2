@@ -36,7 +36,7 @@ class CarsListPreview extends Component
      */
     public function render()
     {
-        $query = Vehicle::with(['make', 'model', 'entity'])
+        $query = Vehicle::with(['make', 'model', 'entity', 'country'])
             ->where('status', VehicleStatus::APPROVED);
 
         if (in_array($this->condition, ['used', 'new'], true)) {

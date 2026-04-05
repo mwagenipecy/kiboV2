@@ -19,6 +19,6 @@
     </div>
 
     <!-- Vehicle Detail Component -->
-    @livewire('admin.vehicle-registration.vehicle-detail', ['vehicleId' => $id])
+    @livewire('admin.vehicle-registration.vehicle-detail', ['vehiclePublicId' => $publicId])
 @endsection
 

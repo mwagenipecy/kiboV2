@@ -16,24 +16,37 @@ class VehicleSearch extends Component
 
     // Filter parameters
     public $make = '';
+
     public $model = '';
+
     public $minPrice = '';
+
     public $maxPrice = '';
+
     public $minYear = '';
+
     public $maxYear = '';
+
     public $minMileage = '';
+
     public $maxMileage = '';
+
     public $transmission = [];
+
     public $bodyType = [];
+
     public $fuelType = [];
+
     public $condition = '';
-    
+
     // Sort
     public $sortBy = 'relevance';
-    
+
     // UI states
     public $showFilters = false;
+
     public $savedVehicles = [];
+
     public $expandedSections = [
         'sort' => true,
         'distance' => false,
@@ -45,13 +58,16 @@ class VehicleSearch extends Component
         'gearbox' => false,
         'bodyType' => false,
     ];
-    
+
     // Order modals
     public $showValuationModal = false;
+
     public $showFinancingModal = false;
+
     public $showCashPurchaseModal = false;
+
     public $selectedVehicleId = null;
-    
+
     protected $queryString = [
         'make',
         'model',
@@ -67,7 +83,7 @@ class VehicleSearch extends Component
     {
         // Load saved vehicles from session
         $this->savedVehicles = session()->get('saved_vehicles', []);
-        
+
         // Check if this is the electric cars page - set default filter
         if (request()->routeIs('cars.electric')) {
             $this->fuelType = ['Electric'];
@@ -97,15 +113,15 @@ class VehicleSearch extends Component
 
     public function toggleSection($section)
     {
-        $this->expandedSections[$section] = !$this->expandedSections[$section];
+        $this->expandedSections[$section] = ! $this->expandedSections[$section];
     }
 
     public function clearFilters()
     {
         $this->reset([
-            'make', 'model', 'minPrice', 'maxPrice', 
+            'make', 'model', 'minPrice', 'maxPrice',
             'minYear', 'maxYear', 'minMileage', 'maxMileage',
-            'transmission', 'bodyType', 'fuelType', 'condition', 'sortBy'
+            'transmission', 'bodyType', 'fuelType', 'condition', 'sortBy',
         ]);
         $this->showFilters = false;
         $this->resetPage();
@@ -142,7 +158,7 @@ class VehicleSearch extends Component
 
     public function render()
     {
-        $query = Vehicle::with(['make', 'model', 'entity'])
+        $query = Vehicle::with(['make', 'model', 'entity', 'country'])
             ->where('status', VehicleStatus::APPROVED);
 
         // Apply filters
@@ -178,18 +194,18 @@ class VehicleSearch extends Component
             $query->where('mileage', '<=', $this->maxMileage);
         }
 
-        if (!empty($this->transmission)) {
+        if (! empty($this->transmission)) {
             $query->whereIn('transmission', $this->transmission);
         }
 
-        if (!empty($this->bodyType)) {
+        if (! empty($this->bodyType)) {
             $query->whereIn('body_type', $this->bodyType);
         }
 
         // For electric cars page, always filter for electric vehicles only (not petrol or diesel)
         if (request()->routeIs('cars.electric')) {
             $query->where('fuel_type', 'Electric');
-        } elseif (!empty($this->fuelType)) {
+        } elseif (! empty($this->fuelType)) {
             $query->whereIn('fuel_type', $this->fuelType);
         }
 
@@ -224,7 +240,7 @@ class VehicleSearch extends Component
 
         // Get all active lending criteria for checking financing availability
         $allCriteria = LendingCriteria::active()->get();
-        
+
         // Check which vehicles have financing available
         $vehicleFinancingAvailability = [];
         foreach ($vehicles as $vehicle) {
@@ -236,7 +252,7 @@ class VehicleSearch extends Component
 
         // Get available makes and models for filters
         $makes = VehicleMake::where('status', 'active')->orderBy('name')->get();
-        
+
         $models = collect();
         if ($this->make) {
             $models = VehicleModel::where('vehicle_make_id', $this->make)

@@ -11,53 +11,66 @@ use Livewire\Component;
 class VehicleDetail extends Component
 {
     public $vehicleId;
+
     public $vehicle;
+
     public $isSaved = false;
+
     public $expandedSections = [];
+
     public $showImageModal = false;
+
     public $currentImage = null;
+
     public $allImages = [];
+
     public $showInfoModal = false;
+
     public $modalContent = null;
+
     public $matchingLenders = [];
 
     /** @var bool Visitation request bottom sheet */
     public $showVisitationSheet = false;
+
     public $visitationName = '';
+
     public $visitationEmail = '';
+
     public $visitationPhone = '';
+
     public $visitationReason = '';
+
     public $visitationSubmitted = false;
 
     public function mount($id)
     {
         $this->vehicleId = $id;
-        $this->vehicle = Vehicle::with(['make', 'model', 'entity'])
+        $this->vehicle = Vehicle::with(['make', 'model', 'entity', 'country'])
             ->findOrFail($id);
-        
+
         // Check if vehicle is saved
         $savedVehicles = session()->get('saved_vehicles', []);
         $this->isSaved = in_array($id, $savedVehicles);
-        
+
         // Prepare all images for gallery
         $this->allImages = [];
         if ($this->vehicle->image_front) {
             $this->allImages[] = $this->vehicle->image_front;
         }
 
-         if ($this->vehicle->image_side) {
+        if ($this->vehicle->image_side) {
             $this->allImages[] = $this->vehicle->image_side;
         }
 
-       if ($this->vehicle->image_back) {
+        if ($this->vehicle->image_back) {
             $this->allImages[] = $this->vehicle->image_back;
         }
-
 
         if ($this->vehicle->other_images && count($this->vehicle->other_images) > 0) {
             $this->allImages = array_merge($this->allImages, $this->vehicle->other_images);
         }
-        
+
         // Initialize expanded sections
         $this->expandedSections = [
             'rareFeatures' => false,
@@ -68,11 +81,11 @@ class VehicleDetail extends Component
             'exported' => false,
             'writtenOff' => false,
         ];
-        
+
         // Get matching lenders for financing options
         $this->matchingLenders = $this->getMatchingLenders();
     }
-    
+
     /**
      * Get lenders whose criteria match this vehicle
      */
@@ -82,18 +95,18 @@ class VehicleDetail extends Component
             ->active()
             ->orderBy('priority', 'desc')
             ->get();
-        
+
         $matching = $criteria->filter(function ($criterion) {
             return $criterion->vehicleMeetsCriteria($this->vehicle);
         });
-        
+
         return $matching->values();
     }
 
     public function toggleSave()
     {
         $savedVehicles = session()->get('saved_vehicles', []);
-        
+
         if ($this->isSaved) {
             $savedVehicles = array_diff($savedVehicles, [$this->vehicleId]);
             $this->isSaved = false;
@@ -101,13 +114,13 @@ class VehicleDetail extends Component
             $savedVehicles[] = $this->vehicleId;
             $this->isSaved = true;
         }
-        
+
         session()->put('saved_vehicles', $savedVehicles);
     }
 
     public function toggleSection($section)
     {
-        $this->expandedSections[$section] = !$this->expandedSections[$section];
+        $this->expandedSections[$section] = ! $this->expandedSections[$section];
     }
 
     public function openImageModal($imageIndex)

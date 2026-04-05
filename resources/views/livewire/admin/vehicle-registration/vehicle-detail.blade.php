@@ -29,6 +29,9 @@
                         {{ ucfirst($vehicle->condition) }}
                     </span>
                 </div>
+                @if($vehicle->displayLocation())
+                    <p class="text-sm text-gray-600 mt-3">{{ $vehicle->displayLocation() }}</p>
+                @endif
             </div>
 
             <!-- Action Buttons -->
@@ -59,7 +62,7 @@
                 @endif
 
                 <!-- Edit Button -->
-                <a href="{{ route('admin.vehicles.registration.edit', $vehicle->id) }}" class="p-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-gray-600">
+                <a href="{{ route('admin.vehicles.registration.edit', $vehicle->public_id) }}" class="p-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-gray-600">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                     </svg>
@@ -308,17 +311,11 @@
                 </div>
             </div>
 
-            <!-- Features -->
-            @if($vehicle->features && count($vehicle->features) > 0)
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Features</h3>
-                    <div class="flex flex-wrap gap-2">
-                        @foreach($vehicle->features as $feature)
-                            <span class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm">{{ $feature }}</span>
-                        @endforeach
-                    </div>
-                </div>
-            @endif
+            <!-- Specifications (full checklist) -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Specifications</h3>
+                @include('partials.vehicle-specifications-display', ['vehicle' => $vehicle])
+            </div>
         </div>
 
         <!-- Sidebar - Right Side (1/3) -->

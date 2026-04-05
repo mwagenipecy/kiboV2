@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
         // Seed database with initial data
         $this->call([
             AdminUserSeeder::class,
+            CountrySeeder::class,
             VehicleMakeModelSeeder::class,
             PricingPlanSeeder::class,
             // AgentSeeder::class,

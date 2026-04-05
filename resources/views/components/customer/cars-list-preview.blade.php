@@ -55,7 +55,10 @@
                     <h3 class="text-base font-bold text-gray-900 mb-1 line-clamp-2">
                         {{ $vehicle->make->name ?? '' }} {{ $vehicle->model->name ?? '' }}
                     </h3>
-                    <p class="text-sm text-gray-600 mb-2">{{ $vehicle->year }} • {{ number_format($vehicle->mileage) }} km</p>
+                    <p class="text-sm text-gray-600 mb-1">{{ $vehicle->year }} • {{ number_format($vehicle->mileage) }} km</p>
+                    @if($vehicle->displayLocation())
+                    <p class="text-xs text-gray-500 mb-2 line-clamp-1">{{ $vehicle->displayLocation() }}</p>
+                    @endif
                     <p class="text-xl font-bold kibo-text">{{ $symbol }} {{ number_format($vehicle->price, 0) }}</p>
                 </div>
             </a>

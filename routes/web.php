@@ -839,14 +839,14 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'otp.ver
                 return view('admin.vehicles.registration-sold');
             })->name('sold');
 
-            // Dynamic routes come last
-            Route::get('/{id}', function ($id) {
-                return view('admin.vehicles.registration-view', ['id' => $id]);
-            })->name('view');
+            // Dynamic routes use ULID public_id (not numeric id)
+            Route::get('/{publicId}', function (string $publicId) {
+                return view('admin.vehicles.registration-view', ['publicId' => $publicId]);
+            })->whereUlid('publicId')->name('view');
 
-            Route::get('/{id}/edit', function ($id) {
-                return view('admin.vehicles.registration-edit', ['id' => $id]);
-            })->name('edit');
+            Route::get('/{publicId}/edit', function (string $publicId) {
+                return view('admin.vehicles.registration-edit', ['publicId' => $publicId]);
+            })->whereUlid('publicId')->name('edit');
         });
     });
 

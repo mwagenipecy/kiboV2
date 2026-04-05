@@ -86,6 +86,15 @@
                             KiboAuto
                         @endif
                     </p>
+                    @if($vehicle->displayLocation())
+                    <p class="text-sm text-gray-600 mb-4 flex items-center gap-2">
+                        <svg class="w-4 h-4 shrink-0 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                        {{ $vehicle->displayLocation() }}
+                    </p>
+                    @endif
                     
                     <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ $vehicle->make->name ?? '' }} {{ $vehicle->model->name ?? '' }}</h1>
                     @if($vehicle->variant)
@@ -254,22 +263,11 @@
                 </div>
                 @endif
 
-                {{-- Features --}}
-                @if($vehicle->features && count($vehicle->features) > 0)
+                {{-- Specifications checklist (full list; ticks for equipped items) --}}
                 <div class="bg-white rounded-xl p-6 shadow-sm">
-                    <h2 class="text-2xl font-bold text-gray-900 mb-4">Features</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        @foreach($vehicle->features as $feature)
-                        <div class="flex items-center gap-2">
-                            <svg class="w-5 h-5 kibo-text flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                            </svg>
-                            <span class="text-gray-700">{{ $feature }}</span>
-                        </div>
-                        @endforeach
-                    </div>
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6">Specifications</h2>
+                    @include('partials.vehicle-specifications-display', ['vehicle' => $vehicle, 'variant' => 'customer'])
                 </div>
-                @endif
 
                 {{-- Before You Buy --}}
                 <div class="bg-white rounded-xl p-6 shadow-sm">

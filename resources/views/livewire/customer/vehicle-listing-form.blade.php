@@ -191,6 +191,8 @@
                 </div>
             </div>
 
+            @include('partials.vehicle-specification-checkboxes')
+
             <div class="flex justify-between">
                 <button type="button" wire:click="previousStep" wire:loading.attr="disabled" wire:target="previousStep" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold px-6 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2">
                     <span wire:loading.remove wire:target="previousStep">Previous</span>

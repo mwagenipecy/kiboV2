@@ -4,24 +4,31 @@ namespace App\Livewire\Admin\VehicleRegistration;
 
 use App\Enums\VehicleStatus;
 use App\Models\Vehicle;
-use App\Models\VehicleView;
 use App\Models\VehicleLike;
+use App\Models\VehicleView;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
 class VehicleDetail extends Component
 {
     public $vehicleId;
+
     public $vehicle;
+
     public $isLiked = false;
+
     public $showStatusModal = false;
+
     public $newStatus;
+
     public $statusNotes = '';
+
     public $selectedImage = null;
 
-    public function mount($vehicleId)
+    public function mount(string $vehiclePublicId)
     {
-        $this->vehicleId = $vehicleId;
+        $vehicle = Vehicle::where('public_id', $vehiclePublicId)->firstOrFail();
+        $this->vehicleId = $vehicle->id;
         $this->loadVehicle();
         $this->trackView();
         $this->checkIfLiked();
@@ -33,6 +40,7 @@ class VehicleDetail extends Component
             'make',
             'model',
             'entity',
+            'country',
             'registeredBy',
             'approvedBy',
             'views.user',
@@ -45,7 +53,7 @@ class VehicleDetail extends Component
     public function trackView()
     {
         $user = Auth::user();
-        
+
         VehicleView::create([
             'vehicle_id' => $this->vehicleId,
             'user_id' => $user ? $user->id : null,
@@ -66,9 +74,10 @@ class VehicleDetail extends Component
     public function toggleLike()
     {
         $user = Auth::user();
-        
-        if (!$user) {
+
+        if (! $user) {
             session()->flash('error', 'You must be logged in to like a vehicle.');
+
             return;
         }
 
@@ -115,9 +124,9 @@ class VehicleDetail extends Component
 
         // Add notes if provided
         if ($this->statusNotes) {
-            $updateData['notes'] = $this->vehicle->notes 
-                ? $this->vehicle->notes . "\n\n" . now()->format('Y-m-d H:i') . ": " . $this->statusNotes
-                : now()->format('Y-m-d H:i') . ": " . $this->statusNotes;
+            $updateData['notes'] = $this->vehicle->notes
+                ? $this->vehicle->notes."\n\n".now()->format('Y-m-d H:i').': '.$this->statusNotes
+                : now()->format('Y-m-d H:i').': '.$this->statusNotes;
         }
 
         // If approved, set approval details
@@ -134,7 +143,7 @@ class VehicleDetail extends Component
         $this->vehicle->update($updateData);
 
         session()->flash('success', 'Vehicle status updated successfully!');
-        
+
         $this->closeStatusModal();
         $this->loadVehicle();
     }
