@@ -24,6 +24,9 @@ class VehicleDetail extends Component
 
     public $allImages = [];
 
+    /** Which image is shown in the large main area (syncs with thumbnails). */
+    public int $galleryIndex = 0;
+
     public $showInfoModal = false;
 
     public $modalContent = null;
@@ -127,8 +130,33 @@ class VehicleDetail extends Component
 
     public function openImageModal($imageIndex)
     {
-        $this->currentImage = $imageIndex;
+        $this->currentImage = (int) $imageIndex;
         $this->showImageModal = true;
+    }
+
+    public function setGalleryIndex(int $index): void
+    {
+        if (isset($this->allImages[$index])) {
+            $this->galleryIndex = $index;
+        }
+    }
+
+    public function nextGalleryImage(): void
+    {
+        $n = count($this->allImages);
+        if ($n < 2) {
+            return;
+        }
+        $this->galleryIndex = ($this->galleryIndex + 1) % $n;
+    }
+
+    public function previousGalleryImage(): void
+    {
+        $n = count($this->allImages);
+        if ($n < 2) {
+            return;
+        }
+        $this->galleryIndex = ($this->galleryIndex - 1 + $n) % $n;
     }
 
     public function closeImageModal()

@@ -42,46 +42,147 @@
     </div>
 
     <div class="max-w-7xl mx-auto px-4 py-6">
-        {{-- Full Width Image Gallery --}}
-        <div class="bg-white rounded-xl overflow-hidden shadow-sm mb-6">
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-2 p-2">
-                {{-- Display all images --}}
+        {{-- Gallery: main (left) + 4 images (right); bottom = horizontal sliding thumbnails --}}
+        @php
+            $photoCount = count($allImages);
+            $rightIndices = [];
+            if ($photoCount > 1) {
+                for ($k = 1; $k < $photoCount && count($rightIndices) < 4; $k++) {
+                    $rightIndices[] = ($galleryIndex + $k) % $photoCount;
+                }
+            }
+        @endphp
+        <div class="bg-white rounded-xl overflow-hidden shadow-sm mb-6 p-2 sm:p-3">
+            @if($photoCount > 0)
+                <div class="flex flex-col lg:grid lg:grid-cols-3 lg:gap-3 gap-3 lg:items-stretch">
+                    {{-- Main image (full width when only one photo; else 2/3) --}}
+                    <div class="relative aspect-[16/10] w-full rounded-lg overflow-hidden bg-gradient-to-br from-gray-200 to-gray-300 {{ $photoCount > 1 ? 'lg:col-span-2' : 'lg:col-span-3' }}">
+                        <button
+                            type="button"
+                            wire:click="openImageModal({{ $galleryIndex }})"
+                            class="absolute inset-0 z-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-inset"
+                            aria-label="Open photo {{ $galleryIndex + 1 }} fullscreen"
+                        >
+                            <img
+                                src="{{ asset('storage/' . $allImages[$galleryIndex]) }}"
+                                alt="Vehicle photo {{ $galleryIndex + 1 }} of {{ $photoCount }}"
+                                class="w-full h-full object-cover"
+                                loading="eager"
+                                decoding="async"
+                            >
+                        </button>
 
-                
-                @if(count($allImages) > 0)
-                    @foreach($allImages as $index => $image)
-                        <div wire:click="openImageModal({{ $index }})" class="relative aspect-[4/3] bg-gradient-to-br from-gray-200 to-gray-300 rounded-lg overflow-hidden cursor-pointer hover:opacity-90 transition-opacity {{ $index === 0 ? 'md:col-span-2 md:row-span-2 aspect-[16/10]' : '' }}">
-                            <img src="{{ asset('storage/' . $image) }}" alt="Vehicle image {{ $index + 1 }}" class="w-full h-full object-cover">
-                            @if($index === 0)
-                            <div class="absolute bottom-4 right-4 bg-black bg-opacity-70 text-white px-4 py-2 rounded-lg flex items-center gap-2">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        @if($photoCount > 1)
+                            <button
+                                type="button"
+                                wire:click.stop="previousGalleryImage"
+                                class="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 z-10 w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center rounded-full bg-black/45 text-white hover:bg-black/60 transition-colors shadow-lg"
+                                aria-label="Previous photo"
+                            >
+                                <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                                 </svg>
-                                <span class="font-medium">{{ count($allImages) }} photos</span>
+                            </button>
+                            <button
+                                type="button"
+                                wire:click.stop="nextGalleryImage"
+                                class="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 z-10 w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center rounded-full bg-black/45 text-white hover:bg-black/60 transition-colors shadow-lg"
+                                aria-label="Next photo"
+                            >
+                                <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                </svg>
+                            </button>
+                        @endif
+
+                        <div class="absolute bottom-2 left-2 right-2 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
+                            <div class="pointer-events-auto inline-flex items-center gap-2 rounded-md bg-black/65 text-white px-2.5 py-1 text-xs sm:text-sm font-medium">
+                                <span>{{ $galleryIndex + 1 }} / {{ $photoCount }}</span>
                             </div>
+                            <button
+                                type="button"
+                                wire:click.stop="openImageModal({{ $galleryIndex }})"
+                                class="pointer-events-auto inline-flex items-center gap-1 rounded-md bg-white/95 text-gray-900 px-2.5 py-1 text-xs sm:text-sm font-semibold shadow hover:bg-white transition-colors"
+                            >
+                                Fullscreen
+                            </button>
+                        </div>
+                    </div>
+
+                    @if($photoCount > 1)
+                    {{-- Right: up to 4 images in 2×2 --}}
+                    <div class="grid grid-cols-2 grid-rows-2 gap-2 min-h-[140px] sm:min-h-[180px] lg:min-h-0 lg:h-full lg:self-stretch">
+                        @foreach([0, 1, 2, 3] as $slot)
+                            @php $idx = $rightIndices[$slot] ?? null; @endphp
+                            @if($idx !== null)
+                                <button
+                                    type="button"
+                                    wire:click="setGalleryIndex({{ $idx }})"
+                                    class="relative aspect-[4/3] lg:aspect-auto lg:min-h-0 lg:h-full min-h-0 rounded-lg overflow-hidden ring-2 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2 {{ $galleryIndex === $idx ? 'ring-green-600 shadow-md' : 'ring-transparent hover:ring-gray-300' }}"
+                                    aria-label="Show photo {{ $idx + 1 }}"
+                                >
+                                    <img
+                                        src="{{ asset('storage/' . $allImages[$idx]) }}"
+                                        alt=""
+                                        class="w-full h-full object-cover"
+                                        loading="lazy"
+                                        decoding="async"
+                                    >
+                                </button>
+                            @else
+                                <div class="relative aspect-[4/3] lg:aspect-auto lg:min-h-0 lg:h-full min-h-0 rounded-lg bg-gray-100 border border-dashed border-gray-200 flex items-center justify-center" aria-hidden="true">
+                                    <svg class="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                    </svg>
+                                </div>
                             @endif
-                        </div>
-                    @endforeach
-                @else
-                    {{-- Placeholder if no images --}}
-                    <div class="md:col-span-2 md:row-span-2 relative aspect-[16/10] bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
-                        <div class="text-center text-gray-400">
-                            <svg class="w-20 h-20 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                            </svg>
-                            <p class="text-lg font-medium">No images available</p>
+                        @endforeach
+                    </div>
+                    @endif
+                </div>
+
+                {{-- Bottom: scrollable thumbnail strip (all photos) --}}
+                @if($photoCount > 1)
+                    <div class="mt-3 border-t border-gray-100 pt-3">
+                        <p class="text-xs text-gray-500 mb-2 px-0.5">All photos — tap to view</p>
+                        <div class="relative">
+                            <div
+                                class="flex gap-2 overflow-x-auto scroll-smooth pb-1 snap-x snap-mandatory [-webkit-overflow-scrolling:touch]"
+                                style="scrollbar-width: thin;"
+                                role="list"
+                            >
+                                @foreach($allImages as $i => $imgPath)
+                                    <button
+                                        type="button"
+                                        wire:click="setGalleryIndex({{ $i }})"
+                                        class="snap-start shrink-0 w-[4.5rem] sm:w-24 aspect-[4/3] rounded-lg overflow-hidden ring-2 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 {{ $galleryIndex === $i ? 'ring-green-600 opacity-100 shadow' : 'ring-transparent opacity-80 hover:opacity-100 hover:ring-gray-300' }}"
+                                        aria-label="Photo {{ $i + 1 }}"
+                                        aria-current="{{ $galleryIndex === $i ? 'true' : 'false' }}"
+                                    >
+                                        <img
+                                            src="{{ asset('storage/' . $imgPath) }}"
+                                            alt=""
+                                            class="w-full h-full object-cover"
+                                            loading="lazy"
+                                            decoding="async"
+                                        >
+                                    </button>
+                                @endforeach
+                            </div>
                         </div>
                     </div>
-                    @for($i = 0; $i < 6; $i++)
-                    <div class="relative aspect-[4/3] bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
-                        <svg class="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                        </svg>
-                    </div>
-                    @endfor
                 @endif
-            </div>
+            @else
+                <div class="relative aspect-[16/10] bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
+                    <div class="text-center text-gray-400 px-4">
+                        <svg class="w-16 h-16 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                        <p class="text-base font-medium">No images available</p>
+                    </div>
+                </div>
+            @endif
         </div>
 
         {{-- Content with Sidebar --}}
