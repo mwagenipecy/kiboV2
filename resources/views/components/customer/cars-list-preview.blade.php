@@ -29,7 +29,7 @@
                 ];
                 $symbol = $currencySymbols[$vehicle->currency] ?? $vehicle->currency;
             @endphp
-            <a href="{{ route('cars.detail', $vehicle->id) }}" class="group bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-lg transition-shadow duration-300 block">
+            <a href="{{ route('cars.detail', $vehicle->public_id) }}" class="group bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-lg transition-shadow duration-300 block">
                 <div class="relative aspect-[4/3] bg-gray-100">
                     @if($mainImage)
                         <img

@@ -106,8 +106,10 @@ Route::prefix('cars')->name('cars.')->group(function () {
         return view('cars.buy-online', ['vehicleType' => 'cars']);
     })->name('buy-online');
 
-    // Dynamic route comes last
-    Route::get('/{id}', \App\Livewire\Customer\VehicleDetail::class)->name('detail');
+    // Dynamic route comes last (public ULID, not numeric id)
+    Route::get('/{publicId}', \App\Livewire\Customer\VehicleDetail::class)
+        ->whereUlid('publicId')
+        ->name('detail');
 });
 
 // ============================================

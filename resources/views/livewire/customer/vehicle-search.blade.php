@@ -461,12 +461,12 @@
                 <div class="relative aspect-[4/3] bg-gray-100 group overflow-hidden rounded-t-lg" data-carousel="vehicle-{{ $vehicle->id }}">
                     @if($imageCount > 0)
                         @foreach($allImages as $index => $image)
-                        <a href="{{ route('cars.detail', $vehicle->id) }}" class="carousel-image absolute inset-0 {{ $index === 0 ? '' : 'hidden' }}" data-index="{{ $index }}">
+                        <a href="{{ route('cars.detail', $vehicle->public_id) }}" class="carousel-image absolute inset-0 {{ $index === 0 ? '' : 'hidden' }}" data-index="{{ $index }}">
                             <img src="{{ asset('storage/' . $image) }}" alt="{{ $vehicle->full_name }}" class="w-full h-full object-cover">
                         </a>
                         @endforeach
                     @else
-                        <a href="{{ route('cars.detail', $vehicle->id) }}" class="absolute inset-0">
+                        <a href="{{ route('cars.detail', $vehicle->public_id) }}" class="absolute inset-0">
                             <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-200 to-gray-300">
                                 <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
@@ -526,7 +526,7 @@
                 </div>
 
                 {{-- Content --}}
-                <a href="{{ route('cars.detail', $vehicle->id) }}" class="p-4 flex flex-col flex-grow">
+                <a href="{{ route('cars.detail', $vehicle->public_id) }}" class="p-4 flex flex-col flex-grow">
                     <h3 class="text-base font-bold text-gray-900 mb-1">{{ $vehicle->make->name ?? '' }} {{ $vehicle->model->name ?? '' }}</h3>
                     <p class="text-sm text-gray-700 mb-1 line-clamp-2">{{ $vehicle->variant }}</p>
                     <p class="text-xs text-gray-600 mb-3">{{ $vehicle->year }} • {{ number_format($vehicle->mileage) }} km</p>

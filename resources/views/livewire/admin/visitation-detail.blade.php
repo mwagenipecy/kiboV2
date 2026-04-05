@@ -23,7 +23,7 @@
                 <div>
                     <dt class="font-medium text-gray-700">Vehicle</dt>
                     <dd class="text-gray-900">
-                        <a href="{{ route('cars.detail', $visitation->vehicle_id) }}" target="_blank" class="text-green-600 hover:text-green-800">{{ $visitation->vehicle->make?->name }} {{ $visitation->vehicle->model?->name }} ({{ $visitation->vehicle->year }})</a>
+                        <a href="{{ route('cars.detail', $visitation->vehicle->public_id) }}" target="_blank" class="text-green-600 hover:text-green-800">{{ $visitation->vehicle->make?->name }} {{ $visitation->vehicle->model?->name }} ({{ $visitation->vehicle->year }})</a>
                     </dd>
                 </div>
                 <div>

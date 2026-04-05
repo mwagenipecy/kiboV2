@@ -1,3 +1,10 @@
+@php
+    $shareListingUrl = route('cars.detail', $vehicle->public_id, absolute: true);
+    $shareListingTitle = collect([$vehicle->make?->name, $vehicle->model?->name])->filter()->implode(' ');
+    if ($shareListingTitle === '') {
+        $shareListingTitle = config('app.name', 'KiboAuto');
+    }
+@endphp
 <div class="min-h-screen bg-gray-50">
     <style>
         .kibo-text { color: #009866 !important; }
@@ -19,8 +26,14 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
                     </svg>
                 </button>
-                <button class="w-10 h-10 flex items-center justify-center hover:bg-gray-100 rounded-full transition-colors">
-                    <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <button
+                    type="button"
+                    class="w-10 h-10 flex items-center justify-center hover:bg-gray-100 rounded-full transition-colors"
+                    title="Share listing"
+                    aria-label="Share listing"
+                    onclick="window.kiboShareVehicle(@js($shareListingUrl), @js($shareListingTitle))"
+                >
+                    <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
                     </svg>
                 </button>
@@ -988,3 +1001,43 @@
     {{-- Report Modal --}}
     @livewire('customer.report-modal', ['section' => 'vehicle', 'reportableId' => $vehicle->id, 'reportableType' => 'App\Models\Vehicle'], key('report-modal-'.$vehicle->id))
 </div>
+
+@script
+<script>
+    window.kiboShareVehicle = window.kiboShareVehicle || async function (url, title) {
+        const safeTitle = title || 'KiboAuto';
+        const text = safeTitle ? `${safeTitle} · KiboAuto` : url;
+
+        const showToast = (message) => {
+            const existing = document.getElementById('kibo-share-toast');
+            if (existing) {
+                existing.remove();
+            }
+            const el = document.createElement('div');
+            el.id = 'kibo-share-toast';
+            el.setAttribute('role', 'status');
+            el.className = 'fixed bottom-6 left-1/2 z-[100] -translate-x-1/2 rounded-lg bg-gray-900 px-4 py-3 text-sm text-white shadow-lg';
+            el.textContent = message;
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 2800);
+        };
+
+        try {
+            if (navigator.share) {
+                await navigator.share({ title: safeTitle, text, url });
+                return;
+            }
+        } catch (e) {
+            if (e && e.name === 'AbortError') {
+                return;
+            }
+        }
+        try {
+            await navigator.clipboard.writeText(url);
+            showToast('Link copied to clipboard');
+        } catch {
+            window.prompt('Copy this link:', url);
+        }
+    };
+</script>
+@endscript

@@ -43,15 +43,17 @@ class VehicleDetail extends Component
 
     public $visitationSubmitted = false;
 
-    public function mount($id)
+    public function mount(string $publicId)
     {
-        $this->vehicleId = $id;
         $this->vehicle = Vehicle::with(['make', 'model', 'entity', 'country'])
-            ->findOrFail($id);
+            ->where('public_id', $publicId)
+            ->firstOrFail();
 
-        // Check if vehicle is saved
+        $this->vehicleId = $this->vehicle->id;
+
+        // Check if vehicle is saved (session stores numeric ids)
         $savedVehicles = session()->get('saved_vehicles', []);
-        $this->isSaved = in_array($id, $savedVehicles);
+        $this->isSaved = in_array($this->vehicleId, $savedVehicles);
 
         // Prepare all images for gallery
         $this->allImages = [];
