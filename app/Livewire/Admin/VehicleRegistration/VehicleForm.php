@@ -104,6 +104,9 @@ class VehicleForm extends Component
 
     public $new_other_images = [];
 
+    /** Bumped after each gallery batch so the file input is remounted (pick more images without JS hacks). */
+    public int $otherImagesInputKey = 0;
+
     /** Stored paths when editing (for preview + gallery merge on save). */
     public ?string $existingImageFront = null;
 
@@ -405,14 +408,15 @@ class VehicleForm extends Component
             ->all();
     }
 
-    public function updatedNewOtherImages()
+    public function updatedNewOtherImages(): void
     {
-        if (! empty($this->new_other_images)) {
-            // Merge new images with existing ones
-            $this->other_images = array_merge($this->other_images, $this->new_other_images);
-            // Clear the new images input
-            $this->new_other_images = [];
+        if (empty($this->new_other_images)) {
+            return;
         }
+
+        $this->other_images = array_merge($this->other_images, $this->new_other_images);
+        $this->new_other_images = [];
+        $this->otherImagesInputKey++;
     }
 
     public function removeOtherImage($index)
