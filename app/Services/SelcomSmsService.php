@@ -17,12 +17,13 @@ class SelcomSmsService
 
         if (empty($baseUrl) || empty($username) || empty($password) || empty($normalized)) {
             Log::error('Selcom SMS configuration/number invalid', [
-                'base_url_set' => !empty($baseUrl),
-                'username_set' => !empty($username),
-                'password_set' => !empty($password),
+                'base_url_set' => ! empty($baseUrl),
+                'username_set' => ! empty($username),
+                'password_set' => ! empty($password),
                 'phone_raw' => $phoneNumber,
                 'normalized' => $normalized,
             ]);
+
             return false;
         }
 
@@ -30,19 +31,20 @@ class SelcomSmsService
             $response = Http::withoutVerifying()
                 ->connectTimeout(5)
                 ->timeout(10)
-                ->get($baseUrl . '/bin/send.json', [
+                ->get($baseUrl.'/bin/send.json', [
                     'USERNAME' => $username,
                     'PASSWORD' => $password,
                     'DESTADDR' => $normalized,
                     'MESSAGE' => $message,
                 ]);
 
-            if (!$response->successful()) {
+            if (! $response->successful()) {
                 Log::error('Selcom SMS HTTP error', [
                     'to' => $normalized,
                     'http_status' => $response->status(),
                     'body' => $response->body(),
                 ]);
+
                 return false;
             }
 
@@ -69,6 +71,7 @@ class SelcomSmsService
                     'msgid' => $first['msgid'] ?? null,
                     'balance' => $data['balance'] ?? null,
                 ]);
+
                 return true;
             }
 
@@ -88,10 +91,10 @@ class SelcomSmsService
         return false;
     }
 
-    private function normalizeTanzaniaNumber(string $phoneNumber): string
+    public function normalizeTanzaniaNumber(string $phoneNumber): string
     {
         $digits = preg_replace('/\D+/', '', $phoneNumber);
-        if (!$digits) {
+        if (! $digits) {
             return '';
         }
 
@@ -111,15 +114,15 @@ class SelcomSmsService
         // Handle 0XXXXXXXXX (10 digits total)
         if (str_starts_with($digits, '0')) {
             $local = substr($digits, 1);
-            return strlen($local) === 9 ? '255' . $local : '';
+
+            return strlen($local) === 9 ? '255'.$local : '';
         }
 
         // Handle 9-digit local numbers (e.g. 758238772)
         if (strlen($digits) === 9) {
-            return '255' . $digits;
+            return '255'.$digits;
         }
 
         return '';
     }
 }
-
