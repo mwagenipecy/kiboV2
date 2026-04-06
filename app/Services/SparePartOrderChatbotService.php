@@ -69,7 +69,7 @@ class SparePartOrderChatbotService
         $lower = strtolower($trimmed);
         $locale = $conversation->language === 'sw' ? 'sw' : 'en';
 
-        if (in_array($lower, ['back', 'cancel', 'rudi', 'ghairi', 'menu'])) {
+        if (in_array($lower, ['back', 'cancel', 'rudi', 'ghairi', 'menu']) || $this->isMainMenuZeroShortcut($lower)) {
             $conversation->setContext('sparepart_substep', null);
             $conversation->updateStep('main_menu');
 
@@ -117,6 +117,15 @@ class SparePartOrderChatbotService
         $trimmed = trim($message);
         $lower = strtolower($trimmed);
         $locale = $conversation->language === 'sw' ? 'sw' : 'en';
+
+        if ($this->isMainMenuZeroShortcut($lower) || in_array($lower, ['menu'])) {
+            $conversation->setContext('sparepart_substep', null);
+            $conversation->setContext('sparepart_otp', null);
+            $conversation->setContext('sparepart_otp_expires_at', null);
+            $conversation->updateStep('main_menu');
+
+            return $this->getMainMenuMessage($conversation);
+        }
 
         if (in_array($lower, ['back', 'cancel', 'rudi', 'ghairi'])) {
             $conversation->setContext('sparepart_substep', 'same_whatsapp_phone_question');
@@ -184,6 +193,16 @@ class SparePartOrderChatbotService
         // Check for resend request
         if (in_array($message, ['resend', 'send again', 'tuma tena', 'tuma upya', 'retry'])) {
             return $this->resendOtp($conversation);
+        }
+
+        // Main menu shortcut (0) — do not confuse with 4-digit OTP
+        if ($this->isMainMenuZeroShortcut($message) || $message === 'menu') {
+            $conversation->setContext('sparepart_otp', null);
+            $conversation->setContext('sparepart_otp_expires_at', null);
+            $conversation->setContext('sparepart_substep', null);
+            $conversation->updateStep('main_menu');
+
+            return $this->getMainMenuMessage($conversation);
         }
 
         // Check for back/cancel
@@ -895,6 +914,13 @@ class SparePartOrderChatbotService
         ]));
 
         return User::whereIn('phone_number', $variants)->first();
+    }
+
+    protected function isMainMenuZeroShortcut(string $lowerOrMessage): bool
+    {
+        $t = strtolower(trim($lowerOrMessage));
+
+        return in_array($t, ['0', '0.', '00', '00.'], true);
     }
 
     protected function clearCurrentOrderContext(ChatbotConversation $conversation): void

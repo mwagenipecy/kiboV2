@@ -35,8 +35,9 @@ class WhatsAppChatbotService
 
         $trimLower = strtolower(trim($message));
         $skipTerminateForNav = $conversation && (
-            ($conversation->current_step === 'track_order_input' && in_array($trimLower, ['0', 'back', 'menu', 'rudi', 'orodha', 'cancel', 'ghairi'], true))
-            || ($conversation->current_step === 'kibo_services_menu' && in_array($trimLower, ['0', 'back', 'menu', 'rudi', 'orodha'], true))
+            ($conversation->current_step === 'track_order_input' && ($this->isNumericMainMenuShortcut($message) || in_array($trimLower, ['back', 'menu', 'rudi', 'orodha', 'cancel', 'ghairi'], true)))
+            || ($conversation->current_step === 'kibo_services_menu' && ($this->isNumericMainMenuShortcut($message) || in_array($trimLower, ['back', 'menu', 'rudi', 'orodha'], true)))
+            || ($conversation->current_step === 'service_selected' && ($this->isNumericMainMenuShortcut($message) || in_array($trimLower, ['back', 'menu', 'rudi', 'orodha'], true)))
         );
 
         // If user is in OTP verification and types resend, skip termination check
@@ -626,7 +627,7 @@ class WhatsAppChatbotService
         $trimmed = trim($message);
         $lower = strtolower($trimmed);
 
-        if ($trimmed === '0' || in_array($lower, ['back', 'menu', 'rudi', 'orodha'])) {
+        if ($this->isNumericMainMenuShortcut($message) || in_array($lower, ['back', 'menu', 'rudi', 'orodha'])) {
             $conversation->updateStep('main_menu');
 
             return $this->getMainMenu();
@@ -668,7 +669,7 @@ class WhatsAppChatbotService
         $trimmed = trim($message);
         $lower = strtolower($trimmed);
 
-        if ($trimmed === '0' || in_array($lower, ['back', 'menu', 'rudi', 'orodha', 'cancel', 'ghairi'])) {
+        if ($this->isNumericMainMenuShortcut($message) || in_array($lower, ['back', 'menu', 'rudi', 'orodha', 'cancel', 'ghairi'])) {
             $conversation->updateStep('main_menu');
 
             return $this->getMainMenu();
@@ -777,24 +778,46 @@ class WhatsAppChatbotService
     }
 
     /**
+     * True when user sends 0 (or 00 / 0.) to return to main menu. Must not match 4-digit OTPs like 0000.
+     */
+    protected function isNumericMainMenuShortcut(string $message): bool
+    {
+        $t = strtolower(trim($message));
+
+        return in_array($t, ['0', '0.', '00', '00.'], true);
+    }
+
+    /**
+     * Leave service_selected: main menu, or Kibo submenu if user opened service from there.
+     */
+    protected function goBackFromServiceToMenus(ChatbotConversation $conversation): string
+    {
+        $conversation->setContext('sparepart_substep', null);
+        $conversation->setContext('cars_substep', null);
+
+        if ($conversation->getContext('from_kibo_submenu')) {
+            $conversation->setContext('from_kibo_submenu', false);
+            $conversation->updateStep('kibo_services_menu', ['previous_step' => 'service_selected']);
+
+            return $this->getKiboServicesMenuMessage();
+        }
+
+        $conversation->updateStep('main_menu', ['previous_step' => 'service_selected']);
+
+        return $this->getMainMenu();
+    }
+
+    /**
      * Handle service selected
      */
     protected function handleServiceSelected(ChatbotConversation $conversation, string $message): ?string
     {
-        $message = strtolower(trim($message));
+        $rawTrimmed = trim($message);
+        $message = strtolower($rawTrimmed);
 
-        // Check for back to menu (or Kibo submenu if user came from there)
-        if (in_array($message, ['back', 'menu', 'rudi', 'orodha'])) {
-            $conversation->setContext('sparepart_substep', null);
-            if ($conversation->getContext('from_kibo_submenu')) {
-                $conversation->setContext('from_kibo_submenu', false);
-                $conversation->updateStep('kibo_services_menu', ['previous_step' => 'service_selected']);
-
-                return $this->getKiboServicesMenuMessage();
-            }
-            $conversation->updateStep('main_menu', ['previous_step' => 'service_selected']);
-
-            return $this->getMainMenu();
+        // Check for back to menu (or Kibo submenu if user came from there). Include 0 = main menu (not language reset).
+        if ($this->isNumericMainMenuShortcut($rawTrimmed) || in_array($message, ['back', 'menu', 'rudi', 'orodha'])) {
+            return $this->goBackFromServiceToMenus($conversation);
         }
 
         // Check for reset/start over
@@ -876,6 +899,12 @@ class WhatsAppChatbotService
      */
     protected function handleCarsFlow(ChatbotConversation $conversation, string $message): ?string
     {
+        $rawTrimmed = trim($message);
+        $lower = strtolower($rawTrimmed);
+        if ($this->isNumericMainMenuShortcut($rawTrimmed) || in_array($lower, ['back', 'menu', 'rudi', 'orodha'])) {
+            return $this->goBackFromServiceToMenus($conversation);
+        }
+
         $subStep = $conversation->getContext('cars_substep', 'menu');
 
         return match ($subStep) {
