@@ -56,8 +56,8 @@ class SparePartOrderChatbotService
         $display = $this->formatPhoneForDisplay($this->normalizedConversationPhone($conversation));
 
         return $locale === 'sw'
-            ? "Karibu! Ili kuendelea na agizo la sehemu za ziada, je nambari ya simu ya mawasiliano na utoaji ni *hiyo hiyo* na nambari ya WhatsApp unayotumia sasa ({$display})?\n\nJibu *NDIYO* au *HAPANA*.\n\nAu andika 'rudi' kurudi menyu kuu."
-            : "Welcome! To continue your spare part order, is your *contact and delivery phone number the same* as this WhatsApp number ({$display})?\n\nReply *YES* or *NO*.\n\nOr type 'back' to return to the main menu.";
+            ? "Karibu! Ili kuendelea na agizo la sehemu za ziada, je nambari ya simu ya mawasiliano na utoaji ni *hiyo hiyo* na nambari ya WhatsApp unayotumia sasa ({$display})?\n\nJibu *NDIYO* au *HAPANA*.\n\nAu jibu *99*, *menu*, au *rudi* kurudi menyu kuu."
+            : "Welcome! To continue your spare part order, is your *contact and delivery phone number the same* as this WhatsApp number ({$display})?\n\nReply *YES* or *NO*.\n\nOr reply *99*, *menu*, or *back* to return to the main menu.";
     }
 
     /**
@@ -69,7 +69,7 @@ class SparePartOrderChatbotService
         $lower = strtolower($trimmed);
         $locale = $conversation->language === 'sw' ? 'sw' : 'en';
 
-        if (in_array($lower, ['back', 'cancel', 'rudi', 'ghairi', 'menu']) || $this->isMainMenuZeroShortcut($lower)) {
+        if (in_array($lower, ['back', 'cancel', 'rudi', 'ghairi', 'menu']) || $this->isBackToMainMenuCommand($trimmed)) {
             $conversation->setContext('sparepart_substep', null);
             $conversation->updateStep('main_menu');
 
@@ -83,8 +83,8 @@ class SparePartOrderChatbotService
 
         if (! $yes && ! $no) {
             return $locale === 'sw'
-                ? "Tafadhali jibu *NDIYO* ikiwa nambari ni ile ile, au *HAPANA* ikiwa ni nambari tofauti.\n\nAu andika 'rudi' kurudi menyu kuu."
-                : "Please reply *YES* if it is the same number, or *NO* if you use a different contact number.\n\nOr type 'back' to return to the main menu.";
+                ? "Tafadhali jibu *NDIYO* ikiwa nambari ni ile ile, au *HAPANA* ikiwa ni nambari tofauti.\n\nAu jibu *99*, *menu*, au *rudi* kurudi menyu kuu."
+                : "Please reply *YES* if it is the same number, or *NO* if you use a different contact number.\n\nOr reply *99*, *menu*, or *back* to return to the main menu.";
         }
 
         if ($yes) {
@@ -118,7 +118,7 @@ class SparePartOrderChatbotService
         $lower = strtolower($trimmed);
         $locale = $conversation->language === 'sw' ? 'sw' : 'en';
 
-        if ($this->isMainMenuZeroShortcut($lower) || in_array($lower, ['menu'])) {
+        if ($this->isBackToMainMenuCommand($trimmed) || in_array($lower, ['menu'])) {
             $conversation->setContext('sparepart_substep', null);
             $conversation->setContext('sparepart_otp', null);
             $conversation->setContext('sparepart_otp_expires_at', null);
@@ -195,8 +195,8 @@ class SparePartOrderChatbotService
             return $this->resendOtp($conversation);
         }
 
-        // Main menu shortcut (0) — do not confuse with 4-digit OTP
-        if ($this->isMainMenuZeroShortcut($message) || $message === 'menu') {
+        // Main menu shortcut 99 — never matches a 4-digit OTP
+        if ($this->isBackToMainMenuCommand($message) || $message === 'menu') {
             $conversation->setContext('sparepart_otp', null);
             $conversation->setContext('sparepart_otp_expires_at', null);
             $conversation->setContext('sparepart_substep', null);
@@ -916,11 +916,11 @@ class SparePartOrderChatbotService
         return User::whereIn('phone_number', $variants)->first();
     }
 
-    protected function isMainMenuZeroShortcut(string $lowerOrMessage): bool
+    protected function isBackToMainMenuCommand(string $message): bool
     {
-        $t = strtolower(trim($lowerOrMessage));
+        $normalized = preg_replace('/\s+/', '', strtolower(trim($message)));
 
-        return in_array($t, ['0', '0.', '00', '00.'], true);
+        return $normalized === '99';
     }
 
     protected function clearCurrentOrderContext(ChatbotConversation $conversation): void

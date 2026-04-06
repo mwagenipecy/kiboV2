@@ -4,6 +4,8 @@ return [
     'welcome' => '👋 Karibu Kibo Auto! 🚗',
     'select_language' => 'Tafadhali chagua lugha unayopendelea:',
     'reply_with_number' => 'Tafadhali jibu kwa nambari ya chaguo lako.',
+
+    'submenu_back_hint' => 'Jibu *99* au *menu* kwa menyu kuu.',
     'invalid_selection' => '❌ Chaguo si sahihi. Tafadhali jaribu tena.',
     'wrong_language_selection' => 'Chaguo si sahihi. Tafadhali chagua 1 kwa Kiingereza au 2 kwa Kiswahili.',
     'start_over' => 'Anza upya',
@@ -14,7 +16,9 @@ return [
         'kibo_services' => '🏢 Huduma za Kibo (magari, malori, ukodishaji na zingine)',
     ],
 
-    'service_help' => '💡 *Unahitaji msaada zaidi?* Jibu kwa "rudi" kurudi kwenye menyu kuu, "anza" au "anza upya" kuanza tena.',
+    'main_menu_zero_hint' => '*0* hapa = anza upya (chagua lugha tena). Kwenye skrini nyingine, jibu *99* kurudi menyu hii.',
+
+    'service_help' => '💡 *Unahitaji msaada zaidi?* Jibu *99* au "rudi" / "menu" kurudi menyu kuu, "anza" au "anza upya" kuanza tena.',
     'termination_keywords' => 'Unaweza kuanza upya wakati wowote kwa kuandika: anza, anza upya, rudi, au menyu',
     'visit_website' => '🌐 Tembelea tovuti yetu',
 
@@ -52,12 +56,12 @@ return [
 
     'kibo_submenu' => [
         'title' => '🏢 *Huduma za Kibo* — chagua mada',
-        'back' => '← Rudi menyu kuu',
+        'back' => '← Menyu kuu',
     ],
 
     'tracking' => [
-        'prompt' => 'Ingiza *nambari ya agizo* (mfano SPO-20260404-9E2D2A), bandika *kiungo cha ufuatiliaji* kutoka SMS, au *msimbo wa herufi 40*.',
-        'prompt_again' => 'Tuma nambari nyingine kufuatilia, au *0* / *menu* kurudi menyu kuu.',
+        'prompt' => 'Ingiza *nambari ya agizo* (mfano SPO-20260404-9E2D2A), bandika *kiungo cha ufuatiliaji* kutoka SMS, au *msimbo wa herufi 40*.'."\n\n".'Jibu *99* au *menu* kurudi menyu kuu.',
+        'prompt_again' => 'Tuma nambari nyingine kufuatilia, au jibu *99* / *menu* kurudi menyu kuu.',
         'not_found' => 'Hatukuipata agizo kwa kumbukumbu hiyo. Angalia muundo na jaribu tena.',
         'summary_title' => 'Hali ya agizo',
         'label_order' => 'Agizo:',

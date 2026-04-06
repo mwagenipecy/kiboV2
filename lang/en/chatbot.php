@@ -4,6 +4,8 @@ return [
     'welcome' => '👋 Welcome to Kibo Auto! 🚗',
     'select_language' => 'Please select your preferred language:',
     'reply_with_number' => 'Please reply with the number of your choice.',
+
+    'submenu_back_hint' => 'Reply *99* or *menu* for the main menu.',
     'invalid_selection' => '❌ Invalid selection. Please try again.',
     'wrong_language_selection' => 'Wrong selection. Please choose 1 for English or 2 for Swahili.',
     'start_over' => 'Start over',
@@ -14,7 +16,9 @@ return [
         'kibo_services' => '🏢 Kibo services (cars, trucks, leasing & more)',
     ],
 
-    'service_help' => '💡 *Need more help?* Reply with "back" to return to the main menu, "reset" or "start" to begin again.',
+    'main_menu_zero_hint' => '*0* here = start over (pick language again). From other screens, reply *99* to come back to this menu.',
+
+    'service_help' => '💡 *Need more help?* Reply *99* or "back" / "menu" to return to the main menu, "reset" or "start" to begin again.',
     'termination_keywords' => 'You can reset the session anytime by typing: reset, restart, new, start over, or menu',
     'visit_website' => '🌐 Visit our website',
 
@@ -52,12 +56,12 @@ return [
 
     'kibo_submenu' => [
         'title' => '🏢 *Kibo services* — choose a topic',
-        'back' => '← Back to main menu',
+        'back' => '← Main menu',
     ],
 
     'tracking' => [
-        'prompt' => 'Enter your *order number* (e.g. SPO-20260404-9E2D2A), paste the *tracking link* from SMS, or the *40-character code*.',
-        'prompt_again' => 'Send another number to track, or *0* / *menu* to return to the main menu.',
+        'prompt' => 'Enter your *order number* (e.g. SPO-20260404-9E2D2A), paste the *tracking link* from SMS, or the *40-character code*.'."\n\n".'Reply *99* or *menu* to return to the main menu.',
+        'prompt_again' => 'Send another number to track, or reply *99* / *menu* to return to the main menu.',
         'not_found' => 'We could not find an order with that reference. Check the format and try again.',
         'summary_title' => 'Order status',
         'label_order' => 'Order:',
