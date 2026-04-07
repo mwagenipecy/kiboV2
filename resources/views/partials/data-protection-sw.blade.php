@@ -15,8 +15,8 @@
         <li>Savanna Hills Limited</li>
         <li>Jina la biashara: KiboAuto Marketplace</li>
         <li>Tovuti: https://kiboauto.co.tz</li>
-        <li>Anwani ya Usajili: [Weka Anwani ya Usajili]</li>
-        <li>Anwani ya Biashara: Sinza kwa remi</li>
+        <li><strong>Tawi:</strong> Sinza Mori, karibu na Kitambaa Cheupe</li>
+        <li><strong>Makao makuu :</strong> Tan House, ghorofa ya 9</li>
         <li>Barua pepe: info@kiboauto.co.tz</li>
         <li>Simu: [Weka Namba ya Simu]</li>
     </ul>

@@ -491,7 +491,7 @@ class VehicleForm extends Component
         }
 
         $entity = $this->entity_id ? Entity::with('pricingPlan')->find($this->entity_id) : null;
-        if ($entity && ! $this->editMode) {
+        if ($entity && ! $this->editMode && $userRole !== 'admin') {
             if (! $entity->canAddVehicle()) {
                 $max = $entity->max_allowed_cars;
                 $current = $entity->vehiclesCountExcludingSold();

@@ -11,22 +11,42 @@ class PricingManagement extends Component
     use WithPagination;
 
     public $showModal = false;
+
     public $editingId = null;
+
     public $name = '';
+
     public $category = 'cars';
+
     public $description = '';
+
     public $price = '';
+
     public $currency = 'GBP';
+
     public $durationDays = '';
+
     public $features = [];
+
     public $newFeature = '';
+
     public $isFeatured = false;
+
     public $isPopular = false;
+
     public $isActive = true;
+
     public $sortOrder = 0;
+
     public $maxListings = '';
+
     public $maxTrucks = '';
+
     public $maxLeases = '';
+
+    public $slug = '';
+
+    public $isFreeTier = false;
 
     protected $rules = [
         'name' => 'required|string|max:255',
@@ -42,6 +62,8 @@ class PricingManagement extends Component
         'isPopular' => 'boolean',
         'isActive' => 'boolean',
         'sortOrder' => 'integer|min:0',
+        'slug' => 'nullable|string|max:100',
+        'isFreeTier' => 'boolean',
     ];
 
     public function mount()
@@ -64,6 +86,8 @@ class PricingManagement extends Component
             $this->maxListings = $plan->max_listings !== null ? (string) $plan->max_listings : '';
             $this->maxTrucks = $plan->max_trucks !== null ? (string) $plan->max_trucks : '';
             $this->maxLeases = $plan->max_leases !== null ? (string) $plan->max_leases : '';
+            $this->slug = $plan->slug ?? '';
+            $this->isFreeTier = (bool) $plan->is_free_tier;
             $this->features = $plan->features ?? [];
             $this->isFeatured = $plan->is_featured;
             $this->isPopular = $plan->is_popular;
@@ -91,6 +115,8 @@ class PricingManagement extends Component
         $this->maxListings = '';
         $this->maxTrucks = '';
         $this->maxLeases = '';
+        $this->slug = '';
+        $this->isFreeTier = false;
         $this->features = [];
         $this->newFeature = '';
         $this->isFeatured = false;
@@ -101,7 +127,7 @@ class PricingManagement extends Component
 
     public function addFeature()
     {
-        if (!empty($this->newFeature)) {
+        if (! empty($this->newFeature)) {
             $this->features[] = $this->newFeature;
             $this->newFeature = '';
         }
@@ -132,6 +158,8 @@ class PricingManagement extends Component
             'is_popular' => $this->isPopular,
             'is_active' => $this->isActive,
             'sort_order' => $this->sortOrder,
+            'slug' => $this->slug !== '' ? $this->slug : null,
+            'is_free_tier' => $this->isFreeTier,
         ];
 
         if ($this->editingId) {
@@ -147,14 +175,20 @@ class PricingManagement extends Component
 
     public function delete($id)
     {
-        PricingPlan::findOrFail($id)->delete();
+        $plan = PricingPlan::findOrFail($id);
+        if ($plan->is_free_tier) {
+            session()->flash('message', 'The free tier plan cannot be deleted.');
+
+            return;
+        }
+        $plan->delete();
         session()->flash('message', 'Pricing plan deleted successfully!');
     }
 
     public function toggleActive($id)
     {
         $plan = PricingPlan::findOrFail($id);
-        $plan->update(['is_active' => !$plan->is_active]);
+        $plan->update(['is_active' => ! $plan->is_active]);
         session()->flash('message', 'Pricing plan status updated!');
     }
 

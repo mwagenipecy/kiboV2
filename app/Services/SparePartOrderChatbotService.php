@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Jobs\SendOtpSms;
 use App\Jobs\SendSparePartOrderConfirmationEmail;
 use App\Models\ChatbotConversation;
 use App\Models\SparePartOrder;
@@ -295,16 +294,15 @@ class SparePartOrderChatbotService
         $conversation->setContext('sparepart_otp', $otpCode);
         $conversation->setContext('sparepart_otp_expires_at', now()->addMinutes(10)->toDateTimeString());
 
-        try {
-            SendOtpSms::dispatchSync($phoneNumber, $otpCode);
-        } catch (\Exception $e) {
-            Log::error('Failed to dispatch sparepart OTP SMS: '.$e->getMessage(), [
-                'phone' => $phoneNumber,
-            ]);
+        $sent = app(SelcomSmsService::class)->sendOtp($phoneNumber, $otpCode);
+        if (! $sent) {
+            $conversation->setContext('sparepart_otp', null);
+            $conversation->setContext('sparepart_otp_expires_at', null);
+            Log::error('Spare part chatbot OTP SMS failed', ['phone' => $phoneNumber]);
 
             return $locale === 'sw'
-                ? 'Kumekuwa na hitilafu katika kutuma nambari ya uthibitisho. Tafadhali jaribu tena baadaye.'
-                : 'There was an error sending the verification code. Please try again later.';
+                ? 'Kumekuwa na hitilafu katika kutuma nambari ya uthibitisho kwa SMS. Tafadhali jaribu tena baadaye.'
+                : 'We could not send the verification code by SMS. Please try again later.';
         }
 
         $conversation->setContext('sparepart_substep', 'otp_verification');

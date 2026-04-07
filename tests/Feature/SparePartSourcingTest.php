@@ -23,7 +23,7 @@ it('submits spare part request and creates orders', function () {
         ->set('customerPhone', '0712345678')
         ->set('vehicleMakeId', (string) $make->id)
         ->set('vehicleModelId', (string) $model->id)
-        ->set('deliveryAddress', 'Sinza kwa Remi, Tan House')
+        ->set('deliveryAddress', 'Sinza Mori, Near Kitambaa Cheupe')
         ->set('deliveryCity', 'Dar es Salaam')
         ->set('orderItemIds', [1, 2])
         ->set('partNames', ['Brake pads', 'Oil filter'])

@@ -7,6 +7,20 @@ use Illuminate\Support\Facades\Log;
 
 class SelcomSmsService
 {
+    /**
+     * Login / guest verification OTP — same copy as used across the app (direct API, no queue).
+     */
+    public function sendOtp(string $phoneNumber, string $otpCode): bool
+    {
+        $body = "Your Kibo Auto OTP code is {$otpCode}. It expires in 5 minutes.";
+
+        return $this->send($phoneNumber, $body);
+    }
+
+    /**
+     * Selcom expects GET /bin/send.json?USERNAME=…&PASSWORD=…&DESTADDR=…&MESSAGE=…
+     * DESTADDR must be 12 digits: 255 + 9-digit national (no leading 0), e.g. 255767582837.
+     */
     public function send(string $phoneNumber, string $message): bool
     {
         $baseUrl = rtrim((string) (config('services.selcom_sms.base_url') ?: 'https://gw.selcommobile.com:8443'), '/');
@@ -15,28 +29,39 @@ class SelcomSmsService
 
         $normalized = $this->normalizeTanzaniaNumber($phoneNumber);
 
-        if (empty($baseUrl) || empty($username) || empty($password) || empty($normalized)) {
+        if (empty($baseUrl) || empty($username) || empty($password) || ! $this->isValidSelcomDestAddr($normalized)) {
             Log::error('Selcom SMS configuration/number invalid', [
                 'base_url_set' => ! empty($baseUrl),
                 'username_set' => ! empty($username),
                 'password_set' => ! empty($password),
                 'phone_raw' => $phoneNumber,
                 'normalized' => $normalized,
+                'destaddr_valid' => $this->isValidSelcomDestAddr($normalized),
             ]);
 
             return false;
         }
 
+        // Match curl: GET with query string (RFC3986 so spaces become %20 like MESSAGE=test%20SMS)
+        $queryString = http_build_query(
+            [
+                'USERNAME' => $username,
+                'PASSWORD' => $password,
+                'DESTADDR' => $normalized,
+                'MESSAGE' => $message,
+            ],
+            '',
+            '&',
+            PHP_QUERY_RFC3986
+        );
+
+        $url = $baseUrl.'/bin/send.json?'.$queryString;
+
         try {
             $response = Http::withoutVerifying()
                 ->connectTimeout(5)
                 ->timeout(10)
-                ->get($baseUrl.'/bin/send.json', [
-                    'USERNAME' => $username,
-                    'PASSWORD' => $password,
-                    'DESTADDR' => $normalized,
-                    'MESSAGE' => $message,
-                ]);
+                ->get($url);
 
             if (! $response->successful()) {
                 Log::error('Selcom SMS HTTP error', [
@@ -124,5 +149,13 @@ class SelcomSmsService
         }
 
         return '';
+    }
+
+    /**
+     * Selcom DESTADDR: exactly 255 + 9 digits (e.g. 0767582837 → 255767582837).
+     */
+    public function isValidSelcomDestAddr(string $normalized): bool
+    {
+        return $normalized !== '' && preg_match('/^255\d{9}$/', $normalized) === 1;
     }
 }

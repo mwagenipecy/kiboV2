@@ -158,10 +158,29 @@
                             <span class="text-gray-600">Phone:</span>
                             <a href="tel:+255794777772" class="text-green-700 hover:underline">0794 777772</a>
                         </p>
-                        <p class="text-gray-700">
-                            <span class="text-gray-600">Location:</span><br>
-                            Sinza kwa Remi, Tan House, 9th Floor
-                        </p>
+                        @php
+                            $footerOfficeLines = config('kibo.contact.locations');
+                            if (empty($footerOfficeLines) || ! is_array($footerOfficeLines)) {
+                                $locString = config('kibo.contact.location');
+                                $footerOfficeLines = $locString
+                                    ? array_values(array_filter(preg_split('/\r\n|\r|\n/', $locString)))
+                                    : [];
+                            }
+                            if (empty($footerOfficeLines)) {
+                                $footerOfficeLines = [
+                                    'Branch: Sinza Mori, Near Kitambaa Cheupe',
+                                    'Headquarters  Tan House, 9th Floor',
+                                ];
+                            }
+                        @endphp
+                        <div class="text-gray-700">
+                            <span class="text-gray-600">Locations:</span>
+                            <div class="mt-1 space-y-1">
+                                @foreach($footerOfficeLines as $officeLine)
+                                    <p class="m-0">{{ $officeLine }}</p>
+                                @endforeach
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

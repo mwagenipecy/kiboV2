@@ -2,12 +2,12 @@
 
 namespace App\Livewire\Customer;
 
-use App\Jobs\SendOtpSms;
 use App\Jobs\SendSparePartOrderPlacedSms;
 use App\Models\SparePartOrder;
 use App\Models\VehicleMake;
 use App\Models\VehicleModel;
 use App\Services\ImageCompressionService;
+use App\Services\SelcomSmsService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
@@ -335,10 +335,16 @@ class SparePartSourcing extends Component
         }
 
         $otpCode = str_pad((string) random_int(0, 9999), 4, '0', STR_PAD_LEFT);
+
+        $sent = app(SelcomSmsService::class)->sendOtp($normalized, $otpCode);
+        if (! $sent) {
+            $this->addError('guestOtpPhone', 'Could not send SMS. Check the number and try again.');
+
+            return;
+        }
+
         Cache::put($this->guestOtpCacheKey($normalized), $otpCode, now()->addMinutes(5));
         Cache::put($sendKey, $attempts + 1, now()->addHour());
-
-        SendOtpSms::dispatchSync($normalized, $otpCode);
 
         $this->guestModalStep = 'otp';
         $this->guestOtpCode = '';

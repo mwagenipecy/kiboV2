@@ -51,6 +51,11 @@
                                 <span class="bg-yellow-400 text-yellow-900 px-2 py-1 rounded-full text-xs font-semibold">Featured</span>
                             </div>
                         @endif
+                        @if($plan->is_free_tier)
+                            <div class="absolute top-4 left-4">
+                                <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs font-semibold">Starter</span>
+                            </div>
+                        @endif
 
                         <div class="p-8">
                             <h3 class="text-2xl font-bold text-gray-900 mb-2">{{ $plan->name }}</h3>
@@ -59,12 +64,17 @@
                             @endif
 
                             <div class="mb-6">
-                                <div class="flex items-baseline">
-                                    <span class="text-4xl font-bold text-gray-900">{{ $plan->currency }} {{ number_format($plan->price, 2) }}</span>
-                                    @if($plan->duration_days)
-                                        <span class="ml-2 text-gray-600">/ {{ $plan->duration_days }} days</span>
+                                <div class="flex items-baseline flex-wrap gap-x-2">
+                                    @if($plan->is_free_tier)
+                                        <span class="text-4xl font-bold text-gray-900">Free</span>
+                                        <span class="text-gray-600">— no subscription</span>
                                     @else
-                                        <span class="ml-2 text-gray-600">one-time</span>
+                                        <span class="text-4xl font-bold text-gray-900">{{ $plan->currency }} {{ number_format($plan->price, 2) }}</span>
+                                        @if($plan->duration_days)
+                                            <span class="ml-2 text-gray-600">/ {{ $plan->duration_days }} days</span>
+                                        @else
+                                            <span class="ml-2 text-gray-600">one-time</span>
+                                        @endif
                                     @endif
                                 </div>
                                 @if($plan->max_listings !== null || $plan->max_trucks !== null)
@@ -93,9 +103,18 @@
                             @if($category === 'cars')
                                 @php
                                     $isCurrentPlan = $currentPlan && $currentPlan->id === $plan->id;
-                                    $isUpgrade = $currentPlan && !$isCurrentPlan && isset($currentPlanIndex) && $plans->search(fn ($p) => $p->id === $plan->id) > $currentPlanIndex;
+                                    $onFreeTierNoPaidPlan = $isDealer && $plan->is_free_tier && auth()->user()->entity && ! auth()->user()->entity->hasPaidCarsAdvertisingPlan();
+                                    $isUpgrade = $currentPlan && ! $isCurrentPlan && isset($currentPlanIndex) && $plans->search(fn ($p) => $p->id === $plan->id) > $currentPlanIndex;
                                 @endphp
-                                @if($isCurrentPlan)
+                                @if($plan->is_free_tier)
+                                    <div class="w-full rounded-lg border border-gray-200 bg-gray-50 py-3 px-6 text-center text-sm font-medium text-gray-700">
+                                        @if($onFreeTierNoPaidPlan || $isCurrentPlan)
+                                            Your current tier — upgrade above for more listings
+                                        @else
+                                            Default limits for dealers without a paid plan. No checkout required.
+                                        @endif
+                                    </div>
+                                @elseif($isCurrentPlan)
                                     <div class="w-full bg-gray-200 text-gray-700 font-semibold py-3 px-6 rounded-lg text-center cursor-default">
                                         Current plan
                                     </div>

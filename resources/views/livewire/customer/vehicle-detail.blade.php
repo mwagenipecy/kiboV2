@@ -194,7 +194,7 @@
                 <div class="bg-white rounded-xl p-6 shadow-sm">
                     <p class="text-sm text-gray-600 mb-2">From</p>
                     <p class="text-sm text-gray-700 mb-4">
-                        @if($vehicle->entity && $vehicle->entity->pricing_plan_id !== null && $vehicle->entity->pricing_plan_id !== '')
+                        @if($vehicle->entity && $vehicle->entity->hasPaidCarsAdvertisingPlan())
                             {{ $vehicle->entity->name }}
                         @else
                             KiboAuto
@@ -577,12 +577,16 @@
                     <div class="bg-white rounded-xl p-6 shadow-sm">
                         <h3 class="text-xl font-bold text-gray-900 mb-4">Contact seller</h3>
                         @php
-                            $hasPaidPlan = $vehicle->entity && $vehicle->entity->pricing_plan_id !== null && $vehicle->entity->pricing_plan_id !== '';
+                            $hasPaidPlan = $vehicle->entity && $vehicle->entity->hasPaidCarsAdvertisingPlan();
                             $showDealerContact = $hasPaidPlan;
                             $kibo = array_merge([
                                 'email' => 'info@kiboauto.co.tz',
                                 'phone' => '0794 777772',
-                                'location' => 'Sinza kwa Remi, Tan House 9th Floor',
+                                'locations' => [
+                                    'Branch: Sinza Mori, Near Kitambaa Cheupe',
+                                    'Headquarters  Tan House, 9th Floor',
+                                ],
+                                'location' => "Branch: Sinza Mori, Near Kitambaa Cheupe\nHeadquarters : Tan House, 9th Floor",
                             ], config('kibo.contact', []));
                         @endphp
 
@@ -630,8 +634,14 @@
                             {{ $kibo['email'] }}
                         </a>
                         @endif
-                        @if(!empty($kibo['location']))
-                        <p class="text-sm text-gray-600 mt-2">{{ $kibo['location'] }}</p>
+                        @if(! empty($kibo['locations']) && is_array($kibo['locations']))
+                            <div class="text-sm text-gray-600 mt-2 space-y-1">
+                                @foreach($kibo['locations'] as $kiboLocationLine)
+                                    <p class="m-0">{{ $kiboLocationLine }}</p>
+                                @endforeach
+                            </div>
+                        @elseif(! empty($kibo['location']))
+                            <p class="text-sm text-gray-600 mt-2 whitespace-pre-line">{{ $kibo['location'] }}</p>
                         @endif
                         @endif
                     </div>

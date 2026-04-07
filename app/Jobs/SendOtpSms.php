@@ -18,12 +18,9 @@ class SendOtpSms
     public function handle(SelcomSmsService $smsService): void
     {
         try {
-            $sent = $smsService->send(
-                $this->phoneNumber,
-                "Your Kibo Auto OTP code is {$this->otpCode}. It expires in 5 minutes."
-            );
+            $sent = $smsService->sendOtp($this->phoneNumber, $this->otpCode);
 
-            if (!$sent) {
+            if (! $sent) {
                 Log::error('OTP SMS failed to send', ['to' => $this->phoneNumber]);
             }
         } catch (\Throwable $e) {
@@ -34,4 +31,3 @@ class SendOtpSms
         }
     }
 }
-

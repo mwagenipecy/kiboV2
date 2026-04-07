@@ -50,6 +50,9 @@
                                     @if($plan->is_featured)
                                         <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">Featured</span>
                                     @endif
+                                    @if($plan->is_free_tier)
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-200 text-gray-800">Free tier</span>
+                                    @endif
                                 </div>
                             </div>
                         </td>
@@ -126,6 +129,21 @@
                                     <option value="garage">Garage</option>
                                 </select>
                                 @error('category') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Slug (optional)</label>
+                                <input type="text" wire:model="slug" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500" placeholder="e.g. free">
+                                <p class="text-xs text-gray-500 mt-1">Stable key for the Free tier row (e.g. <code class="text-xs">free</code>).</p>
+                                @error('slug') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                            </div>
+                            <div class="flex items-end pb-1">
+                                <label class="inline-flex items-center gap-2 text-sm text-gray-700">
+                                    <input type="checkbox" wire:model="isFreeTier" class="rounded border-gray-300 text-green-600 focus:ring-green-500">
+                                    Free tier (hidden from public pricing; no paid checkout)
+                                </label>
                             </div>
                         </div>
 

@@ -5,10 +5,6 @@ namespace App\Models;
 use App\Enums\EntityStatus;
 use App\Enums\EntityType;
 use App\Enums\VehicleStatus;
-use App\Models\PricingPlan;
-use App\Models\Vehicle;
-use App\Models\Truck;
-use App\Models\VehicleLease;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -56,7 +52,9 @@ class Entity extends Model
      */
     public function getMaxActiveListingsAttribute(): ?int
     {
-        return $this->pricingPlan?->max_listings;
+        $plan = $this->relationLoaded('pricingPlan') ? $this->pricingPlan : $this->pricingPlan()->first();
+
+        return $plan?->max_listings ?? PricingPlan::activeCarsFreeTier()?->max_listings;
     }
 
     /**
@@ -64,34 +62,77 @@ class Entity extends Model
      */
     public function getMaxActiveTrucksAttribute(): ?int
     {
-        return $this->pricingPlan?->max_trucks;
+        $plan = $this->relationLoaded('pricingPlan') ? $this->pricingPlan : $this->pricingPlan()->first();
+
+        return $plan?->max_trucks ?? PricingPlan::activeCarsFreeTier()?->max_trucks;
     }
 
     /**
-     * Max cars allowed (paid plan or free tier limit)
+     * Max cars allowed (assigned plan, else active Free tier row in advertising_pricing, else config).
      */
     public function getMaxAllowedCarsAttribute(): int
     {
-        $fromPlan = $this->pricingPlan?->max_listings;
-        return $fromPlan !== null ? (int) $fromPlan : (int) config('kibo.free_max_cars', 3);
+        $plan = $this->relationLoaded('pricingPlan') ? $this->pricingPlan : $this->pricingPlan()->first();
+        if ($this->pricing_plan_id && $plan !== null && $plan->max_listings !== null) {
+            return (int) $plan->max_listings;
+        }
+
+        $free = PricingPlan::activeCarsFreeTier();
+        if ($free && $free->max_listings !== null) {
+            return (int) $free->max_listings;
+        }
+
+        return (int) config('kibo.free_max_cars', 6);
     }
 
     /**
-     * Max trucks allowed (paid plan or free tier limit)
+     * Max trucks allowed (assigned plan, else Free tier row, else config).
      */
     public function getMaxAllowedTrucksAttribute(): int
     {
-        $fromPlan = $this->pricingPlan?->max_trucks;
-        return $fromPlan !== null ? (int) $fromPlan : (int) config('kibo.free_max_trucks', 1);
+        $plan = $this->relationLoaded('pricingPlan') ? $this->pricingPlan : $this->pricingPlan()->first();
+        if ($this->pricing_plan_id && $plan !== null && $plan->max_trucks !== null) {
+            return (int) $plan->max_trucks;
+        }
+
+        $free = PricingPlan::activeCarsFreeTier();
+        if ($free && $free->max_trucks !== null) {
+            return (int) $free->max_trucks;
+        }
+
+        return (int) config('kibo.free_max_trucks', 1);
     }
 
     /**
-     * Max lease listings allowed (paid plan or free tier limit)
+     * Max lease listings allowed (assigned plan, else Free tier row, else config).
      */
     public function getMaxAllowedLeasesAttribute(): int
     {
-        $fromPlan = $this->pricingPlan?->max_leases;
-        return $fromPlan !== null ? (int) $fromPlan : (int) config('kibo.free_max_leases', 1);
+        $plan = $this->relationLoaded('pricingPlan') ? $this->pricingPlan : $this->pricingPlan()->first();
+        if ($this->pricing_plan_id && $plan !== null && $plan->max_leases !== null) {
+            return (int) $plan->max_leases;
+        }
+
+        $free = PricingPlan::activeCarsFreeTier();
+        if ($free && $free->max_leases !== null) {
+            return (int) $free->max_leases;
+        }
+
+        return (int) config('kibo.free_max_leases', 1);
+    }
+
+    /**
+     * Dealer pays for cars advertising (show dealer contact on listings). Free tier does not count as paid.
+     */
+    public function hasPaidCarsAdvertisingPlan(): bool
+    {
+        if (! $this->pricing_plan_id) {
+            return false;
+        }
+
+        $plan = $this->relationLoaded('pricingPlan') ? $this->pricingPlan : $this->pricingPlan()->first();
+
+        return $plan !== null && $plan->isBillable();
     }
 
     /**
@@ -202,4 +243,3 @@ class Entity extends Model
         return $this->status->label();
     }
 }
-

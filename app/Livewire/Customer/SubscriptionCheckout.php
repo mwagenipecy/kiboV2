@@ -27,7 +27,7 @@ class SubscriptionCheckout extends Component
     public function mount($plan)
     {
         $this->planId = (int) $plan;
-        $this->plan = PricingPlan::active()->byCategory('cars')->find($this->planId);
+        $this->plan = PricingPlan::active()->byCategory('cars')->billable()->find($this->planId);
 
         if (! $this->plan) {
             session()->flash('pricing_cars_modal', [
@@ -75,7 +75,7 @@ class SubscriptionCheckout extends Component
             return $this->redirect(route('otp.verify.show'), navigate: true);
         }
 
-        if (! $this->plan || ! $this->entity || $this->entity->type->value !== 'dealer') {
+        if (! $this->plan || ! $this->plan->isBillable() || ! $this->entity || $this->entity->type->value !== 'dealer') {
             session()->flash('pricing_cars_modal', [
                 'variant' => 'access',
                 'reason' => 'not_dealer',

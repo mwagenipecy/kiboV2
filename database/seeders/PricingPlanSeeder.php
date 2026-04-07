@@ -12,6 +12,8 @@ class PricingPlanSeeder extends Seeder
      */
     public function run(): void
     {
+        $this->call(FreePricingPlanSeeder::class);
+
         // Cars: monthly dealer subscription (TZS). max_listings = uploads allowed per billing period.
         $carsPlans = [
             [
@@ -31,6 +33,7 @@ class PricingPlanSeeder extends Seeder
                 'is_featured' => false,
                 'is_popular' => false,
                 'is_active' => true,
+                'is_free_tier' => false,
                 'sort_order' => 1,
             ],
             [
@@ -50,6 +53,7 @@ class PricingPlanSeeder extends Seeder
                 'is_featured' => true,
                 'is_popular' => true,
                 'is_active' => true,
+                'is_free_tier' => false,
                 'sort_order' => 2,
             ],
             [
@@ -69,6 +73,7 @@ class PricingPlanSeeder extends Seeder
                 'is_featured' => true,
                 'is_popular' => false,
                 'is_active' => true,
+                'is_free_tier' => false,
                 'sort_order' => 3,
             ],
         ];
@@ -234,6 +239,7 @@ class PricingPlanSeeder extends Seeder
 
         PricingPlan::query()
             ->where('category', 'cars')
+            ->where('is_free_tier', false)
             ->whereNotIn('name', $carPlanNames)
             ->delete();
 

@@ -16,8 +16,8 @@
         <li>Savanna Hills Limited</li>
         <li>Trading as: KiboAuto Marketplace</li>
         <li>Website: https://kiboauto.co.tz</li>
-        <li>Registered Address: Tan House 9th Floor</li>
-        <li>Business Address: Sinza kwa remi</li>
+        <li><strong>Branch:</strong> Sinza Mori, Near Kitambaa Cheupe</li>
+        <li><strong>Headquarters :</strong> Tan House, 9th Floor</li>
         <li>Email: info@kiboauto.co.tz</li>
         <li>Telephone: [Insert Telephone Number]</li>
     </ul>

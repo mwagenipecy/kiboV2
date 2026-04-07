@@ -48,7 +48,7 @@ class VehicleDetail extends Component
 
     public function mount(string $publicId)
     {
-        $this->vehicle = Vehicle::with(['make', 'model', 'entity', 'country'])
+        $this->vehicle = Vehicle::with(['make', 'model', 'entity.pricingPlan', 'country'])
             ->where('public_id', $publicId)
             ->firstOrFail();
 

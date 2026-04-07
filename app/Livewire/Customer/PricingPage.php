@@ -42,10 +42,16 @@ class PricingPage extends Component
 
     public function render()
     {
-        $plans = PricingPlan::active()
+        // Cars: show Free tier on the page (informational); paid checkout still excludes it via SubscriptionCheckout.
+        $plansQuery = PricingPlan::active()
             ->byCategory($this->category)
-            ->ordered()
-            ->get();
+            ->ordered();
+
+        if ($this->category !== 'cars') {
+            $plansQuery->billable();
+        }
+
+        $plans = $plansQuery->get();
 
         $categoryName = match ($this->category) {
             'cars' => 'Cars',
