@@ -478,8 +478,8 @@
                             </svg>
                         </div>
                         <div>
-                            <h2 class="text-lg sm:text-xl font-bold text-gray-900">Car & Cost Details</h2>
-                            <p class="text-gray-500 text-xs sm:text-sm">Tell us about the car and the costs you need to cover.</p>
+                            <h2 class="text-lg sm:text-xl font-bold text-gray-900">Car details</h2>
+                            <p class="text-gray-500 text-xs sm:text-sm">Tell us about the vehicle. Import tax, duty, transport, and other clearing costs will be added later by your clearance and forwarding agent.</p>
                         </div>
                     </div>
 
@@ -536,32 +536,11 @@
                                 <option value="new">New</option>
                             </select>
                         </div>
+                    </div>
 
-                        <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Import Tax/Duty Amount *</label>
-                                <div class="relative">
-                                    <span class="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm">TZS</span>
-                                    <input type="number" wire:model="taxAmount" class="w-full pl-12 sm:pl-14 pr-3 sm:pr-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors text-sm sm:text-base" placeholder="0.00" step="0.01">
-                                </div>
-                                @error('taxAmount') <p class="mt-1 text-sm text-red-500">{{ $message }}</p> @enderror
-                            </div>
-
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Transport Cost *</label>
-                                <div class="relative">
-                                    <span class="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm">TZS</span>
-                                    <input type="number" wire:model="transportCost" class="w-full pl-12 sm:pl-14 pr-3 sm:pr-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors text-sm sm:text-base" placeholder="0.00" step="0.01">
-                                </div>
-                                @error('transportCost') <p class="mt-1 text-sm text-red-500">{{ $message }}</p> @enderror
-                            </div>
-
-                            <div class="sm:col-span-2">
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Other Clearing Costs</label>
-                                <div class="relative">
-                                    <span class="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm">TZS</span>
-                                    <input type="number" wire:model="totalClearingCost" class="w-full pl-12 sm:pl-14 pr-3 sm:pr-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors text-sm sm:text-base" placeholder="0.00" step="0.01">
-                                </div>
-                            </div>
+                    <div class="mt-6 rounded-xl border border-amber-100 bg-amber-50/80 px-4 py-3 text-sm text-amber-950">
+                        <p class="font-medium text-amber-900">Clearing costs</p>
+                        <p class="mt-1 text-amber-900/90">Import tax/duty, transport, and other clearing amounts are not entered here. They will be provided by your clearance and forwarding agent when available.</p>
                     </div>
                 </div>
                 @endif
@@ -589,9 +568,6 @@
                                 <input type="number" wire:model="financingAmountRequested" class="w-full pl-12 sm:pl-14 pr-3 sm:pr-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors text-sm sm:text-base" placeholder="Enter amount" step="0.01">
                             </div>
                             @error('financingAmountRequested') <p class="mt-1 text-sm text-red-500">{{ $message }}</p> @enderror
-                            @if($taxAmount || $transportCost || $totalClearingCost)
-                                <p class="mt-2 text-sm text-gray-500">Total costs: TZS {{ number_format(($taxAmount ?? 0) + ($transportCost ?? 0) + ($totalClearingCost ?? 0), 2) }}</p>
-                            @endif
                         </div>
 
                         <div>
@@ -644,9 +620,9 @@
                                         <span class="font-medium text-gray-900 text-xs sm:text-sm text-right">{{ $this->vehicleMakeName }} {{ $vehicleModel }} {{ $vehicleYear ? '(' . $vehicleYear . ')' : '' }}</span>
                                     </div>
                                     @endif
-                                    <div class="flex justify-between items-center">
-                                        <span class="text-xs sm:text-sm text-gray-600">Total Costs</span>
-                                        <span class="font-medium text-gray-900 text-xs sm:text-sm">TZS {{ number_format(($taxAmount ?? 0) + ($transportCost ?? 0) + ($totalClearingCost ?? 0), 2) }}</span>
+                                    <div class="flex justify-between items-start gap-2">
+                                        <span class="text-xs sm:text-sm text-gray-600">Clearing costs</span>
+                                        <span class="font-medium text-gray-700 text-xs sm:text-sm text-right">To be set by clearance &amp; forwarding agent</span>
                                     </div>
                                 </div>
                                 <div class="bg-white rounded-lg p-3 sm:p-4">

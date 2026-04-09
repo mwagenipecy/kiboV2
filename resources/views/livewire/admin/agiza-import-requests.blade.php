@@ -99,16 +99,24 @@
                                 @endif
                             </td>
                             <td class="px-6 py-4">
-                                <div class="text-sm font-medium text-gray-900">{{ $request->vehicle_make }} {{ $request->vehicle_model }}</div>
+                                @php $vehicleTitle = trim(($request->vehicle_make ?? '').' '.($request->vehicle_model ?? '')); @endphp
+                                @if($vehicleTitle !== '')
+                                <div class="text-sm font-medium text-gray-900">{{ $vehicleTitle }}</div>
                                 @if($request->vehicle_year)
-                                <div class="text-xs text-gray-500">{{ $request->vehicle_year }} • {{ ucfirst($request->vehicle_condition) }}</div>
+                                <div class="text-xs text-gray-500">{{ $request->vehicle_year }} • {{ ucfirst($request->vehicle_condition ?? '') }}</div>
+                                @endif
+                                @endif
+                                @if($request->vehicle_link)
+                                <div class="text-xs mt-1 break-all">
+                                    <a href="{{ $request->vehicle_link }}" target="_blank" rel="noopener noreferrer" class="text-green-600 hover:text-green-800">Open listing</a>
+                                </div>
                                 @endif
                                 @if($request->estimated_price)
-                                <div class="text-xs text-gray-500">~{{ number_format($request->estimated_price, 0) }} {{ $request->price_currency }}</div>
+                                <div class="text-xs text-gray-500 mt-1">~{{ number_format($request->estimated_price, 0) }} {{ $request->price_currency }}</div>
                                 @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {{ $request->source_country }}
+                                {{ $request->source_country ?: '—' }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full {{ $request->request_type === 'with_link' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800' }}">

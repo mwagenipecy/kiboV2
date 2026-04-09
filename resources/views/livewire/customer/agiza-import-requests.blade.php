@@ -87,13 +87,21 @@
                                 <div class="text-xs text-gray-500">{{ $request->request_type === 'with_link' ? 'With Link' : 'Dealer Contacted' }}</div>
                             </td>
                             <td class="px-6 py-4">
-                                <div class="text-sm font-medium text-gray-900">{{ $request->vehicle_make }} {{ $request->vehicle_model }}</div>
+                                @php $vehicleTitle = trim(($request->vehicle_make ?? '').' '.($request->vehicle_model ?? '')); @endphp
+                                @if($vehicleTitle !== '')
+                                <div class="text-sm font-medium text-gray-900">{{ $vehicleTitle }}</div>
                                 @if($request->vehicle_year)
-                                <div class="text-xs text-gray-500">{{ $request->vehicle_year }} • {{ ucfirst($request->vehicle_condition) }}</div>
+                                <div class="text-xs text-gray-500">{{ $request->vehicle_year }} • {{ ucfirst($request->vehicle_condition ?? '') }}</div>
+                                @endif
+                                @endif
+                                @if($request->vehicle_link)
+                                <div class="text-sm {{ $vehicleTitle !== '' ? 'mt-1' : '' }}">
+                                    <a href="{{ $request->vehicle_link }}" target="_blank" rel="noopener noreferrer" class="text-green-600 hover:text-green-800 font-medium break-all">View listing</a>
+                                </div>
                                 @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {{ $request->source_country }}
+                                {{ $request->source_country ?: '—' }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 @if($request->quoted_total_cost)

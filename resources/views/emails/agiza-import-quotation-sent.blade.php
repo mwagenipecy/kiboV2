@@ -27,14 +27,25 @@
                     <td style="padding: 8px 0; font-weight: bold; color: #6b7280;">Request Number:</td>
                     <td style="padding: 8px 0; color: #111827;">{{ $request->request_number }}</td>
                 </tr>
+                @if($request->vehicle_link)
+                <tr>
+                    <td style="padding: 8px 0; font-weight: bold; color: #6b7280;">Listing:</td>
+                    <td style="padding: 8px 0; color: #111827;"><a href="{{ $request->vehicle_link }}" style="color: #059669; word-break: break-all;">{{ $request->vehicle_link }}</a></td>
+                </tr>
+                @endif
+                @php $vehicleLabel = trim(($request->vehicle_make ?? '').' '.($request->vehicle_model ?? '')); @endphp
+                @if($vehicleLabel !== '')
                 <tr>
                     <td style="padding: 8px 0; font-weight: bold; color: #6b7280;">Vehicle:</td>
-                    <td style="padding: 8px 0; color: #111827;">{{ $request->vehicle_make }} {{ $request->vehicle_model }} @if($request->vehicle_year)({{ $request->vehicle_year }})@endif</td>
+                    <td style="padding: 8px 0; color: #111827;">{{ $vehicleLabel }}@if($request->vehicle_year) ({{ $request->vehicle_year }})@endif</td>
                 </tr>
+                @endif
+                @if(filled($request->source_country))
                 <tr>
                     <td style="padding: 8px 0; font-weight: bold; color: #6b7280;">Source Country:</td>
                     <td style="padding: 8px 0; color: #111827;">{{ $request->source_country }}</td>
                 </tr>
+                @endif
             </table>
         </div>
 

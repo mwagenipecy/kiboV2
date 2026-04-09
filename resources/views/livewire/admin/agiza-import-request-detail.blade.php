@@ -64,30 +64,50 @@
                 </dl>
             </div>
 
-            <!-- Vehicle Details -->
+            <!-- Vehicle / listing -->
             <div class="bg-white rounded-lg shadow p-6">
-                <h2 class="text-lg font-semibold text-gray-900 mb-4">Vehicle Details</h2>
+                <h2 class="text-lg font-semibold text-gray-900 mb-4">Vehicle / listing</h2>
                 <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    @if($request->vehicle_link)
+                    <div class="sm:col-span-2">
+                        <dt class="text-sm font-medium text-gray-500">Listing URL</dt>
+                        <dd class="mt-1">
+                            <a href="{{ $request->vehicle_link }}" target="_blank" rel="noopener noreferrer" class="text-sm text-green-600 hover:text-green-700 underline break-all">
+                                {{ $request->vehicle_link }}
+                            </a>
+                        </dd>
+                    </div>
+                    @endif
+                    @if(filled($request->vehicle_make))
                     <div>
                         <dt class="text-sm font-medium text-gray-500">Make</dt>
                         <dd class="mt-1 text-sm text-gray-900">{{ $request->vehicle_make }}</dd>
                     </div>
+                    @endif
+                    @if(filled($request->vehicle_model))
                     <div>
                         <dt class="text-sm font-medium text-gray-500">Model</dt>
                         <dd class="mt-1 text-sm text-gray-900">{{ $request->vehicle_model }}</dd>
                     </div>
+                    @endif
+                    @if($request->vehicle_year)
                     <div>
                         <dt class="text-sm font-medium text-gray-500">Year</dt>
-                        <dd class="mt-1 text-sm text-gray-900">{{ $request->vehicle_year ?? 'N/A' }}</dd>
+                        <dd class="mt-1 text-sm text-gray-900">{{ $request->vehicle_year }}</dd>
                     </div>
+                    @endif
+                    @if(filled($request->vehicle_condition))
                     <div>
                         <dt class="text-sm font-medium text-gray-500">Condition</dt>
                         <dd class="mt-1 text-sm text-gray-900">{{ ucfirst($request->vehicle_condition) }}</dd>
                     </div>
+                    @endif
+                    @if(filled($request->source_country))
                     <div>
                         <dt class="text-sm font-medium text-gray-500">Source Country</dt>
                         <dd class="mt-1 text-sm text-gray-900">{{ $request->source_country }}</dd>
                     </div>
+                    @endif
                     @if($request->estimated_price)
                     <div>
                         <dt class="text-sm font-medium text-gray-500">Estimated Price</dt>
@@ -95,17 +115,6 @@
                     </div>
                     @endif
                 </dl>
-
-                @if($request->vehicle_link)
-                <div class="mt-4">
-                    <dt class="text-sm font-medium text-gray-500">Car Listing Link</dt>
-                    <dd class="mt-1">
-                        <a href="{{ $request->vehicle_link }}" target="_blank" class="text-sm text-green-600 hover:text-green-700 underline break-all">
-                            {{ $request->vehicle_link }}
-                        </a>
-                    </dd>
-                </div>
-                @endif
 
                 @if($request->dealer_contact_info)
                 <div class="mt-4">

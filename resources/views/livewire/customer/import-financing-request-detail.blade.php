@@ -91,18 +91,34 @@
                             @else
                                 <div>
                                     <dt class="text-sm text-gray-500">Tax/Duty Amount</dt>
-                                    <dd class="mt-1 font-medium text-gray-900">TZS {{ number_format($request->tax_amount ?? 0, 2) }}</dd>
+                                    <dd class="mt-1 font-medium text-gray-900">
+                                        @if($request->tax_amount !== null)
+                                            TZS {{ number_format($request->tax_amount, 2) }}
+                                        @else
+                                            <span class="text-gray-500 font-normal">Pending (clearance agent)</span>
+                                        @endif
+                                    </dd>
                                 </div>
                                 <div>
                                     <dt class="text-sm text-gray-500">Transport Cost</dt>
-                                    <dd class="mt-1 font-medium text-gray-900">TZS {{ number_format($request->transport_cost ?? 0, 2) }}</dd>
+                                    <dd class="mt-1 font-medium text-gray-900">
+                                        @if($request->transport_cost !== null)
+                                            TZS {{ number_format($request->transport_cost, 2) }}
+                                        @else
+                                            <span class="text-gray-500 font-normal">Pending (clearance agent)</span>
+                                        @endif
+                                    </dd>
                                 </div>
-                                @if($request->total_clearing_cost)
                                 <div>
                                     <dt class="text-sm text-gray-500">Other Clearing Costs</dt>
-                                    <dd class="mt-1 font-medium text-gray-900">TZS {{ number_format($request->total_clearing_cost, 2) }}</dd>
+                                    <dd class="mt-1 font-medium text-gray-900">
+                                        @if($request->total_clearing_cost !== null)
+                                            TZS {{ number_format($request->total_clearing_cost, 2) }}
+                                        @else
+                                            <span class="text-gray-500 font-normal">Pending (clearance agent)</span>
+                                        @endif
+                                    </dd>
                                 </div>
-                                @endif
                             @endif
 
                             <div>

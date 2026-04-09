@@ -22,9 +22,10 @@ class AgizaImportRequestSeeder extends Seeder
                 'user_id' => $customer->id,
                 'customer_name' => $customer->name,
                 'customer_email' => $customer->email,
+                'customer_phone' => $customer->phone ?? ('07'.fake()->numerify('########')),
             ]);
         }
 
-        $this->command->info('Created sample Agiza/Import requests for demonstration.');
+        $this->command->info('Created sample Agiza/Import requests (listing link only, no seeded vehicle fields).');
     }
 }

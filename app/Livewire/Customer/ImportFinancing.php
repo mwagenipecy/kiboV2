@@ -41,15 +41,6 @@ class ImportFinancing extends Component
     #[Validate('nullable|in:new,used')]
     public ?string $vehicleCondition = 'used';
 
-    #[Validate('nullable|numeric|min:0')]
-    public ?float $taxAmount = null;
-
-    #[Validate('nullable|numeric|min:0')]
-    public ?float $transportCost = null;
-
-    #[Validate('nullable|numeric|min:0')]
-    public ?float $totalClearingCost = null;
-
     public $vehicleMakes = [];
 
     public $vehicleModels = [];
@@ -340,13 +331,7 @@ class ImportFinancing extends Component
                 ]);
                 break;
             case 3:
-                $this->validate([
-                    'taxAmount' => 'required|numeric|min:0',
-                    'transportCost' => 'required|numeric|min:0',
-                ], [
-                    'taxAmount.required' => 'Please enter the tax amount.',
-                    'transportCost.required' => 'Please enter the transport cost.',
-                ]);
+                // Vehicle details only; tax/transport/clearing costs are entered later by clearance & forwarding.
                 break;
             case 4:
                 $this->validate([
@@ -395,9 +380,9 @@ class ImportFinancing extends Component
                 'vehicle_model' => $this->vehicleModel ?: null,
                 'vehicle_year' => $this->vehicleYear,
                 'vehicle_condition' => $this->vehicleCondition,
-                'tax_amount' => $this->taxAmount,
-                'transport_cost' => $this->transportCost,
-                'total_clearing_cost' => $this->totalClearingCost,
+                'tax_amount' => null,
+                'transport_cost' => null,
+                'total_clearing_cost' => null,
                 'vehicle_currency' => 'TZS',
             ];
 
@@ -420,8 +405,7 @@ class ImportFinancing extends Component
     {
         $this->reset([
             'requestType', 'vehicleMake', 'vehicleModel', 'vehicleYear',
-            'vehicleCondition', 'taxAmount', 'transportCost',
-            'totalClearingCost', 'financingAmountRequested', 'loanTermMonths',
+            'vehicleCondition', 'financingAmountRequested', 'loanTermMonths',
             'downPayment', 'documents', 'customerNotes', 'currentStep', 'showSuccess',
             'referenceNumber',
         ]);

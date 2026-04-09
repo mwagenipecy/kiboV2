@@ -13,6 +13,7 @@ class AgizaImportRequests extends Component
     use WithPagination;
 
     public string $search = '';
+
     public string $statusFilter = '';
 
     public function updatingSearch()
@@ -30,9 +31,10 @@ class AgizaImportRequests extends Component
         $requests = AgizaImportRequest::where('user_id', auth()->id())
             ->when($this->search, function ($query) {
                 $query->where(function ($q) {
-                    $q->where('request_number', 'like', '%' . $this->search . '%')
-                      ->orWhere('vehicle_make', 'like', '%' . $this->search . '%')
-                      ->orWhere('vehicle_model', 'like', '%' . $this->search . '%');
+                    $q->where('request_number', 'like', '%'.$this->search.'%')
+                        ->orWhere('vehicle_link', 'like', '%'.$this->search.'%')
+                        ->orWhere('vehicle_make', 'like', '%'.$this->search.'%')
+                        ->orWhere('vehicle_model', 'like', '%'.$this->search.'%');
                 });
             })
             ->when($this->statusFilter, function ($query) {
