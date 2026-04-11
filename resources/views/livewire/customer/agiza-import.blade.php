@@ -154,6 +154,7 @@
       <div class="p-6 sm:p-8">
         <button type="submit" wire:loading.attr="disabled" class="w-full py-4 rounded-xl text-white font-bold text-base flex items-center justify-center gap-2 transition-all disabled:opacity-50 hover:shadow-lg hover:-translate-y-px" style="background: #009866; font-family: 'Syne', sans-serif; box-shadow: 0 4px 20px rgba(0,152,102,0.35);">
           <span  class="flex" wire:loading.remove>
+
           <div>Submit Import Request    </div>
           </span>
           <span wire:loading>Processing…</span>
