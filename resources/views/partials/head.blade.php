@@ -3,8 +3,8 @@
 
 <title>{{ $title ?? config('app.name') }}</title>
 
-<link rel="icon" type="image/png" href="{{ asset('logo/green.png') }}">
-<link rel="apple-touch-icon" href="{{ asset('logo/green.png') }}">
+<link rel="icon" type="image/png" href="{{ asset('logo/smalldeviceLogo.png') }}">
+<link rel="apple-touch-icon" href="{{ asset('logo/smalldeviceLogo.png') }}">
 
 <link rel="preconnect" href="https://fonts.bunny.net">
 <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
