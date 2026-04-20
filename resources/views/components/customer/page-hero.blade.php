@@ -116,7 +116,7 @@
 
             @if($variant === 'floating_overlay' && isset($overlay))
                 <div class="relative mt-6 sm:mt-0 sm:absolute sm:bottom-0 sm:left-0 sm:right-0 sm:transform sm:translate-y-1/2 px-4 z-30">
-                    <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-4 sm:p-6">
+                    <div class="max-w-4xl mx-auto bg-white rounded-3xl shadow-lg shadow-black/10 border border-gray-100 p-3 sm:p-4">
                         {{ $overlay }}
                     </div>
                 </div>
