@@ -1,4 +1,4 @@
-<div class="max-w-3xl mx-auto px-4 py-6 sm:py-8">
+<div class="w-full py-6 sm:py-8">
     {{-- Guest: login prompt modal --}}
     @guest
         <div id="carExchangeLoginPrompt" role="dialog" aria-modal="true" class="fixed inset-0 z-[9999] grid place-items-center bg-black/50 p-4">
@@ -72,13 +72,45 @@
     @endif
 
     @auth
-    <p class="text-center text-sm text-gray-600 mb-6">Complete the form below — add photos of your car one at a time so dealers can value it accurately.</p>
+    <p class="text-center text-sm text-gray-600 mb-6">Use the steps below — add photos of your car one at a time so dealers can value it accurately.</p>
 
     <!-- Main Form -->
-    <form wire:submit.prevent="submit" class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 sm:p-8 space-y-8 ring-1 ring-black/5">
+    <form wire:submit.prevent="submit" class="bg-white rounded-2xl border border-gray-200 shadow-sm ring-1 ring-black/5 overflow-hidden">
+        {{-- Stepper --}}
+        <div class="px-4 sm:px-8 pt-6 sm:pt-8 pb-2 border-b border-gray-100 bg-gradient-to-b from-gray-50/80 to-white">
+            <nav aria-label="Progress">
+                <ol class="flex items-center justify-between gap-1 sm:gap-3">
+                    @foreach ([
+                        1 => 'Your car',
+                        2 => 'What you want',
+                        3 => 'Details & submit',
+                    ] as $num => $label)
+                        <li class="flex flex-1 min-w-0 items-center @if($num < 3) gap-1 sm:gap-2 @endif">
+                            <div class="flex flex-col items-center flex-1 min-w-0">
+                                <span
+                                    class="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full text-sm font-bold border-2 transition-colors shrink-0
+                                    @if($step > $num) border-[#009866] bg-[#009866] text-white
+                                    @elseif($step === $num) border-[#009866] bg-white text-[#009866] ring-2 ring-[#009866]/25
+                                    @else border-gray-200 bg-gray-50 text-gray-400 @endif"
+                                    aria-current="{{ $step === $num ? 'step' : 'false' }}"
+                                >{{ $num }}</span>
+                                <span class="mt-1.5 text-[10px] sm:text-xs font-medium text-center leading-tight truncate w-full px-0.5
+                                    @if($step >= $num) text-gray-900 @else text-gray-400 @endif">{{ $label }}</span>
+                            </div>
+                            @if($num < 3)
+                                <div class="hidden sm:block h-0.5 flex-1 min-w-[0.5rem] -mt-6 rounded-full {{ $step > $num ? 'bg-[#009866]' : 'bg-gray-200' }}" aria-hidden="true"></div>
+                            @endif
+                        </li>
+                    @endforeach
+                </ol>
+            </nav>
+            <p class="text-center text-xs text-gray-500 mt-4 sm:hidden">Step {{ $step }} of 3</p>
+        </div>
+
+        <div class="p-6 sm:p-8 space-y-8">
         
         <!-- Section 1: Current Vehicle -->
-        <div class="space-y-5">
+        <div class="space-y-5 @if($step !== 1) hidden @endif" @if($step === 1) aria-hidden="false" @else aria-hidden="true" @endif>
             <h2 class="text-base font-semibold text-gray-900 pb-2 border-b border-gray-200 flex items-center gap-2">
                 <span class="flex h-7 w-7 items-center justify-center rounded-lg text-xs font-bold text-white shrink-0" style="background-color: #009866;">1</span>
                 Your current vehicle
@@ -210,7 +242,7 @@
         </div>
 
         <!-- Section 2: Desired Vehicle -->
-        <div class="space-y-5">
+        <div class="space-y-5 @if($step !== 2) hidden @endif" @if($step === 2) aria-hidden="false" @else aria-hidden="true" @endif>
             <h2 class="text-base font-semibold text-gray-900 pb-2 border-b border-gray-200 flex items-center gap-2">
                 <span class="flex h-7 w-7 items-center justify-center rounded-lg text-xs font-bold text-white shrink-0" style="background-color: #009866;">2</span>
                 Vehicle you want
@@ -364,7 +396,7 @@
         </div>
 
         <!-- Section 3: Additional Info -->
-        <div class="space-y-5">
+        <div class="space-y-5 @if($step !== 3) hidden @endif" @if($step === 3) aria-hidden="false" @else aria-hidden="true" @endif>
             <h2 class="text-base font-semibold text-gray-900 pb-2 border-b border-gray-200 flex items-center gap-2">
                 <span class="flex h-7 w-7 items-center justify-center rounded-lg text-xs font-bold text-white shrink-0" style="background-color: #009866;">3</span>
                 Additional information
@@ -393,16 +425,49 @@
             </div>
         </div>
 
-        <!-- Submit Button -->
-        <div class="pt-2">
-            <button 
-                type="submit" 
-                wire:loading.attr="disabled"
-                class="w-full text-white font-semibold py-3.5 px-6 rounded-xl transition-colors duration-200 text-base disabled:opacity-60" style="background-color: #009866;"
-            >
-                <span wire:loading.remove wire:target="submit">Submit exchange request</span>
-                <span wire:loading wire:target="submit">Submitting…</span>
-            </button>
+        <!-- Step actions -->
+        <div class="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3 pt-4 border-t border-gray-100">
+            <div class="sm:w-40">
+                @if($step > 1)
+                    <button
+                        type="button"
+                        wire:click="previousStep"
+                        wire:loading.attr="disabled"
+                        class="w-full sm:w-auto px-5 py-3 rounded-xl border-2 border-gray-200 font-semibold text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50"
+                    >
+                        Back
+                    </button>
+                @endif
+            </div>
+            <div class="flex flex-col sm:flex-row gap-3 sm:justify-end flex-1">
+                @if($step < 3)
+                    <button
+                        type="button"
+                        wire:click="nextStep"
+                        wire:loading.attr="disabled"
+                        wire:target="nextStep"
+                        class="w-full sm:min-w-[200px] text-white font-semibold py-3.5 px-6 rounded-xl transition-colors duration-200 text-base disabled:opacity-60 inline-flex items-center justify-center gap-2"
+                        style="background-color: #009866;"
+                    >
+                        <span wire:loading.remove wire:target="nextStep">Continue</span>
+                        <span wire:loading wire:target="nextStep" class="inline-flex items-center gap-2">
+                            <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                            Checking…
+                        </span>
+                    </button>
+                @else
+                    <button
+                        type="submit"
+                        wire:loading.attr="disabled"
+                        class="w-full sm:min-w-[240px] text-white font-semibold py-3.5 px-6 rounded-xl transition-colors duration-200 text-base disabled:opacity-60"
+                        style="background-color: #009866;"
+                    >
+                        <span wire:loading.remove wire:target="submit">Submit exchange request</span>
+                        <span wire:loading wire:target="submit">Submitting…</span>
+                    </button>
+                @endif
+            </div>
+        </div>
         </div>
     </form>
     @endauth

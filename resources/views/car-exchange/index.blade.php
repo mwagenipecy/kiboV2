@@ -16,10 +16,8 @@
     <!-- Compact page header -->
     <section class="relative border-b border-gray-200 bg-gradient-to-r from-white to-gray-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6">
-            <div class="max-w-3xl">
-                <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">Car exchange</h1>
-                <p class="mt-1.5 text-sm sm:text-base text-gray-600 leading-relaxed">Tell us about your car and what you’re looking for. The request form is right below.</p>
-            </div>
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">Car exchange</h1>
+            <p class="mt-1.5 text-sm sm:text-base text-gray-600 leading-relaxed">Tell us about your car and what you’re looking for. The request form is right below.</p>
         </div>
     </section>
 

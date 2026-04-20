@@ -62,6 +62,9 @@ class CarExchangeForm extends Component
 
     public $desiredModels = [];
 
+    /** Wizard step 1–3 (Livewire-driven stepper). */
+    public int $step = 1;
+
     public function mount(): void
     {
         if (auth()->check()) {
@@ -160,6 +163,106 @@ class CarExchangeForm extends Component
 
         unset($this->current_vehicle_images[$index]);
         $this->current_vehicle_images = array_values($this->current_vehicle_images);
+    }
+
+    public function previousStep(): void
+    {
+        $this->step = max(1, $this->step - 1);
+    }
+
+    public function nextStep(): void
+    {
+        if ($this->step === 1) {
+            $this->validateCurrentVehicleStep();
+            $this->step = 2;
+
+            return;
+        }
+
+        if ($this->step === 2) {
+            $this->validateDesiredVehicleStep();
+            $this->step = 3;
+        }
+    }
+
+    private function validateCurrentVehicleStep(): void
+    {
+        $this->validate([
+            'current_vehicle_make_id' => ['required', 'integer', 'exists:vehicle_makes,id'],
+            'current_vehicle_model_id' => ['required', 'integer', 'exists:vehicle_models,id'],
+            'current_vehicle_year' => ['required', 'integer', 'min:1950', 'max:'.(date('Y') + 1)],
+            'current_vehicle_registration' => ['nullable', 'string', 'max:50'],
+            'current_vehicle_mileage' => ['nullable', 'integer', 'min:0'],
+            'current_vehicle_condition' => ['required', 'string', 'in:excellent,good,fair,poor'],
+            'current_vehicle_description' => ['nullable', 'string', 'max:2000'],
+            'current_vehicle_images' => ['nullable', 'array', 'max:12'],
+            'current_vehicle_images.*' => ['required', 'image', 'max:5120'],
+        ], [], [
+            'current_vehicle_make_id' => 'make',
+            'current_vehicle_model_id' => 'model',
+            'current_vehicle_year' => 'year',
+            'current_vehicle_condition' => 'condition',
+        ]);
+
+        $model = VehicleModel::where('id', $this->current_vehicle_model_id)
+            ->where('vehicle_make_id', $this->current_vehicle_make_id)
+            ->exists();
+
+        if (! $model) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'current_vehicle_model_id' => ['The selected model does not belong to the selected make.'],
+            ]);
+        }
+    }
+
+    private function validateDesiredVehicleStep(): void
+    {
+        $this->validate([
+            'desired_vehicle_make_id' => ['nullable', 'integer', 'exists:vehicle_makes,id'],
+            'desired_vehicle_model_id' => ['nullable', 'integer', 'exists:vehicle_models,id'],
+            'desired_min_year' => ['nullable', 'integer', 'min:1950', 'max:'.(date('Y') + 1)],
+            'desired_max_year' => ['nullable', 'integer', 'min:1950', 'max:'.(date('Y') + 1)],
+            'desired_fuel_type' => ['nullable', 'string', 'max:50'],
+            'desired_transmission' => ['nullable', 'string', 'max:50'],
+            'desired_body_type' => ['nullable', 'string', 'max:50'],
+            'max_budget' => ['nullable', 'string'],
+        ]);
+
+        $minY = $this->desired_min_year !== '' && $this->desired_min_year !== null
+            ? (int) $this->desired_min_year : null;
+        $maxY = $this->desired_max_year !== '' && $this->desired_max_year !== null
+            ? (int) $this->desired_max_year : null;
+
+        if ($minY !== null && $maxY !== null && $minY > $maxY) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'desired_min_year' => ['Min year cannot be greater than max year.'],
+            ]);
+        }
+
+        if (! empty($this->desired_vehicle_model_id) && empty($this->desired_vehicle_make_id)) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'desired_vehicle_model_id' => ['Please select a make first.'],
+            ]);
+        }
+
+        if (! empty($this->desired_vehicle_model_id) && ! empty($this->desired_vehicle_make_id)) {
+            $ok = VehicleModel::where('id', $this->desired_vehicle_model_id)
+                ->where('vehicle_make_id', $this->desired_vehicle_make_id)
+                ->exists();
+
+            if (! $ok) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'desired_vehicle_model_id' => ['The selected model does not belong to the selected make.'],
+                ]);
+            }
+        }
+
+        $parsed = $this->parseMoneyToNullableInt($this->max_budget);
+        if ($parsed !== null && $parsed < 0) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'max_budget' => ['Maximum budget must be at least 0.'],
+            ]);
+        }
     }
 
     public function submit()
