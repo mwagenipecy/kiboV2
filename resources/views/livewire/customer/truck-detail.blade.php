@@ -321,30 +321,75 @@
                     </div>
                 </div>
 
-                {{-- Expert Reviews --}}
-                <div class="bg-white rounded-xl p-6 shadow-sm">
-                    <h2 class="text-2xl font-bold text-gray-900 mb-4">Expert reviews for the {{ $truck->make->name ?? '' }} {{ $truck->model->name ?? '' }}</h2>
-                    
-                    <div class="flex items-baseline gap-2 mb-2">
-                        <span class="text-5xl font-bold text-gray-900">3.7</span>
-                        <svg class="w-8 h-8 fill-orange-400 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
-                        </svg>
+                {{-- Trust: transparency without expert scores (reviews not offered yet) --}}
+                <div class="rounded-xl p-6 shadow-sm border border-gray-100 bg-gradient-to-br from-white via-green-50/40 to-white">
+                    <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6">
+                        <div>
+                            <h2 class="text-2xl font-bold text-gray-900 mb-2">Confidence in this {{ $truck->make->name ?? '' }} {{ $truck->model->name ?? '' }}</h2>
+                            <p class="text-gray-600 max-w-2xl">
+                                We do not publish paid expert scores for listings. Instead, we help you decide with <span class="font-medium text-gray-800">clear photos, full specifications, and direct contact with the seller</span>—so you can judge this truck for yourself.
+                            </p>
+                        </div>
+                        <div class="flex-shrink-0 flex items-center gap-2 rounded-lg bg-white/80 border border-green-100 px-4 py-3 shadow-sm">
+                            <svg class="w-10 h-10 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                            </svg>
+                            <div>
+                                <p class="text-sm font-semibold text-gray-900">Facts first</p>
+                                <p class="text-xs text-gray-600">Specs &amp; imagery on this page</p>
+                            </div>
+                        </div>
                     </div>
 
-                    <p class="text-gray-600 mb-6">
-                        This rating comes from our Kibo Auto vehicle experts, and is based on running costs, reliability, safety, comfort, features and power.
-                    </p>
+                    <ul class="grid gap-4 sm:grid-cols-2 mb-6">
+                        <li class="flex gap-3 rounded-lg border border-gray-100 bg-white/90 p-4 shadow-sm">
+                            <span class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-green-100 text-green-600" aria-hidden="true">
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            </span>
+                            <div>
+                                <p class="font-semibold text-gray-900">See it properly</p>
+                                <p class="text-sm text-gray-600 mt-0.5">Photos plus the full equipment list—know what you’re considering before you travel.</p>
+                            </div>
+                        </li>
+                        <li class="flex gap-3 rounded-lg border border-gray-100 bg-white/90 p-4 shadow-sm">
+                            <span class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-green-100 text-green-600" aria-hidden="true">
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+                            </span>
+                            <div>
+                                <p class="font-semibold text-gray-900">Talk to the seller</p>
+                                <p class="text-sm text-gray-600 mt-0.5">Use the contact details on this page to ask questions and arrange to view the truck in person.</p>
+                            </div>
+                        </li>
+                        <li class="flex gap-3 rounded-lg border border-gray-100 bg-white/90 p-4 shadow-sm">
+                            <span class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-green-100 text-green-600" aria-hidden="true">
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6.828M9 10h.01M12 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            </span>
+                            <div>
+                                <p class="font-semibold text-gray-900">No mystery spec sheet</p>
+                                <p class="text-sm text-gray-600 mt-0.5">Payload, mileage, year, and features are listed for this advert—compare them with what you see on the day.</p>
+                            </div>
+                        </li>
+                        <li class="flex gap-3 rounded-lg border border-gray-100 bg-white/90 p-4 shadow-sm">
+                            <span class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-green-100 text-green-600" aria-hidden="true">
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                            </span>
+                            <div>
+                                <p class="font-semibold text-gray-900">Something off?</p>
+                                <p class="text-sm text-gray-600 mt-0.5">If details don’t match reality, report this advert—we take misuse of the platform seriously.</p>
+                            </div>
+                        </li>
+                    </ul>
 
-                    <button wire:click="openInfoModal('review')" class="flex items-center gap-2 text-green-600 hover:text-green-700 font-medium">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                        </svg>
-                        Read our experts review
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                        </svg>
-                    </button>
+                    <div class="flex flex-col sm:flex-row sm:items-center gap-3 pt-2 border-t border-gray-100">
+                        <button type="button" onclick="document.getElementById('contact-seller')?.scrollIntoView({behavior:'smooth', block:'start'})" class="inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white transition-colors shadow-sm bg-green-600 hover:bg-green-700">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+                            Contact the seller
+                        </button>
+                        <button type="button" wire:click="openInfoModal('safety')" class="inline-flex items-center justify-center gap-2 text-sm font-semibold text-green-600 hover:text-green-700">
+                            Read our guide on buying safely
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                        </button>
+                    </div>
                 </div>
 
                 {{-- Buying Safely --}}
@@ -448,7 +493,7 @@
                         </a>
                     </div>
 
-                    <div class="bg-white rounded-xl p-6 shadow-sm">
+                    <div id="contact-seller" class="bg-white rounded-xl p-6 shadow-sm scroll-mt-24">
                         <h3 class="text-xl font-bold text-gray-900 mb-4">Contact seller</h3>
                         
                         @if($truck->entity)
@@ -570,8 +615,6 @@
                         Vehicle History Check
                     @elseif($modalContent === 'insurance')
                         Insurance Quote
-                    @elseif($modalContent === 'review')
-                        Expert Review
                     @elseif($modalContent === 'safety')
                         Buying Safely Guide
                     @endif
@@ -705,96 +748,6 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
                             </svg>
                         </a>
-                    </div>
-
-                @elseif($modalContent === 'review')
-                    {{-- Expert Review Content (stars only, no numbers) --}}
-                    <div class="mb-6">
-                        <div class="flex items-center gap-4 mb-6">
-                            <div class="flex items-center gap-1">
-                                @foreach(range(1, 5) as $i)
-                                <svg class="w-10 h-10 {{ $i <= 4 ? 'fill-amber-400 text-amber-400' : 'fill-gray-200 text-gray-200' }}" viewBox="0 0 24 24" aria-hidden="true">
-                                    <path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
-                                </svg>
-                                @endforeach
-                            </div>
-                        </div>
-
-                        <h3 class="text-lg font-bold text-gray-900 mb-4">Rating Breakdown</h3>
-                        <div class="space-y-4 mb-6">
-                            <div>
-                                <div class="flex justify-between text-sm mb-1">
-                                    <span class="font-medium text-gray-700">Running Costs</span>
-                                    <div class="flex gap-0.5">
-                                        @foreach(range(1, 5) as $i) <svg class="w-4 h-4 {{ $i <= 4 ? 'fill-amber-400' : 'fill-gray-200' }}" viewBox="0 0 24 24"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg> @endforeach
-                                    </div>
-                                </div>
-                                <div class="w-full bg-gray-200 rounded-full h-2">
-                                    <div class="bg-green-600 h-2 rounded-full" style="width: 80%"></div>
-                                </div>
-                            </div>
-                            <div>
-                                <div class="flex justify-between text-sm mb-1">
-                                    <span class="font-medium text-gray-700">Reliability</span>
-                                    <div class="flex gap-0.5">
-                                        @foreach(range(1, 5) as $i) <svg class="w-4 h-4 {{ $i <= 3 ? 'fill-amber-400' : 'fill-gray-200' }}" viewBox="0 0 24 24"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg> @endforeach
-                                    </div>
-                                </div>
-                                <div class="w-full bg-gray-200 rounded-full h-2">
-                                    <div class="bg-green-600 h-2 rounded-full" style="width: 70%"></div>
-                                </div>
-                            </div>
-                            <div>
-                                <div class="flex justify-between text-sm mb-1">
-                                    <span class="font-medium text-gray-700">Safety</span>
-                                    <div class="flex gap-0.5">
-                                        @foreach(range(1, 5) as $i) <svg class="w-4 h-4 {{ $i <= 4 ? 'fill-amber-400' : 'fill-gray-200' }}" viewBox="0 0 24 24"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg> @endforeach
-                                    </div>
-                                </div>
-                                <div class="w-full bg-gray-200 rounded-full h-2">
-                                    <div class="bg-green-600 h-2 rounded-full" style="width: 84%"></div>
-                                </div>
-                            </div>
-                            <div>
-                                <div class="flex justify-between text-sm mb-1">
-                                    <span class="font-medium text-gray-700">Comfort</span>
-                                    <div class="flex gap-0.5">
-                                        @foreach(range(1, 5) as $i) <svg class="w-4 h-4 {{ $i <= 4 ? 'fill-amber-400' : 'fill-gray-200' }}" viewBox="0 0 24 24"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg> @endforeach
-                                    </div>
-                                </div>
-                                <div class="w-full bg-gray-200 rounded-full h-2">
-                                    <div class="bg-green-600 h-2 rounded-full" style="width: 76%"></div>
-                                </div>
-                            </div>
-                            <div>
-                                <div class="flex justify-between text-sm mb-1">
-                                    <span class="font-medium text-gray-700">Features</span>
-                                    <div class="flex gap-0.5">
-                                        @foreach(range(1, 5) as $i) <svg class="w-4 h-4 {{ $i <= 3 ? 'fill-amber-400' : 'fill-gray-200' }}" viewBox="0 0 24 24"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg> @endforeach
-                                    </div>
-                                </div>
-                                <div class="w-full bg-gray-200 rounded-full h-2">
-                                    <div class="bg-green-600 h-2 rounded-full" style="width: 70%"></div>
-                                </div>
-                            </div>
-                            <div>
-                                <div class="flex justify-between text-sm mb-1">
-                                    <span class="font-medium text-gray-700">Power</span>
-                                    <div class="flex gap-0.5">
-                                        @foreach(range(1, 5) as $i) <svg class="w-4 h-4 {{ $i <= 3 ? 'fill-amber-400' : 'fill-gray-200' }}" viewBox="0 0 24 24"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg> @endforeach
-                                    </div>
-                                </div>
-                                <div class="w-full bg-gray-200 rounded-full h-2">
-                                    <div class="bg-green-600 h-2 rounded-full" style="width: 70%"></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="bg-gray-50 rounded-lg p-4 mb-6">
-                            <p class="text-gray-700 leading-relaxed">
-                                The {{ $truck->make->name ?? '' }} {{ $truck->model->name ?? '' }} offers a great balance of performance, comfort, and reliability. It's particularly strong in safety features and running costs, making it an excellent choice for families and daily commuters alike.
-                            </p>
-                        </div>
                     </div>
 
                 @elseif($modalContent === 'safety')
