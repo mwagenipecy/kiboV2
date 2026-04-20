@@ -65,6 +65,16 @@
                 </div>
                 @endif
 
+                <!-- Activity Log (Back-office roles) -->
+                @if($userRole && $userRole !== 'customer')
+                <a href="{{ route('admin.activity-log') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('admin.activity-log') ? 'text-white kibo-sidebar-active shadow-sm' : 'text-gray-700 kibo-sidebar-hover' }} transition-colors group">
+                    <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    <span class="menu-text whitespace-nowrap">Activity Log</span>
+                </a>
+                @endif
+
                 <!-- Inventory Section (Admin and Dealer) -->
                 @if($userRole === 'admin' || $userRole === 'dealer')
                 <div class="pt-4 pb-2 section-title">

@@ -10,6 +10,7 @@ use Illuminate\Notifications\Notifiable;
 use App\Models\Customer;
 use Illuminate\Auth\Notifications\ResetPassword;
 use App\Services\SelcomSmsService;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 
@@ -119,6 +120,14 @@ class User extends Authenticatable implements CanResetPassword
     public function cfc()
     {
         return $this->hasOne(Cfc::class);
+    }
+
+    /**
+     * Get login activity entries for this user.
+     */
+    public function loginActivities(): HasMany
+    {
+        return $this->hasMany(LoginActivity::class);
     }
 
     /**

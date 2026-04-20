@@ -807,6 +807,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'otp.ver
         return view('admin.analytics');
     })->name('analytics');
 
+    // Activity Log (Admin only)
+    Route::get('/activity-log', [\App\Http\Controllers\Admin\ActivityLogController::class, 'index'])
+        ->name('activity-log');
+
     // Vehicles
     Route::prefix('vehicles')->name('vehicles.')->group(function () {
         Route::get('/', function () {

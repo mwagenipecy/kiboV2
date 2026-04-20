@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Jobs\SendLoginOtp;
 use App\Jobs\SendOtpSms;
+use App\Models\LoginActivity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
@@ -83,6 +84,13 @@ class OtpVerificationController extends Controller
 
         // Mark OTP as verified in session
         session()->put('otp_verified', true);
+
+        LoginActivity::create([
+            'user_id' => $user->id,
+            'logged_in_at' => now(),
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
         
         // Clear any forgot password flags that might interfere
         session()->forget('showForgotPassword');
