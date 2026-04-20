@@ -115,15 +115,16 @@
             </div>
 
             @if($variant === 'floating_overlay' && isset($overlay))
-                <div class="relative mt-6 sm:mt-0 sm:absolute sm:bottom-0 sm:left-0 sm:right-0 sm:transform sm:translate-y-1/2 px-4 z-30">
-                    <div class="max-w-4xl mx-auto bg-white rounded-3xl shadow-lg shadow-black/10 border border-gray-100 p-3 sm:p-4">
+                <div class="relative mt-5 sm:mt-0 sm:absolute sm:bottom-0 sm:left-0 sm:right-0 sm:transform sm:translate-y-1/2 px-3 sm:px-4 z-30">
+                    <div class="max-w-4xl mx-auto bg-white rounded-2xl sm:rounded-3xl shadow-lg shadow-black/10 border border-gray-100 p-2.5 sm:p-4">
                         {{ $overlay }}
                     </div>
                 </div>
             @endif
         </div>
         @if($variant === 'floating_overlay')
-            <div class="block sm:hidden h-4" aria-hidden="true"></div>
+            {{-- Reserve space on small screens so the half-overlapping search card does not cover the next section --}}
+            <div class="block sm:hidden min-h-[6.5rem] h-[clamp(5.5rem,18vw,9rem)]" aria-hidden="true"></div>
         @endif
     </div>
 </section>
