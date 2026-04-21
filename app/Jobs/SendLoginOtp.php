@@ -37,6 +37,9 @@ class SendLoginOtp implements ShouldQueue
             'to' => $this->email,
             'queue' => $this->queue,
             'mailer' => config('mail.default'),
+            'kibomailer_base_url' => config('services.kibomailer.base_url'),
+            'kibomailer_api_key_set' => !empty(config('services.kibomailer.api_key')),
+            'kibomailer_api_secret_set' => !empty(config('services.kibomailer.api_secret')),
         ]);
 
         // Create a temporary user-like object for the mailable
@@ -53,6 +56,7 @@ class SendLoginOtp implements ShouldQueue
                 'queue' => $this->queue,
                 'mailer' => config('mail.default'),
                 'from' => config('mail.from.address'),
+                'transport' => 'kibomailer_relay',
             ]);
         } catch (\Throwable $e) {
             Log::error('OTP email failed to send', [
@@ -61,6 +65,7 @@ class SendLoginOtp implements ShouldQueue
                 'queue' => $this->queue,
                 'mailer' => config('mail.default'),
                 'from' => config('mail.from.address'),
+                'transport' => 'kibomailer_relay',
                 'error' => $e->getMessage(),
             ]);
 
