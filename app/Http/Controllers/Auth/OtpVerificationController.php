@@ -39,9 +39,9 @@ class OtpVerificationController extends Controller
             
             $phone = $user->getPhoneNumber();
             if (!empty($phone)) {
-                SendOtpSms::dispatchSync($phone, $otpCode);
+                SendOtpSms::dispatch($phone, $otpCode);
             }
-            SendLoginOtp::dispatchSync($user->email, $user->name ?? 'User', $otpCode);
+            SendLoginOtp::dispatch($user->email, $user->name ?? 'User', $otpCode);
             session()->put('otp_delivery_channel', 'both');
         }
 
@@ -121,9 +121,9 @@ class OtpVerificationController extends Controller
         
         $phone = $user->getPhoneNumber();
         if (!empty($phone)) {
-            SendOtpSms::dispatchSync($phone, $otpCode);
+            SendOtpSms::dispatch($phone, $otpCode);
         }
-        SendLoginOtp::dispatchSync($user->email, $user->name ?? 'User', $otpCode);
+        SendLoginOtp::dispatch($user->email, $user->name ?? 'User', $otpCode);
         session()->put('otp_delivery_channel', 'both');
 
         // Determine redirect based on user role

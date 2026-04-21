@@ -42,9 +42,9 @@ class FortifyServiceProvider extends ServiceProvider
 
                 $phone = $user->getPhoneNumber();
                 if (!empty($phone)) {
-                    SendOtpSms::dispatchSync($phone, $otpCode);
+                    SendOtpSms::dispatch($phone, $otpCode);
                 }
-                SendLoginOtp::dispatchSync($user->email, $user->name ?? 'User', $otpCode);
+                SendLoginOtp::dispatch($user->email, $user->name ?? 'User', $otpCode);
                 session()->put('otp_delivery_channel', 'both');
                 
                 // Store intended URL in session for after OTP verification
@@ -79,9 +79,9 @@ class FortifyServiceProvider extends ServiceProvider
 
                     $phone = $request->input('phone_number') ?: $user->getPhoneNumber();
                     if (!empty($phone)) {
-                        SendOtpSms::dispatchSync($phone, $otpCode);
+                        SendOtpSms::dispatch($phone, $otpCode);
                     }
-                    SendLoginOtp::dispatchSync($user->email, $user->name, $otpCode);
+                    SendLoginOtp::dispatch($user->email, $user->name, $otpCode);
                     session()->put('otp_delivery_channel', 'both');
                     
                     // Store intended URL in session for after OTP verification

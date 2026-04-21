@@ -103,7 +103,7 @@ class AgizaImportRequestDetail extends Component
         ]);
 
         try {
-            Mail::to($this->request->customer_email)->send(new AgizaImportQuotationSent($this->request));
+            Mail::to($this->request->customer_email)->queue(new AgizaImportQuotationSent($this->request));
         } catch (\Exception $e) {
             \Log::error('Failed to send quotation email: ' . $e->getMessage());
         }

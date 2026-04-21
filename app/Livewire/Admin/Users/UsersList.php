@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin\Users;
 
+use App\Jobs\SendRegistrationCredentials;
 use App\Jobs\SendPasswordResetEmail;
 use App\Models\User;
 use App\Services\SelcomSmsService;
@@ -108,15 +109,8 @@ class UsersList extends Component
                 'email_verified_at' => now(),
             ]);
 
-            // Send credentials via email
-            Mail::send('emails.admin-credentials', [
-                'name' => $user->name,
-                'email' => $user->email,
-                'password' => $password,
-            ], function ($message) use ($user) {
-                $message->to($user->email)
-                    ->subject('Your Admin Account Credentials - Kibo');
-            });
+            // Send credentials via queued mail job (uses default API mail transport)
+            SendRegistrationCredentials::dispatch($user->email, $user->name, $password, 'admin');
 
             session()->flash('message', 'Admin user created successfully! Credentials sent to ' . $user->email);
             $this->closeAddAdminModal();
@@ -174,7 +168,7 @@ class UsersList extends Component
                 }
             }
 
-            SendPasswordResetEmail::dispatchSync($user->name, $user->email, $newPassword);
+            SendPasswordResetEmail::dispatch($user->name, $user->email, $newPassword);
 
             session()->flash('message', 'Password reset successfully! New credentials will be sent to ' . $user->email . ($phone ? ' and phone.' : '.'));
             $this->closeResetPasswordModal();

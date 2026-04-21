@@ -86,7 +86,7 @@ class AgizaImport extends Component
             $this->requestNumber = $request->request_number;
 
             try {
-                Mail::to($this->customerEmail)->send(new AgizaImportRequestReceived($request));
+                Mail::to($this->customerEmail)->queue(new AgizaImportRequestReceived($request));
             } catch (\Exception $e) {
                 \Log::error('Failed to send confirmation email: '.$e->getMessage());
             }

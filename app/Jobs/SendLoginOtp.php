@@ -36,6 +36,7 @@ class SendLoginOtp implements ShouldQueue
             'job' => self::class,
             'to' => $this->email,
             'queue' => $this->queue,
+            'mailer' => config('mail.default'),
         ]);
 
         // Create a temporary user-like object for the mailable
@@ -51,8 +52,6 @@ class SendLoginOtp implements ShouldQueue
                 'to' => $this->email,
                 'queue' => $this->queue,
                 'mailer' => config('mail.default'),
-                'mail_host' => config('mail.mailers.smtp.host'),
-                'mail_port' => config('mail.mailers.smtp.port'),
                 'from' => config('mail.from.address'),
             ]);
         } catch (\Throwable $e) {
@@ -61,8 +60,6 @@ class SendLoginOtp implements ShouldQueue
                 'to' => $this->email,
                 'queue' => $this->queue,
                 'mailer' => config('mail.default'),
-                'mail_host' => config('mail.mailers.smtp.host'),
-                'mail_port' => config('mail.mailers.smtp.port'),
                 'from' => config('mail.from.address'),
                 'error' => $e->getMessage(),
             ]);

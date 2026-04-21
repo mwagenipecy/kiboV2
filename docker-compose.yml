@@ -115,7 +115,7 @@ services:
       - DB_PASSWORD=${DB_PASSWORD:-kiboAuto_2025}
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - MAIL_MAILER=${MAIL_MAILER:-smtp}
+      - MAIL_MAILER=${MAIL_MAILER:-kibomailer_relay}
       - MAIL_HOST=${MAIL_HOST}
       - MAIL_PORT=${MAIL_PORT:-587}
       - MAIL_USERNAME=${MAIL_USERNAME}

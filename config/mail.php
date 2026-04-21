@@ -14,7 +14,7 @@ return [
     |
     */
 
-    'default' => env('MAIL_MAILER', 'smtp'),
+    'default' => env('MAIL_MAILER', 'kibomailer_relay'),
 
     /*
     |--------------------------------------------------------------------------
@@ -89,7 +89,7 @@ return [
         'failover' => [
             'transport' => 'failover',
             'mailers' => [
-                'smtp',
+                'kibomailer_relay',
                 'log',
             ],
             'retry_after' => 60,
