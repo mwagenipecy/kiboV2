@@ -7,38 +7,67 @@
         .kibo-bg-light { background-color: rgba(0, 152, 102, 0.1) !important; }
     </style>
     {{-- Filters --}}
-    <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-            {{-- Search --}}
-            <div class="md:col-span-2">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Search</label>
+    <div class="mb-6">
+        {{-- Mobile filter --}}
+        <div class="md:hidden rounded-2xl border border-gray-200 bg-gray-50/90 overflow-hidden shadow-inner">
+            <div class="divide-y divide-gray-200/90">
+                <div class="px-4 pt-3 pb-2 bg-white">
+                    <label for="garage-search-mobile" class="block text-[11px] font-semibold uppercase tracking-wide text-gray-500 mb-1">Search</label>
+                    <input
+                        id="garage-search-mobile"
+                        type="text"
+                        wire:model.live.debounce.500ms="search"
+                        placeholder="Garage name, location, or order #"
+                        class="w-full min-h-[44px] px-0 pr-2 py-2 text-base text-gray-900 border-0 bg-transparent focus:ring-0 focus:outline-none placeholder:text-gray-400"
+                    >
+                </div>
+                <div class="px-4 pt-3 pb-2 bg-white">
+                    <label for="garage-make-mobile" class="block text-[11px] font-semibold uppercase tracking-wide text-gray-500 mb-1">Vehicle make</label>
+                    <div class="relative">
+                        <select
+                            id="garage-make-mobile"
+                            wire:model.live="selectedMake"
+                            class="w-full min-h-[44px] pl-0 pr-9 py-2 text-base text-gray-900 border-0 bg-transparent focus:ring-0 focus:outline-none appearance-none"
+                        >
+                            <option value="">All makes</option>
+                            @foreach($vehicleMakes as $make)
+                                <option value="{{ $make->id }}">{{ $make->name }}</option>
+                            @endforeach
+                        </select>
+                        <span class="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 text-gray-400" aria-hidden="true">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Desktop filter --}}
+        <div class="hidden md:flex md:items-stretch md:rounded-full md:border md:border-gray-200 md:bg-gray-50/80 md:overflow-hidden md:shadow-inner">
+            <div class="flex-1 min-w-0 md:border-r md:border-gray-200">
+                <label for="garage-search-desktop" class="sr-only">Search</label>
                 <input
+                    id="garage-search-desktop"
                     type="text"
                     wire:model.live.debounce.500ms="search"
                     placeholder="Search garages or enter order number (e.g., GS-123456)..."
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
-                    style="--tw-ring-color: #009866;"
+                    class="w-full h-full min-h-[2.75rem] px-4 py-2 text-sm text-gray-900 border-0 bg-transparent focus:ring-2 focus:ring-inset focus:ring-[#009866]/25 focus:outline-none placeholder:text-gray-400"
                 >
             </div>
-
-            {{-- Vehicle Make Filter --}}
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Vehicle Make</label>
+            <div class="w-64 shrink-0">
+                <label for="garage-make-desktop" class="sr-only">Vehicle make</label>
                 <select
+                    id="garage-make-desktop"
                     wire:model.live="selectedMake"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
-                    style="--tw-ring-color: #009866;"
+                    class="w-full h-full min-h-[2.75rem] px-4 py-2 text-sm text-gray-900 border-0 bg-transparent focus:ring-2 focus:ring-inset focus:ring-[#009866]/25 focus:outline-none appearance-none"
                 >
-                    <option value="">All Makes</option>
+                    <option value="">All makes</option>
                     @foreach($vehicleMakes as $make)
                         <option value="{{ $make->id }}">{{ $make->name }}</option>
                     @endforeach
                 </select>
             </div>
-
         </div>
-
-        {{-- Location Controls removed per request --}}
     </div>
 
     {{-- Results --}}

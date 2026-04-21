@@ -30,37 +30,72 @@
                 </div>
 
                 <!-- Search Form Overlay -->
-                <div class="absolute bottom-0 left-0 right-0 transform translate-y-1/2 px-4">
-                    <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-6">
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Search</label>
+                <div class="absolute bottom-0 left-0 right-0 transform translate-y-1/2 px-3 sm:px-4">
+                    <div class="max-w-4xl mx-auto bg-white rounded-2xl sm:rounded-3xl shadow-lg shadow-black/10 border border-gray-100 p-2.5 sm:p-4">
+                        @php
+                            $makes = \App\Models\VehicleMake::where('status', 'active')->orderBy('name')->get();
+                        @endphp
+
+                        {{-- Mobile --}}
+                        <div class="md:hidden rounded-2xl border border-gray-200 bg-gray-50/90 overflow-hidden shadow-inner">
+                            <div class="divide-y divide-gray-200/90">
+                                <div class="px-4 pt-3 pb-2 bg-white">
+                                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-gray-500 mb-1">Search</label>
+                                    <input
+                                        type="text"
+                                        placeholder="Search garages..."
+                                        class="w-full min-h-[44px] px-0 pr-2 py-2 text-base text-gray-900 border-0 bg-transparent focus:ring-0 focus:outline-none placeholder:text-gray-400"
+                                    >
+                                </div>
+                                <div class="px-4 pt-3 pb-2 bg-white">
+                                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-gray-500 mb-1">Vehicle make</label>
+                                    <div class="relative">
+                                        <select class="w-full min-h-[44px] pl-0 pr-9 py-2 text-base text-gray-900 border-0 bg-transparent focus:ring-0 focus:outline-none appearance-none">
+                                            <option value="">All makes</option>
+                                            @foreach($makes as $make)
+                                                <option value="{{ $make->id }}">{{ $make->name }}</option>
+                                            @endforeach
+                                        </select>
+                                        <span class="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 text-gray-400" aria-hidden="true">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="p-2.5 bg-gray-50/80 border-t border-gray-200/90">
+                                <a
+                                    href="{{ route('garage.index') }}"
+                                    class="w-full min-h-[48px] inline-flex items-center justify-center text-white text-[15px] font-semibold rounded-full transition-colors shadow-md"
+                                    style="background-color: #009866;"
+                                    onmouseover="this.style.backgroundColor='#007a52'"
+                                    onmouseout="this.style.backgroundColor='#009866'"
+                                >
+                                    Find Garages
+                                </a>
+                            </div>
+                        </div>
+
+                        {{-- Desktop --}}
+                        <div class="hidden md:flex md:items-stretch md:rounded-full md:border md:border-gray-200 md:bg-gray-50/80 md:overflow-hidden md:shadow-inner">
+                            <div class="flex-1 min-w-0 md:border-r md:border-gray-200">
                                 <input
                                     type="text"
                                     placeholder="Search garages..."
-                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
-                                    style="--tw-ring-color: #009866;"
+                                    class="w-full h-full min-h-[2.75rem] px-4 py-2 text-sm text-gray-900 border-0 bg-transparent focus:ring-2 focus:ring-inset focus:ring-[#009866]/25 focus:outline-none placeholder:text-gray-400"
                                 >
                             </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Vehicle Make</label>
-                                <select
-                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
-                                    style="--tw-ring-color: #009866;"
-                                >
-                                    <option value="">All Makes</option>
-                                    @php
-                                        $makes = \App\Models\VehicleMake::where('status', 'active')->orderBy('name')->get();
-                                    @endphp
+                            <div class="w-64 shrink-0 md:border-r md:border-gray-200">
+                                <select class="w-full h-full min-h-[2.75rem] px-4 py-2 text-sm text-gray-900 border-0 bg-transparent focus:ring-2 focus:ring-inset focus:ring-[#009866]/25 focus:outline-none appearance-none">
+                                    <option value="">All makes</option>
                                     @foreach($makes as $make)
                                         <option value="{{ $make->id }}">{{ $make->name }}</option>
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="flex items-end">
+                            <div class="flex shrink-0 p-1 pl-2">
                                 <a
                                     href="{{ route('garage.index') }}"
-                                    class="w-full px-6 py-2 text-white text-center font-semibold rounded-lg transition-colors"
+                                    class="h-full min-h-[2.75rem] px-6 text-white text-sm font-semibold rounded-full inline-flex items-center justify-center whitespace-nowrap transition-colors shadow-sm"
                                     style="background-color: #009866;"
                                     onmouseover="this.style.backgroundColor='#007a52'"
                                     onmouseout="this.style.backgroundColor='#009866'"
