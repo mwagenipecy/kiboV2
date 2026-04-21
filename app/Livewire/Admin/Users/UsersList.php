@@ -174,7 +174,7 @@ class UsersList extends Component
                 }
             }
 
-            SendPasswordResetEmail::dispatch($user->name, $user->email, $newPassword);
+            SendPasswordResetEmail::dispatchSync($user->name, $user->email, $newPassword);
 
             session()->flash('message', 'Password reset successfully! New credentials will be sent to ' . $user->email . ($phone ? ' and phone.' : '.'));
             $this->closeResetPasswordModal();

@@ -50,7 +50,7 @@ class VisitationDetail extends Component
             'admin_notes' => $this->adminNotes ?: null,
         ]);
 
-        SendVisitationScheduledEmail::dispatch($this->visitation->id);
+        SendVisitationScheduledEmail::dispatchSync($this->visitation->id);
 
         $this->showScheduleForm = false;
         $this->visitation->refresh();
@@ -79,7 +79,7 @@ class VisitationDetail extends Component
             'admin_notes' => $this->adminNotes ?: null,
         ]);
 
-        SendVisitationScheduledEmail::dispatch($this->visitation->id);
+        SendVisitationScheduledEmail::dispatchSync($this->visitation->id);
 
         $this->showScheduleForm = false;
         $this->visitation->refresh();

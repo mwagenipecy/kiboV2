@@ -104,7 +104,7 @@ class AgentList extends Component
                 }
             }
 
-            SendRegistrationCredentials::dispatch($agent->email, $agent->name, $password, 'agent');
+            SendRegistrationCredentials::dispatchSync($agent->email, $agent->name, $password, 'agent');
 
             session()->flash('success', 'Agent approved successfully! Credentials have been sent via email.');
             }

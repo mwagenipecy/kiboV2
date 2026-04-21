@@ -84,7 +84,7 @@ class DealerList extends Component
                 }
             }
 
-            SendEntityUserCredentials::dispatch($user, $entity, $password);
+            SendEntityUserCredentials::dispatchSync($user, $entity, $password);
 
             DB::commit();
 

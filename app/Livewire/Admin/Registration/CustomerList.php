@@ -78,7 +78,7 @@ class CustomerList extends Component
                 }
             }
 
-            SendRegistrationCredentials::dispatch($customer->email, $customer->name, $password, 'customer');
+            SendRegistrationCredentials::dispatchSync($customer->email, $customer->name, $password, 'customer');
 
             session()->flash('success', 'Customer approved successfully! Credentials have been sent.');
         } catch (\Exception $e) {

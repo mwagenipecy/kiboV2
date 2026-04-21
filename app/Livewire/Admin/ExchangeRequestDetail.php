@@ -208,7 +208,7 @@ class ExchangeRequestDetail extends Component
 
         // Queue email to customer (non-blocking)
         try {
-            SendExchangeQuotationMail::dispatch($quotation);
+            SendExchangeQuotationMail::dispatchSync($quotation);
             session()->flash('success', 'Quotation created successfully! The email will be sent to the customer shortly.');
         } catch (\Exception $e) {
             // Even if queuing fails, quotation is saved

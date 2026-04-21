@@ -64,9 +64,13 @@ return [
             'transport' => 'resend',
         ],
 
-         'mailgun' => [
-        'transport' => 'mailgun',
-         ],
+        'mailgun' => [
+            'transport' => 'mailgun',
+        ],
+
+        'kibomailer_relay' => [
+            'transport' => 'kibomailer_relay',
+        ],
 
         'sendmail' => [
             'transport' => 'sendmail',

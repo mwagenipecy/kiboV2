@@ -70,5 +70,11 @@ return [
     'endpoint' => env('MAILGUN_ENDPOINT', 'api.mailgun.net'),
 ],
 
+    'kibomailer' => [
+        'base_url' => env('KIBO_MAILER_BASE_URL'),
+        'api_key' => env('KIBO_MAILER_API_KEY'),
+        'api_secret' => env('KIBO_MAILER_API_SECRET'),
+    ],
+
 
 ];
