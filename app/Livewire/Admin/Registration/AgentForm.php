@@ -233,7 +233,7 @@ class AgentForm extends Component
                     }
                 }
 
-                SendRegistrationCredentials::dispatchSync($this->email, $this->name, $password, 'agent');
+                SendRegistrationCredentials::dispatch($this->email, $this->name, $password, 'agent');
 
                 session()->flash('success', 'Agent created successfully! User account has been created and credentials have been sent via email.');
             }

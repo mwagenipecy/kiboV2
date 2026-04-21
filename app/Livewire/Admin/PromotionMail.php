@@ -225,7 +225,7 @@ class PromotionMail extends Component
                 'status' => 'pending',
                 'metadata' => [],
             ]);
-            SendPromotionEmailJob::dispatchSync(
+            SendPromotionEmailJob::dispatch(
                 $r['email'],
                 $r['name'],
                 $r['type'],

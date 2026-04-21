@@ -198,7 +198,7 @@ class FindMeACar extends Component
 
         // Send emails asynchronously via queue
         foreach ($dealerUsers as $dealerUser) {
-            SendNewCarRequestEmail::dispatchSync($dealerUser->email, $carRequest->id);
+            SendNewCarRequestEmail::dispatch($dealerUser->email, $carRequest->id);
         }
 
         session()->flash('find_me_success', 'Your request was sent to dealers. You will receive offers soon.');

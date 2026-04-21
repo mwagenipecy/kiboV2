@@ -84,7 +84,7 @@ class LenderList extends Component
                 }
             }
 
-            SendEntityUserCredentials::dispatchSync($user, $entity, $password);
+            SendEntityUserCredentials::dispatch($user, $entity, $password);
 
             DB::commit();
 

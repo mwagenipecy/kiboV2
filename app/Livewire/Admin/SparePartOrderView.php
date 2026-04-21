@@ -159,7 +159,7 @@ class SparePartOrderView extends Component
         ]);
 
         // Send email notification
-        SendSparePartQuotationEmail::dispatchSync($this->order->fresh());
+        SendSparePartQuotationEmail::dispatch($this->order->fresh());
 
         $this->closeQuoteModal();
         $this->successMessage = 'Quotation has been sent to the customer successfully!';
@@ -258,7 +258,7 @@ class SparePartOrderView extends Component
         ]);
 
         // Send confirmation email
-        SendSparePartPaymentConfirmationEmail::dispatchSync($this->order->fresh());
+        SendSparePartPaymentConfirmationEmail::dispatch($this->order->fresh());
 
         $this->closePaymentVerifyModal();
         $this->successMessage = 'Payment has been verified! The order is now being prepared.';
@@ -316,7 +316,7 @@ class SparePartOrderView extends Component
         ]);
 
         // Send shipping notification
-        SendSparePartShippedEmail::dispatchSync($this->order->fresh());
+        SendSparePartShippedEmail::dispatch($this->order->fresh());
 
         $this->closeShippingModal();
         $this->successMessage = 'Order has been marked as shipped! Customer will be notified.';

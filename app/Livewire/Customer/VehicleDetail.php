@@ -250,7 +250,7 @@ class VehicleDetail extends Component
             'status' => 'pending',
         ]);
 
-        SendVisitationRequestReceivedEmail::dispatchSync($visitation->id);
+        SendVisitationRequestReceivedEmail::dispatch($visitation->id);
 
         $this->visitationSubmitted = true;
         $this->visitationName = '';

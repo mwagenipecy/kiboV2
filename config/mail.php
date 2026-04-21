@@ -14,7 +14,7 @@ return [
     |
     */
 
-    'default' => env('MAIL_MAILER', 'kibomailer_relay'),
+    'default' => env('MAIL_MAILER', 'smtp'),
 
     /*
     |--------------------------------------------------------------------------
@@ -68,10 +68,6 @@ return [
             'transport' => 'mailgun',
         ],
 
-        'kibomailer_relay' => [
-            'transport' => 'kibomailer_relay',
-        ],
-
         'sendmail' => [
             'transport' => 'sendmail',
             'path' => env('MAIL_SENDMAIL_PATH', '/usr/sbin/sendmail -bs -i'),
@@ -89,7 +85,7 @@ return [
         'failover' => [
             'transport' => 'failover',
             'mailers' => [
-                'kibomailer_relay',
+                'smtp',
                 'log',
             ],
             'retry_after' => 60,

@@ -869,7 +869,7 @@ class SparePartOrderChatbotService
                 $createdOrders[] = $order;
 
                 if (! empty($order->customer_email)) {
-                    SendSparePartOrderConfirmationEmail::dispatchSync($order);
+                    SendSparePartOrderConfirmationEmail::dispatch($order);
                 }
             }
 

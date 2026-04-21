@@ -50,7 +50,7 @@ class ComplaintsSection extends Component
             'user_id' => auth()->id(),
         ]);
 
-        SendComplaintReceivedEmail::dispatchSync($complaint->id);
+        SendComplaintReceivedEmail::dispatch($complaint->id);
 
         $this->submittedNumber = $complaintNumber;
         $this->reset(['name', 'email', 'phone', 'subject', 'message', 'category']);

@@ -102,7 +102,7 @@ class CfcList extends Component
                 }
             }
 
-            SendRegistrationCredentials::dispatchSync($cfc->email, $cfc->name, $password, 'cfc');
+            SendRegistrationCredentials::dispatch($cfc->email, $cfc->name, $password, 'cfc');
 
             session()->flash('success', 'CFC approved successfully! Login credentials have been sent via email.');
         } catch (QueryException $e) {

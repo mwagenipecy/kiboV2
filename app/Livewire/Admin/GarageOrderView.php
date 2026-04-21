@@ -97,7 +97,7 @@ class GarageOrderView extends Component
         $this->order->refresh();
 
         // Dispatch email job
-        SendGarageOrderQuotationEmail::dispatchSync($this->order);
+        SendGarageOrderQuotationEmail::dispatch($this->order);
 
         session()->flash('success', 'Quotation sent successfully! An email notification has been sent to the customer.');
         $this->closeQuoteModal();
@@ -119,7 +119,7 @@ class GarageOrderView extends Component
             $this->order->refresh();
 
             // Dispatch email job
-            SendGarageOrderConfirmationEmail::dispatchSync($this->order);
+            SendGarageOrderConfirmationEmail::dispatch($this->order);
 
             session()->flash('success', 'Order confirmed successfully! An email notification has been sent to the customer.');
         } else {

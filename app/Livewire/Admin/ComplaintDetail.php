@@ -57,7 +57,7 @@ class ComplaintDetail extends Component
         ]);
         $this->complaint->refresh();
 
-        SendComplaintResolvedEmail::dispatchSync($this->complaint->id);
+        SendComplaintResolvedEmail::dispatch($this->complaint->id);
 
         $this->successMessage = 'Complaint marked as resolved. A notification email has been queued to the complainant.';
     }
