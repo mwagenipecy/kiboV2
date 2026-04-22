@@ -10,6 +10,8 @@
     use App\Models\User;
     use App\Models\CarRequest;
     use App\Models\DealerCarOffer;
+    use App\Models\Agent;
+    use App\Models\GarageServiceOrder;
     use App\Models\SparePartOrder;
     use App\Models\LendingCriteria;
     use App\Enums\OrderStatus;
@@ -32,10 +34,20 @@
     // Role-specific data
     switch($userRole) {
         case 'agent':
-            $sparePartOrders = SparePartOrder::count();
-            $sparePartOrdersPending = SparePartOrder::where('status', 'pending')->count();
-            $sparePartOrdersInProgress = SparePartOrder::where('status', 'in_progress')->count();
-            $sparePartOrdersCompleted = SparePartOrder::where('status', 'completed')->count();
+            $agent = Agent::where('user_id', auth()->id())->first();
+            $agentType = $agent->agent_type ?? null;
+
+            if ($agentType === 'spare_part') {
+                $sparePartOrders = SparePartOrder::where('agent_id', $agent?->id)->count();
+                $sparePartOrdersPending = SparePartOrder::where('agent_id', $agent?->id)->where('status', 'pending')->count();
+                $sparePartOrdersInProgress = SparePartOrder::where('agent_id', $agent?->id)->whereIn('status', ['processing', 'quoted', 'accepted', 'preparing', 'shipped'])->count();
+                $sparePartOrdersCompleted = SparePartOrder::where('agent_id', $agent?->id)->where('status', 'completed')->count();
+            } elseif ($agentType === 'garage_owner') {
+                $garageOrders = GarageServiceOrder::where('agent_id', $agent?->id)->count();
+                $garageOrdersPending = GarageServiceOrder::where('agent_id', $agent?->id)->where('status', 'pending')->count();
+                $garageOrdersInProgress = GarageServiceOrder::where('agent_id', $agent?->id)->whereIn('status', ['confirmed', 'quoted', 'in_progress'])->count();
+                $garageOrdersCompleted = GarageServiceOrder::where('agent_id', $agent?->id)->where('status', 'completed')->count();
+            }
             break;
         case 'lender':
             $user = auth()->user();
@@ -162,7 +174,13 @@
 
 @switch($userRole)
     @case('agent')
-        @include('admin.dashboard.agent')
+        @if(($agentType ?? null) === 'lubricant_shop')
+            @include('admin.dashboard.agent-lubricant')
+        @elseif(($agentType ?? null) === 'garage_owner')
+            @include('admin.dashboard.agent-garage')
+        @else
+            @include('admin.dashboard.agent')
+        @endif
         @break
     
     @case('lender')

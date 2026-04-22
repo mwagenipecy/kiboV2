@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Agent;
 use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
@@ -28,7 +29,13 @@ class DashboardController extends Controller
                 return redirect()->route('lender.dashboard');
 
             case 'agent':
-                // Agents focus on spare parts and related operations
+                $agentType = Agent::where('user_id', $user->id)->value('agent_type');
+
+                if ($agentType === 'lubricant_shop') {
+                    return redirect()->route('admin.dashboard');
+                }
+
+                // Spare part / garage agents continue to orders workspace
                 return redirect()->route('admin.spare-part-orders');
 
             default:

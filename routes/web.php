@@ -798,6 +798,15 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'otp.ver
         return view('admin.profile');
     })->name('profile');
 
+    Route::get('/agent/profile', function () {
+        $user = auth()->user();
+        if (!$user || $user->role !== 'agent' || optional($user->agent)->agent_type !== 'lubricant_shop') {
+            abort(403);
+        }
+
+        return view('admin.agent.profile');
+    })->name('agent.profile');
+
     Route::get('/settings', function () {
         return view('admin.settings');
     })->name('settings');

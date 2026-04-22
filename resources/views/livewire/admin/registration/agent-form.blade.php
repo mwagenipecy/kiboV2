@@ -11,6 +11,18 @@
 
             <!-- Form Fields -->
             <div class="px-6 py-6 space-y-6">
+                @if (session('error'))
+                    <div class="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                        {{ session('error') }}
+                    </div>
+                @endif
+
+                @error('form')
+                    <div class="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                        {{ $message }}
+                    </div>
+                @enderror
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label for="name" class="block text-sm font-medium text-gray-700 mb-2">

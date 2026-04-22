@@ -52,6 +52,66 @@ class AgentForm extends Component
     // Vehicle makes for dropdown
     public $vehicleMakesList = [];
 
+    protected function rules()
+    {
+        return [
+            'email' => $this->emailRules(),
+        ];
+    }
+
+    protected function emailRules()
+    {
+        return [
+            'required',
+            'email',
+            'max:255',
+            function ($attribute, $value, $fail) {
+                if ($this->agentId) {
+                    $existingAgent = Agent::where('email', $value)->where('id', '!=', $this->agentId)->exists();
+                    if ($existingAgent) {
+                        $fail('This email is already registered in the agents table.');
+                    }
+                } else {
+                    if (Agent::where('email', $value)->exists()) {
+                        $fail('This email is already registered in the agents table.');
+                    }
+                }
+                if (User::where('email', $value)->exists()) {
+                    $fail('This email is already registered in the users table.');
+                }
+                if (\App\Models\Entity::where('email', $value)->exists()) {
+                    $fail('This email is already registered in the entities table.');
+                }
+            },
+        ];
+    }
+
+    protected function phoneRules()
+    {
+        return [
+            'required',
+            'string',
+            'max:20',
+            function ($attribute, $value, $fail) {
+                $existingUserId = null;
+
+                if ($this->agentId) {
+                    $existingUserId = Agent::find($this->agentId)?->user_id;
+                }
+
+                $phoneExists = User::where('phone_number', $value)
+                    ->when($existingUserId, function ($query) use ($existingUserId) {
+                        return $query->where('id', '!=', $existingUserId);
+                    })
+                    ->exists();
+
+                if ($phoneExists) {
+                    $fail('This phone number is already registered as a user.');
+                }
+            },
+        ];
+    }
+
     public function updated($propertyName)
     {
         if ($propertyName === 'email') {
@@ -88,41 +148,24 @@ class AgentForm extends Component
 
     public function updatedAgentType()
     {
+        $this->agentType = $this->normalizeAgentType($this->agentType);
+
         // Reset conditional fields when agent type changes
         $this->vehicleMakes = [];
         $this->services = [];
         $this->sparePartDetails = '';
         $this->supportLogistics = false;
+        $this->resetValidation(['vehicleMakes', 'vehicleMakes.*', 'services', 'services.*', 'sparePartDetails']);
     }
 
     public function save()
     {
+        $this->agentType = $this->normalizeAgentType($this->agentType);
+
         $rules = [
             'name' => 'required|string|max:255',
-            'email' => [
-                'required',
-                'email',
-                'max:255',
-                function ($attribute, $value, $fail) {
-                    if ($this->agentId) {
-                        $existingAgent = Agent::where('email', $value)->where('id', '!=', $this->agentId)->exists();
-                        if ($existingAgent) {
-                            $fail('This email is already registered in the agents table.');
-                        }
-                    } else {
-                        if (Agent::where('email', $value)->exists()) {
-                            $fail('This email is already registered in the agents table.');
-                        }
-                    }
-                    if (User::where('email', $value)->exists()) {
-                        $fail('This email is already registered in the users table.');
-                    }
-                    if (\App\Models\Entity::where('email', $value)->exists()) {
-                        $fail('This email is already registered in the entities table.');
-                    }
-                },
-            ],
-            'phoneNumber' => 'required|string|max:20',
+            'email' => $this->emailRules(),
+            'phoneNumber' => $this->phoneRules(),
             'agentType' => 'required|string|in:garage_owner,lubricant_shop,spare_part',
             'licenseNumber' => 'nullable|string|max:50',
             'address' => 'nullable|string',
@@ -133,10 +176,12 @@ class AgentForm extends Component
         ];
 
         // Validation rules based on agent type
-        if (in_array($this->agentType, ['garage_owner', 'spare_part'])) {
+        if ($this->agentType === 'garage_owner') {
             $rules['vehicleMakes'] = 'required|array|min:1';
-            $rules['vehicleMakes.*'] = 'exists:vehicle_makes,id';
+        } else {
+            $rules['vehicleMakes'] = 'nullable|array';
         }
+        $rules['vehicleMakes.*'] = 'exists:vehicle_makes,id';
 
         if ($this->agentType === 'garage_owner') {
             $rules['services'] = 'required|array|min:1';
@@ -149,6 +194,7 @@ class AgentForm extends Component
 
         $this->validate($rules, [
             'agentType.required' => 'Agent type is required.',
+            'agentType.in' => 'Selected agent type is invalid.',
             'vehicleMakes.required' => 'Please select at least one vehicle make.',
             'services.required' => 'Please select at least one service.',
         ]);
@@ -240,7 +286,16 @@ class AgentForm extends Component
 
             return redirect()->route('admin.registration.agents');
         } catch (\Exception $e) {
+            Log::error('Agent save failed', [
+                'agent_id' => $this->agentId,
+                'email' => $this->email,
+                'phone' => $this->phoneNumber,
+                'agent_type' => $this->agentType,
+                'error' => $e->getMessage(),
+            ]);
+
             session()->flash('error', 'An error occurred: ' . $e->getMessage());
+            $this->addError('form', 'Failed to save agent. ' . $e->getMessage());
         }
     }
 
@@ -252,5 +307,23 @@ class AgentForm extends Component
     public function render()
     {
         return view('livewire.admin.registration.agent-form');
+    }
+
+    protected function normalizeAgentType($value)
+    {
+        $aliases = [
+            'garage' => 'garage_owner',
+            'garage_owner' => 'garage_owner',
+            'shop' => 'lubricant_shop',
+            'lubricant_shop' => 'lubricant_shop',
+            'lubricant shop' => 'lubricant_shop',
+            'spare_part' => 'spare_part',
+            'spare_parts' => 'spare_part',
+            'spare part' => 'spare_part',
+        ];
+
+        $normalized = is_string($value) ? strtolower(trim($value)) : $value;
+
+        return $aliases[$normalized] ?? $value;
     }
 }
