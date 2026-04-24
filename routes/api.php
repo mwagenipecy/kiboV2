@@ -25,9 +25,7 @@ Route::post('/webhook/payment-link', [App\Http\Controllers\Api\PaymentLinkWebhoo
 
 
 Route::get('/health', function () {
-    return response('ok', 200)
-        ->header('Cache-Control', 'no-cache');
-        
-        });
+    return response()->json(['status' => 'ok'], 200);
+});
 
 
