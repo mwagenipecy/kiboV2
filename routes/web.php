@@ -1421,3 +1421,8 @@ Route::get('/test', function () {
 Route::get('/test-dashboard', function () {
     return view('test.dashboard');
 });
+
+
+Route::get('/health', function () {
+    return response()->json(['status' => 'ok'], 200);
+});

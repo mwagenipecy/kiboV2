@@ -23,3 +23,9 @@ Route::prefix('payment-links')->name('payment-links.')->group(function () {
 Route::post('/webhook/payment-link', [App\Http\Controllers\Api\PaymentLinkWebhookController::class, 'handle'])
     ->name('payment-link.webhook');
 
+
+Route::get('/health', function () {
+    return response()->json(['status' => 'ok'], 200);
+});
+
+
